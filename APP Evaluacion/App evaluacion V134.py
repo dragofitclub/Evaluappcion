@@ -583,7 +583,7 @@ def pantalla3():
     with c2:
         st.text_input("¿Cómo te beneficia alcanzar tu meta?", key="obj_beneficio")
         st.text_input("¿Qué eventos tienes en los próximos 3 o 6 meses?", key="obj_eventos")
-        st.text_input("Del 1 al 10, ¿tu nivel de compromiso?", key="obj_compromiso")
+        st.text_input("Del 1 al 10, ¿cuál es tu nivel de compromiso para alacanzar una mejor versión de ti?", key="obj_compromiso")
 
     st.subheader("Análisis de presupuesto")
     col = st.columns(4)
