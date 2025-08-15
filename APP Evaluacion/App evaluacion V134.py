@@ -507,7 +507,16 @@ def pantalla2():
     fecha_nac  = (datos.get('fecha_nac'))
     edad_ref   = edad_desde_fecha(fecha_nac) or int(datos.get('edad', 30))
     rmin, rmax = _rango_grasa_referencia(genero_ref, edad_ref)
-    st.markdown(f"**% GRASA de referencia** para {genero_ref.upper()} y {edad_ref} años: {rmin:.1f}% – {rmax:.1f}%.")
+
+    # —— Mensaje personalizado según género (USANDO rmin, rmax y el % seleccionado) ——
+    es_mujer = str(genero_ref).strip().lower().startswith("muj")
+    if es_mujer:
+        linea = (f"Una **mujer** de tu edad tiene **{rmin:.1f}%** de grasa en el mejor de los casos y "
+                 f"**{rmax:.1f}%** de grasa en el peor de los casos. Tú te encuentras en **{grasa_pct}%**.")
+    else:
+        linea = (f"Un **hombre** de tu edad tiene **{rmin:.1f}%** de grasa en el mejor de los casos y "
+                 f"**{rmax:.1f}%** de grasa en el peor de los casos. Tú te encuentras en **{grasa_pct}%**.")
+    st.markdown(linea)
 
     agua_ml = req_hidratacion_ml(peso_kg)
     prote_g = req_proteina(genero, st.session_state.metas, peso_kg)
@@ -542,7 +551,7 @@ def pantalla3():
         st.text_input("¿En qué momento del día sientes menos energía?", key="ev_menos_energia")
         st.text_input("¿Tomas por lo menos 8 vasos de agua al día?", key="ev_8_vasos")
         st.text_input("¿Practicas actividad física al menos 3 veces/semana?", key="ev_actividad")
-        st.text_input("¿Has intentado algo para verte/estar mejor? (Gym, Dieta, App, Otros)", key="ev_intentos")
+        st.text_input("¿Has intentado algo antes para verte/estar mejor? (Gym, Dieta, App, Otros)", key="ev_intentos")
         st.text_input("¿Qué es lo que más se te complica? (Constancia, Alimentación, Motivación, Otros)", key="ev_complica")
     with c2:
         st.write("Presentas alguna de las siguientes condiciones?")
@@ -579,11 +588,11 @@ def pantalla3():
     with c1:
         st.text_input("¿Qué talla te gustaría ser?", key="obj_talla")
         st.text_input("¿Qué partes del cuerpo te gustaría mejorar?", key="obj_partes")
-        st.text_input("¿Qué tienes en tu ropero para usar como meta?", key="obj_ropero")
+        st.text_input("¿Qué tienes en tu ropero que podamos usar como meta?", key="obj_ropero")
     with c2:
         st.text_input("¿Cómo te beneficia alcanzar tu meta?", key="obj_beneficio")
         st.text_input("¿Qué eventos tienes en los próximos 3 o 6 meses?", key="obj_eventos")
-        st.text_input("Del 1 al 10, ¿cuál es tu nivel de compromiso para alacanzar una mejor versión de ti?", key="obj_compromiso")
+        st.text_input("Del 1 al 10, ¿cual es tu nivel de compromiso en alcanzar una mejor versión de ti?", key="obj_compromiso")
 
     st.subheader("Análisis de presupuesto")
     col = st.columns(4)
@@ -598,6 +607,8 @@ def pantalla3():
 
     prom_diario = round((g_comida + g_cafe + (g_alcohol/7.0) + (g_deliv/7.0)), 2)
     st.metric("Promedio de gastos diarios (S/.)", f"{prom_diario:.2f}")
+
+    st.write("¿Que te pareció la información que has recibido en esta evaluación?")
 
     bton_nav()
 
@@ -698,7 +709,7 @@ def pantalla5():
           "Acompañamiento nutricional y de entrenamiento."]),
         ("wagnerysonia.jpg","Wagner y Sonia — Tercera edad",
          ["Sonia tenia problemas de salud y dolor en las rodillas y talones.",
-          "Solo le recetaban calmantes y inyecciones argumentando que eran problemas de la edad.",
+          "Solo le recetaban calmantes e inyecciones argumentando que eran problemas de la edad.",
           "Controlo 12kg a los 2 meses de sumarse a la comunidad",
           "Mejoro salud, se fueron los dolores y se llenó de energia."]),
         ("mayraymariaantonieta.jpg","Mayra y María Antonieta — Hipotiroidismo",
