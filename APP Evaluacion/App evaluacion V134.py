@@ -653,8 +653,9 @@ def pantalla4():
     st.markdown(f"### {cara}  {texto}")
 
     st.divider()
-    st.write("**Finalmente ¿Te gustaría que te explique cómo, a través de la comunidad, podemos ayudarte a alcanzar los objetivos que te has propuesto?**")
+    st.write("Muchas gracias, con eso concluimos la evaluación.")
 
+    st.write("Antes de terminar **¿Te gustaría que te explique cómo, a través de la comunidad, podemos ayudarte a alcanzar los objetivos que te has propuesto?**") 
     bton_nav()
 
 # -------------------------------------------------------------
