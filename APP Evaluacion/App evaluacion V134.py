@@ -2,6 +2,8 @@
 import math
 from pathlib import Path
 from typing import Dict, List
+import io
+import pandas as pd
 
 import streamlit as st
 from datetime import date, datetime, timedelta
@@ -507,16 +509,7 @@ def pantalla2():
     fecha_nac  = (datos.get('fecha_nac'))
     edad_ref   = edad_desde_fecha(fecha_nac) or int(datos.get('edad', 30))
     rmin, rmax = _rango_grasa_referencia(genero_ref, edad_ref)
-
-    # —— Mensaje personalizado según género (USANDO rmin, rmax y el % seleccionado) ——
-    es_mujer = str(genero_ref).strip().lower().startswith("muj")
-    if es_mujer:
-        linea = (f"Una **mujer** de tu edad tiene **{rmin:.1f}%** de grasa en el mejor de los casos y "
-                 f"**{rmax:.1f}%** de grasa en el peor de los casos. Tú te encuentras en **{grasa_pct}%**.")
-    else:
-        linea = (f"Un **hombre** de tu edad tiene **{rmin:.1f}%** de grasa en el mejor de los casos y "
-                 f"**{rmax:.1f}%** de grasa en el peor de los casos. Tú te encuentras en **{grasa_pct}%**.")
-    st.markdown(linea)
+    st.markdown(f"**% GRASA de referencia** para {genero_ref.upper()} y {edad_ref} años: {rmin:.1f}% – {rmax:.1f}%.")
 
     agua_ml = req_hidratacion_ml(peso_kg)
     prote_g = req_proteina(genero, st.session_state.metas, peso_kg)
@@ -653,9 +646,8 @@ def pantalla4():
     st.markdown(f"### {cara}  {texto}")
 
     st.divider()
-    st.write("Muchas gracias, con eso concluimos la evaluación.")
+    st.write("**Finalmente ¿Te gustaría que te explique cómo, a través de la comunidad, podemos ayudarte a alcanzar los objetivos que te has propuesto?**")
 
-    st.write("Antes de terminar **¿Te gustaría que te explique cómo, a través de la comunidad, podemos ayudarte a alcanzar los objetivos que te has propuesto?**") 
     bton_nav()
 
 # -------------------------------------------------------------
@@ -740,6 +732,124 @@ def pantalla5():
 
     bton_nav()
 
+# =========================
+# Utilidad: construir Excel
+# =========================
+def _excel_bytes():
+    d = st.session_state.get("datos", {})
+    e = st.session_state.get("estilo_vida", {})
+    m = st.session_state.get("metas", {})
+    refs = st.session_state.get("valoracion_contactos", []) or []
+    combo = st.session_state.get("combo_elegido")
+
+    # Derivados actuales
+    altura_cm = d.get("altura_cm")
+    peso_kg   = d.get("peso_kg")
+    grasa_pct = d.get("grasa_pct")
+    edad_calc = edad_desde_fecha(d.get("fecha_nac")) or 0
+    genero    = d.get("genero") or "HOMBRE"
+    imc_val   = imc(peso_kg or 0, altura_cm or 0)
+    agua_ml   = req_hidratacion_ml(peso_kg or 0)
+    prote_g   = req_proteina(genero, m, peso_kg or 0)
+    bmr_val   = bmr_mifflin(genero, peso_kg or 0, altura_cm or 0, max(edad_calc, 16))
+    objetivo_kcal = bmr_val + 250 if m.get("masa_muscular") else bmr_val - 250
+
+    perfil = [
+        ("¿Cuál es tu nombre completo?", d.get("nombre","")),
+        ("¿Cuál es tu correo electrónico?", d.get("email","")),
+        ("¿Cuál es su número de teléfono?", d.get("movil","")),
+        ("¿Cuál es tu fecha de nacimiento?", d.get("fecha_nac","")),
+        ("¿Cuál es tu género?", d.get("genero","")),
+        ("Altura (cm)", altura_cm),
+        ("Peso (kg)", peso_kg),
+        ("% de grasa estimado", grasa_pct),
+    ]
+    estilo = [
+        ("A que hora despiertas?", e.get("despierta","")),
+        ("A que hora vas a dormir?", e.get("dormir","")),
+        ("Tomas desayuno cada mañana?", e.get("desayuna","")),
+        ("A que hora desayunas?", e.get("a_que_hora","")),
+        ("Qué desayunas?", e.get("que_desayunas","")),
+        ("En promedio cuánta agua bebes al día?", e.get("agua","")),
+        ("Tomas alguna otra bebida? (Jugos, refrescos, bebidas energéticas, otros)", e.get("otras_bebidas","")),
+        ("Comes entre comidas?", e.get("meriendas","")),
+        ("Cuantas porciones de frutas y verduras comes al dia?", e.get("porciones","")),
+        ("A que hora del dia sientes menos energia?", e.get("baja_energia","")),
+        ("Con qué frecuencia te ejercitas?", e.get("frecuencia","")),
+        ("Tiendes a comer de más por las noches?", e.get("comer_noche","")),
+        ("Cuál es tu mayor reto respecto a la comida?", e.get("reto","")),
+        ("Cuantas bebidas alcohólicas tomas por semana?", e.get("alcohol","")),
+        ("Cuánto dinero gastas en comida diariamente?", e.get("gasto_comida","")),
+        ("¿En qué momento del día sientes menos energía?", st.session_state.get("ev_menos_energia","")),
+        ("¿Tomas por lo menos 8 vasos de agua al día?", st.session_state.get("ev_8_vasos","")),
+        ("¿Practicas actividad física al menos 3 veces/semana?", st.session_state.get("ev_actividad","")),
+        ("¿Has intentado algo antes para verte/estar mejor? (Gym, Dieta, App, Otros)", st.session_state.get("ev_intentos","")),
+        ("¿Qué es lo que más se te complica? (Constancia, Alimentación, Motivación, Otros)", st.session_state.get("ev_complica","")),
+    ]
+    metas = [
+        ("Perder Peso", bool(m.get("perder_peso"))),
+        ("Tonificar / Bajar Grasa", bool(m.get("tonificar"))),
+        ("Aumentar Masa Muscular", bool(m.get("masa_muscular"))),
+        ("Aumentar Energía", bool(m.get("energia"))),
+        ("Mejorar Rendimiento Físico", bool(m.get("rendimiento"))),
+        ("Mejorar Salud", bool(m.get("salud"))),
+        ("Otros", m.get("otros","")),
+        ("¿Qué talla te gustaría ser?", st.session_state.get("obj_talla","")),
+        ("¿Qué partes del cuerpo te gustaría mejorar?", st.session_state.get("obj_partes","")),
+        ("¿Qué tienes en tu ropero que podamos usar como meta?", st.session_state.get("obj_ropero","")),
+        ("¿Cómo te beneficia alcanzar tu meta?", st.session_state.get("obj_beneficio","")),
+        ("¿Qué eventos tienes en los próximos 3 o 6 meses?", st.session_state.get("obj_eventos","")),
+        ("Nivel de compromiso (1-10)", st.session_state.get("obj_compromiso","")),
+        ("Gasto diario en comida (S/.)", st.session_state.get("presu_comida","")),
+        ("Gasto diario en café (S/.)", st.session_state.get("presu_cafe","")),
+        ("Gasto semanal en alcohol (S/.)", st.session_state.get("presu_alcohol","")),
+        ("Gasto semanal en deliveries/salidas (S/.)", st.session_state.get("presu_deliveries","")),
+    ]
+    composicion = [
+        ("IMC", imc_val),
+        ("Requerimiento de hidratación (ml/día)", agua_ml),
+        ("Requerimiento de proteína (g/día)", prote_g),
+        ("Metabolismo en reposo (kcal/día)", bmr_val),
+        ("Objetivo calórico (kcal/día)", objetivo_kcal),
+    ]
+    condiciones = [
+        ("¿Estreñimiento?", bool(st.session_state.get("p3_estrenimiento"))),
+        ("¿Colesterol Alto?", bool(st.session_state.get("p3_colesterol_alto"))),
+        ("¿Baja Energía?", bool(st.session_state.get("p3_baja_energia"))),
+        ("¿Dolor Muscular?", bool(st.session_state.get("p3_dolor_muscular"))),
+        ("¿Gastritis?", bool(st.session_state.get("p3_gastritis"))),
+        ("¿Hemorroides?", bool(st.session_state.get("p3_hemorroides"))),
+        ("¿Hipertensión?", bool(st.session_state.get("p3_hipertension"))),
+        ("¿Dolor Articular?", bool(st.session_state.get("p3_dolor_articular"))),
+        ("¿Ansiedad por comer?", bool(st.session_state.get("p3_ansiedad_por_comer"))),
+        ("¿Jaquecas / Migrañas?", bool(st.session_state.get("p3_jaquecas_migranas"))),
+        ("Diabetes (antecedentes familiares)", bool(st.session_state.get("p3_diabetes_antecedentes_familiares"))),
+    ]
+    seleccion = []
+    if combo:
+        seleccion = [
+            ("Programa elegido", combo.get("titulo","")),
+            ("Items", " + ".join(combo.get("items",[]))),
+            ("Precio regular", combo.get("precio_regular","")),
+            ("Descuento (%)", combo.get("descuento_pct","")),
+            ("Precio final", combo.get("precio_final","")),
+        ]
+
+    # Crear Excel en memoria
+    buf = io.BytesIO()
+    with pd.ExcelWriter(buf, engine="xlsxwriter") as writer:
+        pd.DataFrame(perfil, columns=["Pregunta","Respuesta"]).to_excel(writer, index=False, sheet_name="Perfil")
+        pd.DataFrame(estilo, columns=["Pregunta","Respuesta"]).to_excel(writer, index=False, sheet_name="Estilo de Vida")
+        pd.DataFrame(metas, columns=["Pregunta","Respuesta"]).to_excel(writer, index=False, sheet_name="Metas")
+        pd.DataFrame(composicion, columns=["Indicador","Valor"]).to_excel(writer, index=False, sheet_name="Composición")
+        pd.DataFrame(condiciones, columns=["Condición","Sí/No"]).to_excel(writer, index=False, sheet_name="Condiciones")
+        if refs:
+            pd.DataFrame(refs).to_excel(writer, index=False, sheet_name="Referidos")
+        if seleccion:
+            pd.DataFrame(seleccion, columns=["Detalle","Valor"]).to_excel(writer, index=False, sheet_name="Selección")
+    buf.seek(0)
+    return buf.getvalue()
+
 # -------------------------------------------------------------
 # STEP 6 - Plan Personalizado (recomendaciones + PRECIOS + SELECCIÓN + cuenta regresiva)
 # -------------------------------------------------------------
@@ -814,6 +924,17 @@ def pantalla6():
 
     # Bloque de precios + selección
     mostrar_opciones_pantalla6()
+
+    # ===== Botón de descarga (Excel) =====
+    st.markdown("### 📥 Descargar tus respuestas")
+    excel_bytes = _excel_bytes()
+    st.download_button(
+        label="Descargar información",
+        data=excel_bytes,
+        file_name=f"Evaluacion_{st.session_state.get('datos',{}).get('nombre','usuario')}.xlsx",
+        mime="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+        use_container_width=True
+    )
 
     bton_nav()
 
