@@ -265,6 +265,10 @@ def _render_card(titulo:str, items:List[str], descuento_pct:int=0, seleccionable
         precio_desc = round(total * (1 - descuento_pct/100))
         tachado = f"<span style='text-decoration:line-through; opacity:.6; margin-right:8px'>{_mon(total)}</span>"
         precio_html = f"{tachado}<strong style='font-size:20px'>{_mon(precio_desc)}</strong> {_chip_desc(descuento_pct)}"
+        # >>> Ajuste solicitado: solo para Batido Nutricional (-5%) mostrar "(S/7.9 al dia)" a la derecha del chip
+        if titulo.strip().lower() == "batido nutricional" and descuento_pct == 5:
+            precio_html += " <span style='font-size:13px; opacity:.8'>(S/7.9 al dia)</span>"
+        # <<< fin ajuste
     else:
         precio_desc = total
         precio_html = f"<strong style='font-size:20px'>{_mon(precio_desc)}</strong>"
@@ -381,7 +385,7 @@ def pantalla1():
         with col1:
             nombre = st.text_input("¿Cuál es tu nombre completo?")
             email  = st.text_input("¿Cuál es tu correo electrónico?")
-            movil  = st.text_input("¿Cuál es su número de teléfono?")
+            movil  = st.text_input("¿Cuál es tu número de teléfono?")
         with col2:
             fecha_nac = st.date_input("¿Cuál es tu fecha de nacimiento?",
                                       value=date(1990,1,1), min_value=date(1900,1,1), max_value=date.today())
@@ -510,6 +514,21 @@ def pantalla2():
     edad_ref   = edad_desde_fecha(fecha_nac) or int(datos.get('edad', 30))
     rmin, rmax = _rango_grasa_referencia(genero_ref, edad_ref)
     st.markdown(f"**% GRASA de referencia** para {genero_ref.upper()} y {edad_ref} años: {rmin:.1f}% – {rmax:.1f}%.")
+
+    # —— Mensaje personalizado por género con el % elegido ——
+    es_mujer = str(genero_ref).strip().lower().startswith("muj")
+    if es_mujer:
+        st.markdown(
+            f"Una **mujer** de tu edad tiene **{rmin:.1f}%** de grasa en el mejor de los casos "
+            f"y **{rmax:.1f}%** de grasa en el peor de los casos. "
+            f"Tú tienes **{grasa_pct}%**."
+        )
+    else:
+        st.markdown(
+            f"Un **hombre** de tu edad tiene **{rmin:.1f}%** de grasa en el mejor de los casos "
+            f"y **{rmax:.1f}%** de grasa en el peor de los casos. "
+            f"Tú tienes **{grasa_pct}%**."
+        )
 
     agua_ml = req_hidratacion_ml(peso_kg)
     prote_g = req_proteina(genero, st.session_state.metas, peso_kg)
@@ -926,7 +945,7 @@ def pantalla6():
     mostrar_opciones_pantalla6()
 
     # ===== Botón de descarga (Excel) =====
-    st.markdown("### 📥 Descargar tus respuestas")
+    st.markdown("### 📥 Descargar Evaluación")
     excel_bytes = _excel_bytes()
     st.download_button(
         label="Descargar información",
