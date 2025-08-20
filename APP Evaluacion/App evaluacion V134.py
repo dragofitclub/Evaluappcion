@@ -265,10 +265,8 @@ def _render_card(titulo:str, items:List[str], descuento_pct:int=0, seleccionable
         precio_desc = round(total * (1 - descuento_pct/100))
         tachado = f"<span style='text-decoration:line-through; opacity:.6; margin-right:8px'>{_mon(total)}</span>"
         precio_html = f"{tachado}<strong style='font-size:20px'>{_mon(precio_desc)}</strong> {_chip_desc(descuento_pct)}"
-        # >>> Ajuste solicitado: solo para Batido Nutricional (-5%) mostrar "(S/7.9 al dia)" a la derecha del chip
         if titulo.strip().lower() == "batido nutricional" and descuento_pct == 5:
             precio_html += " <span style='font-size:13px; opacity:.8'>(S/7.9 al dia)</span>"
-        # <<< fin ajuste
     else:
         precio_desc = total
         precio_html = f"<strong style='font-size:20px'>{_mon(precio_desc)}</strong>"
@@ -314,7 +312,7 @@ def _combos_por_flags() -> List[Dict]:
     if ss.get("p3_baja_energia"):          combos.append(("Batido + Té de Hierbas", ["Batido", "Té de Hierbas"]))
     if ss.get("p3_dolor_muscular"):        combos.append(("Batido + Beverage Mix", ["Batido", "Beverage Mix"]))
     if ss.get("p3_gastritis"):             combos.append(("Batido + Aloe Concentrado", ["Batido", "Aloe Concentrado"]))
-    if ss.get("p3_hemorroides"):           combos.append(("Batido + Aloe", ["Batido", "Aloe Concentrado"]))  # “Aloe” = concentrado
+    if ss.get("p3_hemorroides"):           combos.append(("Batido + Aloe", ["Batido", "Aloe Concentrado"]))
     if ss.get("p3_hipertension"):          combos.append(("Batido + Beta Heart", ["Batido", "Beta Heart"]))
     if ss.get("p3_dolor_articular"):       combos.append(("Batido + Golden Beverage", ["Batido", "Golden Beverage"]))
     if ss.get("p3_ansiedad_por_comer"):    combos.append(("Batido + PDM", ["Batido", "PDM"]))
@@ -415,17 +413,12 @@ def pantalla1():
             desayuna      = st.text_input("Tomas desayuno cada mañana?")
             a_que_hora    = st.text_input("A que hora desayunas?")
             que_desayunas = st.text_input("Qué desayunas?")
-            agua          = st.text_input("En promedio cuánta agua bebes al día?")
         with c2:
-            otras_bebidas = st.text_input("Tomas alguna otra bebida? (Jugos, refrescos, bebidas energéticas, otros)")
             meriendas     = st.text_input("Comes entre comidas?")
             porciones     = st.text_input("Cuantas porciones de frutas y verduras comes al dia?")
-            baja_energia  = st.text_input("A que hora del dia sientes menos energia?")
-            frecuencia    = st.text_input("Con qué frecuencia te ejercitas?")
             comer_noche   = st.text_input("Tiendes a comer de más por las noches?")
             reto          = st.text_input("Cuál es tu mayor reto respecto a la comida?")
             alcohol       = st.text_input("Cuantas bebidas alcohólicas tomas por semana?")
-            gasto_comida  = st.text_input("Cuánto dinero gastas en comida diariamente?")
 
         enviado = st.form_submit_button("Guardar y continuar ➡️")
         if enviado:
@@ -439,10 +432,10 @@ def pantalla1():
             })
             st.session_state.estilo_vida.update({
                 "despierta": despierta, "dormir": dormir, "desayuna": desayuna, "a_que_hora": a_que_hora,
-                "que_desayunas": que_desayunas, "agua": agua, "otras_bebidas": otras_bebidas,
-                "meriendas": meriendas, "porciones": porciones, "baja_energia": baja_energia,
-                "frecuencia": frecuencia, "comer_noche": comer_noche, "reto": reto,
-                "alcohol": alcohol, "gasto_comida": gasto_comida
+                "que_desayunas": que_desayunas,
+                "meriendas": meriendas, "porciones": porciones,
+                "comer_noche": comer_noche, "reto": reto,
+                "alcohol": alcohol
             })
             go(next=True)
 
@@ -609,18 +602,49 @@ def pantalla3():
     st.subheader("Análisis de presupuesto")
     col = st.columns(4)
     with col[0]:
-        g_comida  = st.number_input("Cuanto gastas diariamente en comida? (S/.)", min_value=0.0, step=0.1, key="presu_comida")
+        st.number_input("Cuanto gastas diariamente en comida? (S/.)", min_value=0.0, step=0.1, key="presu_comida")
     with col[1]:
-        g_cafe    = st.number_input("Cuanto gastas al dia en cafe? (S/.)", min_value=0.0, step=0.1, key="presu_cafe")
+        st.number_input("Cuanto gastas al dia en cafe? (S/.)", min_value=0.0, step=0.1, key="presu_cafe")
     with col[2]:
-        g_alcohol = st.number_input("Cuanto gastas a la semana en alcohol? (S/.)", min_value=0.0, step=0.1, key="presu_alcohol")
+        st.number_input("Cuanto gastas a la semana en alcohol? (S/.)", min_value=0.0, step=0.1, key="presu_alcohol")
     with col[3]:
-        g_deliv   = st.number_input("Cuanto gastas a la semana en deliveries/salidas a comer? (S/.)", min_value=0.0, step=0.1, key="presu_deliveries")
+        st.number_input("Cuanto gastas a la semana en deliveries/salidas a comer? (S/.)", min_value=0.0, step=0.1, key="presu_deliveries")
 
-    prom_diario = round((g_comida + g_cafe + (g_alcohol/7.0) + (g_deliv/7.0)), 2)
+    # Promedio (visual)
+    prom_diario = round((
+        float(st.session_state.get("presu_comida", 0.0)) +
+        float(st.session_state.get("presu_cafe", 0.0)) +
+        (float(st.session_state.get("presu_alcohol", 0.0))/7.0) +
+        (float(st.session_state.get("presu_deliveries", 0.0))/7.0)
+    ), 2)
     st.metric("Promedio de gastos diarios (S/.)", f"{prom_diario:.2f}")
 
     st.write("¿Que te pareció la información que has recibido en esta evaluación?")
+
+    # ======= PERSISTENCIA EXPLÍCITA PARA EXPORTACIÓN =======
+    # Hábitos/energía
+    st.session_state.estilo_vida.update({
+        "ev_menos_energia": st.session_state.get("ev_menos_energia", ""),
+        "ev_8_vasos":       st.session_state.get("ev_8_vasos", ""),
+        "ev_actividad":     st.session_state.get("ev_actividad", ""),
+        "ev_intentos":      st.session_state.get("ev_intentos", ""),
+        "ev_complica":      st.session_state.get("ev_complica", ""),
+        # Presupuesto
+        "presu_comida":     st.session_state.get("presu_comida", 0.0),
+        "presu_cafe":       st.session_state.get("presu_cafe", 0.0),
+        "presu_alcohol":    st.session_state.get("presu_alcohol", 0.0),
+        "presu_deliveries": st.session_state.get("presu_deliveries", 0.0),
+    })
+    # Objetivos -> guardados dentro de 'metas'
+    st.session_state.metas.update({
+        "obj_talla":      st.session_state.get("obj_talla",""),
+        "obj_partes":     st.session_state.get("obj_partes",""),
+        "obj_ropero":     st.session_state.get("obj_ropero",""),
+        "obj_beneficio":  st.session_state.get("obj_beneficio",""),
+        "obj_eventos":    st.session_state.get("obj_eventos",""),
+        "obj_compromiso": st.session_state.get("obj_compromiso",""),
+    })
+    # ======= FIN PERSISTENCIA =======
 
     bton_nav()
 
@@ -789,21 +813,17 @@ def _excel_bytes():
         ("Tomas desayuno cada mañana?", e.get("desayuna","")),
         ("A que hora desayunas?", e.get("a_que_hora","")),
         ("Qué desayunas?", e.get("que_desayunas","")),
-        ("En promedio cuánta agua bebes al día?", e.get("agua","")),
-        ("Tomas alguna otra bebida? (Jugos, refrescos, bebidas energéticas, otros)", e.get("otras_bebidas","")),
         ("Comes entre comidas?", e.get("meriendas","")),
         ("Cuantas porciones de frutas y verduras comes al dia?", e.get("porciones","")),
-        ("A que hora del dia sientes menos energia?", e.get("baja_energia","")),
-        ("Con qué frecuencia te ejercitas?", e.get("frecuencia","")),
         ("Tiendes a comer de más por las noches?", e.get("comer_noche","")),
         ("Cuál es tu mayor reto respecto a la comida?", e.get("reto","")),
         ("Cuantas bebidas alcohólicas tomas por semana?", e.get("alcohol","")),
-        ("Cuánto dinero gastas en comida diariamente?", e.get("gasto_comida","")),
-        ("¿En qué momento del día sientes menos energía?", st.session_state.get("ev_menos_energia","")),
-        ("¿Tomas por lo menos 8 vasos de agua al día?", st.session_state.get("ev_8_vasos","")),
-        ("¿Practicas actividad física al menos 3 veces/semana?", st.session_state.get("ev_actividad","")),
-        ("¿Has intentado algo antes para verte/estar mejor? (Gym, Dieta, App, Otros)", st.session_state.get("ev_intentos","")),
-        ("¿Qué es lo que más se te complica? (Constancia, Alimentación, Motivación, Otros)", st.session_state.get("ev_complica","")),
+        # Hábitos y energía
+        ("¿En qué momento del día sientes menos energía?", e.get("ev_menos_energia","")),
+        ("¿Tomas por lo menos 8 vasos de agua al día?", e.get("ev_8_vasos","")),
+        ("¿Practicas actividad física al menos 3 veces/semana?", e.get("ev_actividad","")),
+        ("¿Has intentado algo antes para verte/estar mejor? (Gym, Dieta, App, Otros)", e.get("ev_intentos","")),
+        ("¿Qué es lo que más se te complica? (Constancia, Alimentación, Motivación, Otros)", e.get("ev_complica","")),
     ]
     metas = [
         ("Perder Peso", bool(m.get("perder_peso"))),
@@ -813,16 +833,16 @@ def _excel_bytes():
         ("Mejorar Rendimiento Físico", bool(m.get("rendimiento"))),
         ("Mejorar Salud", bool(m.get("salud"))),
         ("Otros", m.get("otros","")),
-        ("¿Qué talla te gustaría ser?", st.session_state.get("obj_talla","")),
-        ("¿Qué partes del cuerpo te gustaría mejorar?", st.session_state.get("obj_partes","")),
-        ("¿Qué tienes en tu ropero que podamos usar como meta?", st.session_state.get("obj_ropero","")),
-        ("¿Cómo te beneficia alcanzar tu meta?", st.session_state.get("obj_beneficio","")),
-        ("¿Qué eventos tienes en los próximos 3 o 6 meses?", st.session_state.get("obj_eventos","")),
-        ("Nivel de compromiso (1-10)", st.session_state.get("obj_compromiso","")),
-        ("Gasto diario en comida (S/.)", st.session_state.get("presu_comida","")),
-        ("Gasto diario en café (S/.)", st.session_state.get("presu_cafe","")),
-        ("Gasto semanal en alcohol (S/.)", st.session_state.get("presu_alcohol","")),
-        ("Gasto semanal en deliveries/salidas (S/.)", st.session_state.get("presu_deliveries","")),
+        ("¿Qué talla te gustaría ser?", m.get("obj_talla","")),
+        ("¿Qué partes del cuerpo te gustaría mejorar?", m.get("obj_partes","")),
+        ("¿Qué tienes en tu ropero que podamos usar como meta?", m.get("obj_ropero","")),
+        ("¿Cómo te beneficia alcanzar tu meta?", m.get("obj_beneficio","")),
+        ("¿Qué eventos tienes en los próximos 3 o 6 meses?", m.get("obj_eventos","")),
+        ("Nivel de compromiso (1-10)", m.get("obj_compromiso","")),
+        ("Gasto diario en comida (S/.)", e.get("presu_comida","")),
+        ("Gasto diario en café (S/.)", e.get("presu_cafe","")),
+        ("Gasto semanal en alcohol (S/.)", e.get("presu_alcohol","")),
+        ("Gasto semanal en deliveries/salidas (S/.)", e.get("presu_deliveries","")),
     ]
     composicion = [
         ("IMC", imc_val),
