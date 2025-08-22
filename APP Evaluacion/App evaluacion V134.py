@@ -84,6 +84,50 @@ COUNTRY_CONFIG: Dict[str, Dict] = {
             "Fibra Activa","Golden Beverage","NRG","Herbalifeline","PDM"
         ],
     },
+    # ==== NUEVO: España Península ====
+    "España (Península)": {
+        "code": "ES-PEN",
+        "currency_symbol": "€",
+        "thousands_sep": ".",
+        "prices": {
+            "Batido": 62.59,
+            "Té de Hierbas": 40.71,
+            "Aloe Concentrado": 54.92,
+            "Beverage Mix": 51.72,
+            "Beta Heart": 56.83,
+            "Fibra Activa": 39.98,
+            "Golden Beverage": 82.77,
+            "NRG": 71.91,
+            "Herbalifeline": 43.48,
+            "PDM": 72.14,
+        },
+        "available_products": [
+            "Batido","Té de Hierbas","Aloe Concentrado","Beverage Mix","Beta Heart",
+            "Fibra Activa","Golden Beverage","NRG","Herbalifeline","PDM"
+        ],
+    },
+    # ==== NUEVO: España Canarias ====
+    "España (Canarias)": {
+        "code": "ES-CAN",
+        "currency_symbol": "€",
+        "thousands_sep": ".",
+        "prices": {
+            "Batido": 64.75,
+            "Té de Hierbas": 46.38,
+            "Aloe Concentrado": 57.28,
+            "Beverage Mix": 55.17,
+            "Beta Heart": 60.15,
+            "Fibra Activa": 42.75,
+            "Golden Beverage": 84.38,
+            "NRG": 73.82,
+            "Herbalifeline": 46.16,
+            "PDM": 72.14,
+        },
+        "available_products": [
+            "Batido","Té de Hierbas","Aloe Concentrado","Beverage Mix","Beta Heart",
+            "Fibra Activa","Golden Beverage","NRG","Herbalifeline","PDM"
+        ],
+    },
 }
 
 # =========================
@@ -342,8 +386,18 @@ def _producto_disponible(nombre: str) -> bool:
 
 # ——— NOMBRE MOSTRADO (sin afectar precios) ———
 def _display_name(product: str) -> str:
+    cc = st.session_state.get("country_code")
+    # España: mapeos solicitados
+    if cc in ("ES-PEN", "ES-CAN"):
+        if product == "NRG":
+            return "High Protein Iced Coffee"
+        if product in ("Beverage", "Beverage Mix"):
+            return "PPP"
+        if product == "Golden Beverage":
+            return "Collagen Booster"
+    # Chile: caso especial existente
     if (
-        st.session_state.get("country_code") == "CL"
+        cc == "CL"
         and st.session_state.get("p3_dolor_articular")
         and product == "Golden Beverage"
     ):
@@ -367,6 +421,11 @@ def _render_card(titulo:str, items:List[str], descuento_pct:int=0, seleccionable
                 precio_html += " <span style='font-size:13px; opacity:.8'>($1.744 al dia)</span>"
             elif st.session_state.get("country_code") == "CO":
                 precio_html += " <span style='font-size:13px; opacity:.8'>($6.693 al dia)</span>"
+            # ==== NUEVO: España (cálculo dinámico en euros) ====
+            elif st.session_state.get("country_code") in ("ES-PEN", "ES-CAN"):
+                # misma lógica: precio con 5% / 22 días
+                diario = round(precio_desc / 22.0, 2)
+                precio_html += f" <span style='font-size:13px; opacity:.8'>(€{diario:.2f} al dia)</span>"
     else:
         precio_desc = total
         precio_html = f"<strong style='font-size:20px'>{_mon(precio_desc)}</strong>"
@@ -406,22 +465,29 @@ def _render_card(titulo:str, items:List[str], descuento_pct:int=0, seleccionable
 def _combos_por_flags() -> List[Dict]:
     combos = []
     ss = st.session_state
-    if ss.get("p3_estrenimiento"):        combos.append(("Batido + Fibra activa", ["Batido", "Fibra Activa"]))
-    if ss.get("p3_colesterol_alto"):       combos.append(("Batido + Herbalifeline", ["Batido", "Herbalifeline"]))
-    if ss.get("p3_baja_energia"):          combos.append(("Batido + Té de Hierbas", ["Batido", "Té de Hierbas"]))
-    if ss.get("p3_dolor_muscular"):        combos.append(("Batido + Beverage Mix", ["Batido", "Beverage Mix"]))
-    if ss.get("p3_gastritis"):             combos.append(("Batido + Aloe Concentrado", ["Batido", "Aloe Concentrado"]))
-    if ss.get("p3_hemorroides"):           combos.append(("Batido + Aloe", ["Batido", "Aloe Concentrado"]))
-    if ss.get("p3_hipertension"):          combos.append(("Batido + Beta Heart", ["Batido", "Beta Heart"]))
+    cc = ss.get("country_code")
+    if ss.get("p3_estrenimiento"):
+        combos.append((f"Batido + {_display_name('Fibra Activa')}", ["Batido", "Fibra Activa"]))
+    if ss.get("p3_colesterol_alto"):
+        combos.append((f"Batido + {_display_name('Herbalifeline')}", ["Batido", "Herbalifeline"]))
+    if ss.get("p3_baja_energia"):
+        combos.append((f"Batido + {_display_name('Té de Hierbas')}", ["Batido", "Té de Hierbas"]))
+    if ss.get("p3_dolor_muscular"):
+        combos.append((f"Batido + {_display_name('Beverage Mix')}", ["Batido", "Beverage Mix"]))
+    if ss.get("p3_gastritis"):
+        combos.append((f"Batido + {_display_name('Aloe Concentrado')}", ["Batido", "Aloe Concentrado"]))
+    if ss.get("p3_hemorroides"):
+        combos.append(("Batido + Aloe", ["Batido", "Aloe Concentrado"]))
+    if ss.get("p3_hipertension"):
+        combos.append((f"Batido + {_display_name('Beta Heart')}", ["Batido", "Beta Heart"]))
     if ss.get("p3_dolor_articular"):
-        if st.session_state.get("country_code") == "CL":
-            combos.append(("Batido + Collagen Drink", ["Batido", "Golden Beverage"]))
-        else:
-            combos.append(("Batido + Golden Beverage", ["Batido", "Golden Beverage"]))
-    if ss.get("p3_ansiedad_por_comer"):    combos.append(("Batido + PDM", ["Batido", "PDM"]))
-    if ss.get("p3_jaquecas_migranas"):     combos.append(("Batido + NRG", ["Batido", "NRG"]))
+        combos.append((f"Batido + {_display_name('Golden Beverage')}", ["Batido", "Golden Beverage"]))
+    if ss.get("p3_ansiedad_por_comer"):
+        combos.append((f"Batido + {_display_name('PDM')}", ["Batido", "PDM"]))
+    if ss.get("p3_jaquecas_migranas"):
+        combos.append((f"Batido + {_display_name('NRG')}", ["Batido", "NRG"]))
     if ss.get("p3_diabetes_antecedentes_familiares"):
-                                           combos.append(("Batido + Beta Heart", ["Batido", "Beta Heart"]))
+        combos.append((f"Batido + {_display_name('Beta Heart')}", ["Batido", "Beta Heart"]))
     return combos
 
 # ------------------------------
@@ -463,7 +529,7 @@ def mostrar_opciones_pantalla6():
         st.success(
             f"Seleccionado: **{e['titulo']}** — "
             f"{_mon(e['precio_final'])} "
-            f"({e['descuento_pct']}% dscto sobre {_mon(e['precio_regular'])})"
+            f"({e['descuento_pct']}% dscto)"
         )
 
 # -------------------------------------------------------------
@@ -484,9 +550,13 @@ def pantalla1():
             genero = st.selectbox("¿Cuál es tu género?", ["HOMBRE", "MUJER"])
 
         st.subheader("País")
-        # >>> incluye Colombia <<<
-        pais = st.selectbox("Selecciona tu país", ["Perú", "Chile", "Colombia"], index=0,
-                            help="Esto ajustará los precios y la moneda en las recomendaciones.")
+        # >>> incluye Colombia y España <<<
+        pais = st.selectbox(
+            "Selecciona tu país",
+            ["Perú", "Chile", "Colombia", "España (Península)", "España (Canarias)"],
+            index=0,
+            help="Esto ajustará los precios y la moneda en las recomendaciones."
+        )
 
         st.form_submit_button("Continuar")
 
@@ -1006,7 +1076,8 @@ def pantalla6():
         if st.session_state.get("p3_colesterol_alto", False):
             st.write("• Para mejorar tus niveles de colesterol nos apoyamos del **Herbalifeline**, unas cápsulas de concentrado de **omega 3** con sabor a menta y tomillo. Riquísimas.")
         if st.session_state.get("p3_baja_energia", False):
-            st.write("• Con el **té concentrado de hierbas** y su efecto termogénico puedes disparar tus niveles de energía y de paso quemar unas calorías extra al día. Si lo combinas con el **NRG** vas a estar totalmente lúcida y enérgica en cuerpo y mente.")
+            nrg_name = "High Protein Iced Coffee" if st.session_state.get("country_code") in ("ES-PEN","ES-CAN") else "NRG"
+            st.write(f"• Con el **té concentrado de hierbas** y su efecto termogénico puedes disparar tus niveles de energía y de paso quemar unas calorías extra al día. Si lo combinas con el **{nrg_name}** vas a estar totalmente lúcida y enérgica en cuerpo y mente.")
         if st.session_state.get("p3_dolor_muscular", False):
             st.write("• Para el dolor muscular se recomienda una buena ingesta de **proteína**, por lo cual el **PDM** resulta ideal al sumar de 9 a 18 g adicionales según tus requerimientos.")
         if st.session_state.get("p3_gastritis", False):
@@ -1018,12 +1089,16 @@ def pantalla6():
         if st.session_state.get("p3_dolor_articular", False):
             if st.session_state.get("country_code") == "CL":
                 st.write("• Para el **dolor articular** está el **Collagen Drink**, ideal para mantener el cartilago sano.")
+            elif st.session_state.get("country_code") in ("ES-PEN","ES-CAN"):
+                st.write("• Para el **dolor articular** está el **Collagen Booster**, ideal para mantener el cartilago sano.")
             else:
                 st.write("• Para el **dolor articular** está el **Golden Beverage**, una bebida de **cúrcuma** ideal para desinflamar las articulaciones.")
         if st.session_state.get("p3_ansiedad_por_comer", False):
-            st.write("• La **ansiedad por comer** es síntoma de un déficit en la ingesta de proteína diaria. El **PDM** y el **Beverage** son ideales para aportar de 15 a 18 g adicionales al día y generar sensación de saciedad y control de antojos.")
+            bev_name = "PPP" if st.session_state.get("country_code") in ("ES-PEN","ES-CAN") else "Beverage"
+            st.write(f"• La **ansiedad por comer** es síntoma de un déficit en la ingesta de proteína diaria. El **PDM** y el **{bev_name}** son ideales para aportar de 15 a 18 g adicionales al día y generar sensación de saciedad y control de antojos.")
         if st.session_state.get("p3_jaquecas_migranas", False):
-            st.write("• Para ayudarte a aliviar las **jaquecas/migranas**, el **NRG** contiene la dosis ideal de cafeína natural de la **guaraná**, además de brindarte lucidez mental.")
+            nrg_name = "High Protein Iced Coffee" if st.session_state.get("country_code") in ("ES-PEN","ES-CAN") else "NRG"
+            st.write(f"• Para ayudarte a aliviar las **jaquecas/migranas**, el **{nrg_name}** contiene la dosis ideal de cafeína natural, además de brindarte lucidez mental.")
         if st.session_state.get("p3_diabetes_antecedentes_familiares", False):
             st.write("• Para ayudar con la **diabetes** recomendamos el **Beta Heart**, bebida **alta en fibra** que permite reducir el índice glucémico de nuestra alimentación.")
         st.write("")
