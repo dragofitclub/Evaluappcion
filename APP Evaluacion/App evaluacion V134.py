@@ -17,10 +17,79 @@ except Exception:
     HAVE_AUTOREFRESH = False
 
 # =========================
+# Config por país
+# =========================
+COUNTRY_CONFIG: Dict[str, Dict] = {
+    "Perú": {
+        "code": "PE",
+        "currency_symbol": "S/",
+        "thousands_sep": ".",
+        "prices": {
+            "Batido": 184,
+            "Té de Hierbas": 145,
+            "Aloe Concentrado": 180,
+            "Beverage Mix": 159,
+            "Beta Heart": 231,
+            "Fibra Activa": 168,
+            "Golden Beverage": 154,
+            "NRG": 112,
+            "Herbalifeline": 180,
+            "PDM": 234,
+        },
+        "available_products": [
+            "Batido","Té de Hierbas","Aloe Concentrado","Beverage Mix","Beta Heart",
+            "Fibra Activa","Golden Beverage","NRG","Herbalifeline","PDM"
+        ],
+    },
+    "Chile": {
+        "code": "CL",
+        "currency_symbol": "$",
+        "thousands_sep": ".",
+        "prices": {
+            "Batido": 40377,
+            "Beta Heart": 48452,
+            "PDM": 51678,
+            "Beverage Mix": 34943,
+            "Té de Hierbas": 32300,
+            "Aloe Concentrado": 42858,
+            "Fibra Activa": 39503,
+            "Herbalifeline": 44964,
+            "NRG": 25655,
+            "Golden Beverage": 44423,
+        },
+        "available_products": [
+            "Batido","Beta Heart","PDM","Beverage Mix","Té de Hierbas",
+            "Aloe Concentrado","Fibra Activa","Herbalifeline","NRG","Golden Beverage"
+        ],
+    },
+    # ==== NUEVO: Colombia ====
+    "Colombia": {
+        "code": "CO",
+        "currency_symbol": "$",
+        "thousands_sep": ".",
+        "prices": {
+            "Batido": 155000,
+            "Té de Hierbas": 119000,
+            "Aloe Concentrado": 157000,
+            "Beverage Mix": 132000,
+            "Beta Heart": 176000,
+            "Fibra Activa": 128000,
+            "Golden Beverage": 137000,
+            "NRG": 92000,
+            "Herbalifeline": 162000,
+            "PDM": 194000,
+        },
+        "available_products": [
+            "Batido","Té de Hierbas","Aloe Concentrado","Beverage Mix","Beta Heart",
+            "Fibra Activa","Golden Beverage","NRG","Herbalifeline","PDM"
+        ],
+    },
+}
+
+# =========================
 # Utilidades IMC
 # =========================
 def _imc_categoria_y_sintomas(imc: float):
-    """Devuelve (categoria, sintomas) para el IMC dado."""
     if imc is None:
         return None, ""
     if imc < 18.5:
@@ -44,14 +113,13 @@ def _imc_texto_narrativo(imc: float):
                 f"El tuyo es de {imc_str}, eso indica que tienes PESO NORMAL y deberías sentirte con buen nivel de energía, "
                 f"vitalidad y buena condición física. ¿Te sientes así?")
     else:
-        return (f"Tu IMC es el Índice de Masa Corporal. Es la relación entre tu peso y tu tamaño. "
+        return (f"Tu IMC es el Índice de Masa Corporporal. Es la relación entre tu peso y tu tamaño. "
                 f"El tuyo es de {imc_str}, eso indica que tienes {cat} y podrías estar sufriendo de {sintomas}.")
 
 # =========================
 # Edad desde fecha
 # =========================
 def edad_desde_fecha(fecha_nac):
-    """Devuelve edad (int) a partir de date o str ISO; None si no válida."""
     if not fecha_nac:
         return None
     try:
@@ -67,16 +135,21 @@ def edad_desde_fecha(fecha_nac):
         return None
 
 # =========================
-# Rango de grasa de referencia
+# Rango de grasa de referencia (CORREGIDO)
 # =========================
 def _rango_grasa_referencia(genero: str, edad: int):
     gen = (genero or "").strip().lower()
     tabla_mujer = [(20, 39, 21.0, 32.9), (40, 59, 23.0, 33.9), (60, 79, 24.0, 35.9)]
     tabla_hombre = [(20, 39, 8.0, 19.9), (40, 59, 11.0, 21.9), (60, 79, 13.0, 24.9)]
     tabla = tabla_mujer if gen.startswith("muj") else tabla_hombre
+    try:
+        e = int(edad)
+    except Exception:
+        e = 30
     for lo, hi, rmin, rmax in tabla:
-        if lo <= int(edad) <= hi:
+        if lo <= e <= hi:
             return rmin, rmax
+    # fallback seguro
     return tabla[0][2], tabla[0][3]
 
 # -------------------------------------------------------------
@@ -102,6 +175,15 @@ P3_FLAGS = [
     "p3_diabetes_antecedentes_familiares",
 ]
 
+def _apply_country_config(country_name: str):
+    cfg = COUNTRY_CONFIG.get(country_name) or COUNTRY_CONFIG["Perú"]
+    st.session_state.country_name = country_name
+    st.session_state.country_code = cfg["code"]
+    st.session_state.currency_symbol = cfg["currency_symbol"]
+    st.session_state.thousands_sep = cfg["thousands_sep"]
+    st.session_state.precios = cfg["prices"]
+    st.session_state.available_products = set(cfg["available_products"])
+
 def init_state():
     if "step" not in st.session_state:
         st.session_state.step = 1
@@ -116,14 +198,13 @@ def init_state():
         }
     if "valoracion_contactos" not in st.session_state:
         st.session_state.valoracion_contactos: List[Dict] = []
-    # Flags de P3
     for k in P3_FLAGS:
         st.session_state.setdefault(k, False)
-    # Memoria de precios y selección
     st.session_state.setdefault("precios_recomendados", {"batido_5": None, "combo": None})
     st.session_state.setdefault("combo_elegido", None)
-    # Deadline de la promoción
     st.session_state.setdefault("promo_deadline", None)
+    if "country_name" not in st.session_state:
+        _apply_country_config("Perú")
 
 def go(prev=False, next=False, to=None):
     if to is not None:
@@ -229,27 +310,23 @@ def load_img(filename: str):
 # =============================================================
 # PRECIOS, VISUAL Y SELECCIÓN
 # =============================================================
-PRECIOS = {
-    "Batido": 184,
-    "Té de Hierbas": 145,
-    "Aloe Concentrado": 180,
-    "Beverage Mix": 159,
-    "Beta Heart": 231,
-    "Fibra Activa": 168,
-    "Golden Beverage": 154,
-    "NRG": 112,
-    "Herbalifeline": 180,
-    "PDM": 234,
-}
+def _mon(v: float | int):
+    symbol = st.session_state.get("currency_symbol", "S/")
+    sep = st.session_state.get("thousands_sep", ".")
+    s = f"{int(round(v)):,.0f}".replace(",", "X").replace(".", ",").replace("X", ".")
+    if sep != ".":
+        s = s.replace(".", sep)
+    return f"{symbol}{s}"
 
-def _mon(v):
-    return f"S/{v:,.0f}".replace(",", ".")
+def _get_precios() -> Dict[str, int]:
+    return st.session_state.get("precios", COUNTRY_CONFIG["Perú"]["prices"])
 
 def _precio_sumado(items: List[str]):
     total = 0
     faltantes = []
+    precios = _get_precios()
     for it in items:
-        precio = PRECIOS.get(it)
+        precio = precios.get(it)
         if precio is None:
             faltantes.append(it)
         else:
@@ -259,14 +336,37 @@ def _precio_sumado(items: List[str]):
 def _chip_desc(pct:int):
     return f"<span style='background:#e7f8ee; color:#0a7f44; padding:2px 8px; border-radius:999px; font-size:12px'>-{pct}%</span>"
 
+def _producto_disponible(nombre: str) -> bool:
+    disp = st.session_state.get("available_products")
+    return True if not disp else (nombre in disp)
+
+# ——— NOMBRE MOSTRADO (sin afectar precios) ———
+def _display_name(product: str) -> str:
+    if (
+        st.session_state.get("country_code") == "CL"
+        and st.session_state.get("p3_dolor_articular")
+        and product == "Golden Beverage"
+    ):
+        return "Collagen Drink"
+    return product
+
 def _render_card(titulo:str, items:List[str], descuento_pct:int=0, seleccionable:bool=False, key_sufijo:str=""):
+    if not all(_producto_disponible(i) for i in items):
+        return None
+
     total, faltantes = _precio_sumado(items)
     if descuento_pct:
         precio_desc = round(total * (1 - descuento_pct/100))
         tachado = f"<span style='text-decoration:line-through; opacity:.6; margin-right:8px'>{_mon(total)}</span>"
         precio_html = f"{tachado}<strong style='font-size:20px'>{_mon(precio_desc)}</strong> {_chip_desc(descuento_pct)}"
+        # Perú y Chile: texto bajo precio sólo para Batido 5%
         if titulo.strip().lower() == "batido nutricional" and descuento_pct == 5:
-            precio_html += " <span style='font-size:13px; opacity:.8'>(S/7.9 al dia)</span>"
+            if st.session_state.get("country_code") == "PE":
+                precio_html += " <span style='font-size:13px; opacity:.8'>(S/7.9 al dia)</span>"
+            elif st.session_state.get("country_code") == "CL":
+                precio_html += " <span style='font-size:13px; opacity:.8'>($1.744 al dia)</span>"
+            elif st.session_state.get("country_code") == "CO":
+                precio_html += " <span style='font-size:13px; opacity:.8'>($6.693 al dia)</span>"
     else:
         precio_desc = total
         precio_html = f"<strong style='font-size:20px'>{_mon(precio_desc)}</strong>"
@@ -275,7 +375,7 @@ def _render_card(titulo:str, items:List[str], descuento_pct:int=0, seleccionable
     if faltantes:
         faltante_txt = f"<div style='color:#b00020; font-size:12px; margin-top:6px'>Falta configurar precio: {', '.join(faltantes)}</div>"
 
-    items_txt = " + ".join(items)
+    items_txt = " + ".join(_display_name(i) for i in items)
     st.markdown(
         f"""
         <div style='border:1px solid #e8e8e8; border-radius:16px; padding:14px; margin:10px 0; box-shadow:0 2px 8px rgba(0,0,0,.04)'>
@@ -304,7 +404,6 @@ def _render_card(titulo:str, items:List[str], descuento_pct:int=0, seleccionable
     return precio_desc
 
 def _combos_por_flags() -> List[Dict]:
-    """Devuelve una lista de combos (titulo, items) según TODOS los flags marcados en P3."""
     combos = []
     ss = st.session_state
     if ss.get("p3_estrenimiento"):        combos.append(("Batido + Fibra activa", ["Batido", "Fibra Activa"]))
@@ -314,7 +413,11 @@ def _combos_por_flags() -> List[Dict]:
     if ss.get("p3_gastritis"):             combos.append(("Batido + Aloe Concentrado", ["Batido", "Aloe Concentrado"]))
     if ss.get("p3_hemorroides"):           combos.append(("Batido + Aloe", ["Batido", "Aloe Concentrado"]))
     if ss.get("p3_hipertension"):          combos.append(("Batido + Beta Heart", ["Batido", "Beta Heart"]))
-    if ss.get("p3_dolor_articular"):       combos.append(("Batido + Golden Beverage", ["Batido", "Golden Beverage"]))
+    if ss.get("p3_dolor_articular"):
+        if st.session_state.get("country_code") == "CL":
+            combos.append(("Batido + Collagen Drink", ["Batido", "Golden Beverage"]))
+        else:
+            combos.append(("Batido + Golden Beverage", ["Batido", "Golden Beverage"]))
     if ss.get("p3_ansiedad_por_comer"):    combos.append(("Batido + PDM", ["Batido", "PDM"]))
     if ss.get("p3_jaquecas_migranas"):     combos.append(("Batido + NRG", ["Batido", "NRG"]))
     if ss.get("p3_diabetes_antecedentes_familiares"):
@@ -325,12 +428,10 @@ def _combos_por_flags() -> List[Dict]:
 # Cuenta regresiva (48 horas)
 # ------------------------------
 def _init_promo_deadline():
-    """Inicializa el deadline si no existe (48h desde el primer ingreso a Pantalla 6)."""
     if not st.session_state.promo_deadline:
         st.session_state.promo_deadline = (datetime.now() + timedelta(hours=48)).isoformat()
 
 def _render_countdown():
-    """Muestra 'Promoción válida por HH:MM:SS' y autorefresh cada segundo si está disponible."""
     if HAVE_AUTOREFRESH:
         st_autorefresh(interval=1000, key="promo_timer_tick")
     deadline = datetime.fromisoformat(st.session_state.promo_deadline)
@@ -344,25 +445,18 @@ def _render_countdown():
         st.markdown("### ⏳ **Promoción finalizada**")
 
 def mostrar_opciones_pantalla6():
-    """Muestra Batido con 5% y TODOS los combos (10%) según los flags de P3."""
     st.markdown("### Opciones recomendadas")
+    _render_card("Batido Nutricional", ["Batido"], 5, seleccionable=True, key_sufijo="batido")
 
-    # Siempre: Batido Nutricional con 5%
-    precio_batido = _render_card("Batido Nutricional", ["Batido"], 5, seleccionable=True, key_sufijo="batido")
-
+    any_combo_rendered = False
     combos = _combos_por_flags()
     if combos:
         for i, (titulo, items) in enumerate(combos, start=1):
-            _render_card(titulo, items, 10, seleccionable=True, key_sufijo=f"combo_{i}")
-        precio_combo = True
-    else:
+            r = _render_card(titulo, items, 10, seleccionable=True, key_sufijo=f"combo_{i}")
+            if r is not None:
+                any_combo_rendered = True
+    if not any_combo_rendered:
         st.info("Elige una o más opciones en la Pantalla 3 para ver aquí los combos recomendados con 10% de descuento.")
-        precio_combo = None
-
-    st.session_state.precios_recomendados = {
-        "batido_5": precio_batido,
-        "combo": precio_combo,
-    }
 
     if st.session_state.combo_elegido:
         e = st.session_state.combo_elegido
@@ -388,6 +482,11 @@ def pantalla1():
             fecha_nac = st.date_input("¿Cuál es tu fecha de nacimiento?",
                                       value=date(1990,1,1), min_value=date(1900,1,1), max_value=date.today())
             genero = st.selectbox("¿Cuál es tu género?", ["HOMBRE", "MUJER"])
+
+        st.subheader("País")
+        # >>> incluye Colombia <<<
+        pais = st.selectbox("Selecciona tu país", ["Perú", "Chile", "Colombia"], index=0,
+                            help="Esto ajustará los precios y la moneda en las recomendaciones.")
 
         st.form_submit_button("Continuar")
 
@@ -426,6 +525,7 @@ def pantalla1():
                 "nombre": nombre, "email": email, "movil": movil,
                 "fecha_nac": str(fecha_nac), "genero": genero
             })
+            _apply_country_config(pais)
             st.session_state.metas.update({
                 "perder_peso": perder_peso, "tonificar": tonificar, "masa_muscular": masa_muscular,
                 "energia": energia, "rendimiento": rendimiento, "salud": salud, "otros": otros
@@ -508,7 +608,6 @@ def pantalla2():
     rmin, rmax = _rango_grasa_referencia(genero_ref, edad_ref)
     st.markdown(f"**% GRASA de referencia** para {genero_ref.upper()} y {edad_ref} años: {rmin:.1f}% – {rmax:.1f}%.")
 
-    # —— Mensaje personalizado por género con el % elegido ——
     es_mujer = str(genero_ref).strip().lower().startswith("muj")
     if es_mujer:
         st.markdown(
@@ -601,14 +700,15 @@ def pantalla3():
 
     st.subheader("Análisis de presupuesto")
     col = st.columns(4)
+    cur = st.session_state.get("currency_symbol", "S/")
     with col[0]:
-        st.number_input("Cuanto gastas diariamente en comida? (S/.)", min_value=0.0, step=0.1, key="presu_comida")
+        st.number_input(f"Cuanto gastas diariamente en comida? ({cur}.)", min_value=0.0, step=0.1, key="presu_comida")
     with col[1]:
-        st.number_input("Cuanto gastas al dia en cafe? (S/.)", min_value=0.0, step=0.1, key="presu_cafe")
+        st.number_input(f"Cuanto gastas al dia en cafe? ({cur}.)", min_value=0.0, step=0.1, key="presu_cafe")
     with col[2]:
-        st.number_input("Cuanto gastas a la semana en alcohol? (S/.)", min_value=0.0, step=0.1, key="presu_alcohol")
+        st.number_input(f"Cuanto gastas a la semana en alcohol? ({cur}.)", min_value=0.0, step=0.1, key="presu_alcohol")
     with col[3]:
-        st.number_input("Cuanto gastas a la semana en deliveries/salidas a comer? (S/.)", min_value=0.0, step=0.1, key="presu_deliveries")
+        st.number_input(f"Cuanto gastas a la semana en deliveries/salidas a comer? ({cur}.)", min_value=0.0, step=0.1, key="presu_deliveries")
 
     # Promedio (visual)
     prom_diario = round((
@@ -617,7 +717,7 @@ def pantalla3():
         (float(st.session_state.get("presu_alcohol", 0.0))/7.0) +
         (float(st.session_state.get("presu_deliveries", 0.0))/7.0)
     ), 2)
-    st.metric("Promedio de gastos diarios (S/.)", f"{prom_diario:.2f}")
+    st.metric(f"Promedio de gastos diarios ({cur}.)", f"{prom_diario:.2f}")
 
     st.write("¿Que te pareció la información que has recibido en esta evaluación?")
 
@@ -647,6 +747,7 @@ def pantalla3():
     # ======= FIN PERSISTENCIA =======
 
     bton_nav()
+
 
 # -------------------------------------------------------------
 # STEP 4 - Valoración de Servicio
@@ -694,7 +795,7 @@ def pantalla4():
     bton_nav()
 
 # -------------------------------------------------------------
-# STEP 5 - Quiénes somos (Títulos resaltados + viñetas)
+# STEP 5 - Quiénes somos
 # -------------------------------------------------------------
 def show_img(filename: str, caption: str = ""):
     p = (APP_DIR / filename)
@@ -719,14 +820,8 @@ def pantalla5():
 
     st.markdown("""
         <style>
-        .testi-title{
-            font-weight: 800;
-            font-size: 1.2rem;
-            margin: 8px 0 2px 0;
-        }
-        .testi-box{
-            margin-bottom: 18px;
-        }
+        .testi-title{ font-weight: 800; font-size: 1.2rem; margin: 8px 0 2px 0; }
+        .testi-box{ margin-bottom: 18px; }
         </style>
     """, unsafe_allow_html=True)
 
@@ -785,7 +880,6 @@ def _excel_bytes():
     refs = st.session_state.get("valoracion_contactos", []) or []
     combo = st.session_state.get("combo_elegido")
 
-    # Derivados actuales
     altura_cm = d.get("altura_cm")
     peso_kg   = d.get("peso_kg")
     grasa_pct = d.get("grasa_pct")
@@ -797,12 +891,14 @@ def _excel_bytes():
     bmr_val   = bmr_mifflin(genero, peso_kg or 0, altura_cm or 0, max(edad_calc, 16))
     objetivo_kcal = bmr_val + 250 if m.get("masa_muscular") else bmr_val - 250
 
+    cur = st.session_state.get("currency_symbol", "S/")
     perfil = [
         ("¿Cuál es tu nombre completo?", d.get("nombre","")),
         ("¿Cuál es tu correo electrónico?", d.get("email","")),
         ("¿Cuál es su número de teléfono?", d.get("movil","")),
         ("¿Cuál es tu fecha de nacimiento?", d.get("fecha_nac","")),
         ("¿Cuál es tu género?", d.get("genero","")),
+        ("País seleccionado", st.session_state.get("country_name","Perú")),
         ("Altura (cm)", altura_cm),
         ("Peso (kg)", peso_kg),
         ("% de grasa estimado", grasa_pct),
@@ -818,7 +914,6 @@ def _excel_bytes():
         ("Tiendes a comer de más por las noches?", e.get("comer_noche","")),
         ("Cuál es tu mayor reto respecto a la comida?", e.get("reto","")),
         ("Cuantas bebidas alcohólicas tomas por semana?", e.get("alcohol","")),
-        # Hábitos y energía
         ("¿En qué momento del día sientes menos energía?", e.get("ev_menos_energia","")),
         ("¿Tomas por lo menos 8 vasos de agua al día?", e.get("ev_8_vasos","")),
         ("¿Practicas actividad física al menos 3 veces/semana?", e.get("ev_actividad","")),
@@ -839,10 +934,10 @@ def _excel_bytes():
         ("¿Cómo te beneficia alcanzar tu meta?", m.get("obj_beneficio","")),
         ("¿Qué eventos tienes en los próximos 3 o 6 meses?", m.get("obj_eventos","")),
         ("Nivel de compromiso (1-10)", m.get("obj_compromiso","")),
-        ("Gasto diario en comida (S/.)", e.get("presu_comida","")),
-        ("Gasto diario en café (S/.)", e.get("presu_cafe","")),
-        ("Gasto semanal en alcohol (S/.)", e.get("presu_alcohol","")),
-        ("Gasto semanal en deliveries/salidas (S/.)", e.get("presu_deliveries","")),
+        (f"Gasto diario en comida ({cur}.)", e.get("presu_comida","")),
+        (f"Gasto diario en café ({cur}.)", e.get("presu_cafe","")),
+        (f"Gasto semanal en alcohol ({cur}.)", e.get("presu_alcohol","")),
+        (f"Gasto semanal en deliveries/salidas ({cur}.)", e.get("presu_deliveries","")),
     ]
     composicion = [
         ("IMC", imc_val),
@@ -872,9 +967,9 @@ def _excel_bytes():
             ("Precio regular", combo.get("precio_regular","")),
             ("Descuento (%)", combo.get("descuento_pct","")),
             ("Precio final", combo.get("precio_final","")),
+            ("Moneda", st.session_state.get("currency_symbol","S/")),
         ]
 
-    # Crear Excel en memoria
     buf = io.BytesIO()
     with pd.ExcelWriter(buf, engine="xlsxwriter") as writer:
         pd.DataFrame(perfil, columns=["Pregunta","Respuesta"]).to_excel(writer, index=False, sheet_name="Perfil")
@@ -890,7 +985,7 @@ def _excel_bytes():
     return buf.getvalue()
 
 # -------------------------------------------------------------
-# STEP 6 - Plan Personalizado (recomendaciones + PRECIOS + SELECCIÓN + cuenta regresiva)
+# STEP 6 - Plan Personalizado
 # -------------------------------------------------------------
 def pantalla6():
     st.header("6) Plan Personalizado")
@@ -921,7 +1016,10 @@ def pantalla6():
         if st.session_state.get("p3_hipertension", False):
             st.write("• Para ayudarte con la **hipertensión** te recomiendo el **Beta Heart** que contiene **betaglucanos de avena** que ayudan a reducir el colesterol malo.")
         if st.session_state.get("p3_dolor_articular", False):
-            st.write("• Para el **dolor articular** está el **Golden Beverage**, una bebida de **cúrcuma** ideal para desinflamar las articulaciones.")
+            if st.session_state.get("country_code") == "CL":
+                st.write("• Para el **dolor articular** está el **Collagen Drink**, ideal para mantener el cartilago sano.")
+            else:
+                st.write("• Para el **dolor articular** está el **Golden Beverage**, una bebida de **cúrcuma** ideal para desinflamar las articulaciones.")
         if st.session_state.get("p3_ansiedad_por_comer", False):
             st.write("• La **ansiedad por comer** es síntoma de un déficit en la ingesta de proteína diaria. El **PDM** y el **Beverage** son ideales para aportar de 15 a 18 g adicionales al día y generar sensación de saciedad y control de antojos.")
         if st.session_state.get("p3_jaquecas_migranas", False):
@@ -957,20 +1055,17 @@ def pantalla6():
         "Entonces, ¿Con qué programa te permites empezar?"
     )
 
-    # Cuenta regresiva de 48 horas
     _init_promo_deadline()
     _render_countdown()
-
-    # Bloque de precios + selección
     mostrar_opciones_pantalla6()
 
-    # ===== Botón de descarga (Excel) =====
     st.markdown("### 📥 Descargar Evaluación")
     excel_bytes = _excel_bytes()
+    file_country = st.session_state.get("country_code","PE")
     st.download_button(
         label="Descargar información",
         data=excel_bytes,
-        file_name=f"Evaluacion_{st.session_state.get('datos',{}).get('nombre','usuario')}.xlsx",
+        file_name=f"Evaluacion_{file_country}_{st.session_state.get('datos',{}).get('nombre','usuario')}.xlsx",
         mime="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
         use_container_width=True
     )
@@ -983,6 +1078,7 @@ def pantalla6():
 def sidebar_nav():
     with st.sidebar:
         st.title("APP EVALUACIONES")
+        st.caption(f"País: {st.session_state.get('country_name','Perú')}  ·  Moneda: {st.session_state.get('currency_symbol','S/')}")
         for i, titulo in [
             (1, "Perfil de Bienestar"),
             (2, "Composición Corporal"),
