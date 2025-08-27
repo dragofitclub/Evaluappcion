@@ -731,10 +731,12 @@ def pantalla3():
     c1, c2 = st.columns(2)
     with c1:
         st.text_input("¿En qué momento del día sientes menos energía?", key="ev_menos_energia")
-        st.text_input("¿Tomas por lo menos 8 vasos de agua al día?", key="ev_8_vasos")
+        # ELIMINADO: ¿Tomas por lo menos 8 vasos de agua al día?
         st.text_input("¿Practicas actividad física al menos 3 veces/semana?", key="ev_actividad")
         st.text_input("¿Has intentado algo antes para verte/estar mejor? (Gym, Dieta, App, Otros)", key="ev_intentos")
         st.text_input("¿Qué es lo que más se te complica? (Constancia, Alimentación, Motivación, Otros)", key="ev_complica")
+        # NUEVO: Prioridad personal (después de "lo que más se te complica")
+        st.text_input("¿Consideras que cuidar de ti es una prioridad?", key="ev_prioridad_personal")
     with c2:
         st.write("Presentas alguna de las siguientes condiciones?")
         cols = st.columns(2)
@@ -780,11 +782,11 @@ def pantalla3():
     col = st.columns(4)
     cur = st.session_state.get("currency_symbol", "S/")
     with col[0]:
-        st.number_input(f"Cuanto gastas diariamente en comida? ({cur}.)", min_value=0.0, step=0.1, key="presu_comida")
+        st.number_input(f"Cuanto gastas diariamente en tu comida? ({cur}.)", min_value=0.0, step=0.1, key="presu_comida")
     with col[1]:
-        st.number_input(f"Cuanto gastas al dia en cafe? ({cur}.)", min_value=0.0, step=0.1, key="presu_cafe")
+        st.number_input(f"Cuanto gastas diariamente en postres, snacks, dulces, etc? ({cur}.)", min_value=0.0, step=0.1, key="presu_cafe")
     with col[2]:
-        st.number_input(f"Cuanto gastas a la semana en alcohol? ({cur}.)", min_value=0.0, step=0.1, key="presu_alcohol")
+        st.number_input(f"Cuanto gastas a la semana en bebidas? ({cur}.)", min_value=0.0, step=0.1, key="presu_alcohol")
     with col[3]:
         st.number_input(f"Cuanto gastas a la semana en deliveries/salidas a comer? ({cur}.)", min_value=0.0, step=0.1, key="presu_deliveries")
 
@@ -796,20 +798,30 @@ def pantalla3():
         (float(st.session_state.get("presu_deliveries", 0.0))/7.0)
     ), 2)
     st.metric(f"Promedio de gastos diarios ({cur}.)", f"{prom_diario:.2f}")
+    # FRASE solicitada acompañando el promedio
+    st.write(f"La aplicación nos arroja que tu promedio de gastos diarios es de {cur} {prom_diario:.2f}.")
+    # NUEVO: pregunta después del promedio
+    st.text_input(
+        "¿Consideras valioso optimizar tu presupuesto y darle prioridad a comidas y bebidas que aporten a tu bienestar y objetivos?",
+        key="ev_valora_optimizar"
+    )
 
     st.write("¿Que te pareció la información que has recibido en esta evaluación?")
 
     # ======= PERSISTENCIA EXPLÍCITA PARA EXPORTACIÓN =======
     st.session_state.estilo_vida.update({
-        "ev_menos_energia": st.session_state.get("ev_menos_energia", ""),
-        "ev_8_vasos":       st.session_state.get("ev_8_vasos", ""),
-        "ev_actividad":     st.session_state.get("ev_actividad", ""),
-        "ev_intentos":      st.session_state.get("ev_intentos", ""),
-        "ev_complica":      st.session_state.get("ev_complica", ""),
-        "presu_comida":     st.session_state.get("presu_comida", 0.0),
-        "presu_cafe":       st.session_state.get("presu_cafe", 0.0),
-        "presu_alcohol":    st.session_state.get("presu_alcohol", 0.0),
-        "presu_deliveries": st.session_state.get("presu_deliveries", 0.0),
+        "ev_menos_energia":      st.session_state.get("ev_menos_energia", ""),
+        # ELIMINADO: "ev_8_vasos"
+        "ev_actividad":          st.session_state.get("ev_actividad", ""),
+        "ev_intentos":           st.session_state.get("ev_intentos", ""),
+        "ev_complica":           st.session_state.get("ev_complica", ""),
+        "ev_prioridad_personal": st.session_state.get("ev_prioridad_personal",""),   # NUEVO
+        "ev_valora_optimizar":   st.session_state.get("ev_valora_optimizar",""),     # NUEVO
+        # Presupuesto
+        "presu_comida":          st.session_state.get("presu_comida", 0.0),
+        "presu_cafe":            st.session_state.get("presu_cafe", 0.0),
+        "presu_alcohol":         st.session_state.get("presu_alcohol", 0.0),
+        "presu_deliveries":      st.session_state.get("presu_deliveries", 0.0),
     })
     st.session_state.metas.update({
         "obj_talla":      st.session_state.get("obj_talla",""),
@@ -964,7 +976,7 @@ def _excel_bytes():
         ("Peso (kg)", peso_kg),
         ("% de grasa estimado", grasa_pct),
     ]
-    # >>> Sección ESTILO actualizada con las NUEVAS preguntas de Pantalla 1
+    # >>> Sección ESTILO (incluye P1 y P3). Actualizada según cambios de Pantalla 3
     estilo = [
         ("¿A qué hora despiertas y a qué hora te vas a dormir?", e.get("horarios","")),
         ("¿Tomas desayuno todos los días? ¿A qué hora?", e.get("desayuno_h","")),
@@ -975,12 +987,15 @@ def _excel_bytes():
         ("Cuál es tu mayor reto respecto a la comida?", e.get("reto","")),
         ("¿Tomas por lo menos 8 vasos de agua al dia?", e.get("agua8_p1","")),
         ("¿Tomas bebidas alcohólicas? ¿Cuántas veces al mes?", e.get("alcohol_mes","")),
-        # De Pantalla 3 (se mantienen como en tu versión)
+        # De Pantalla 3
         ("¿En qué momento del día sientes menos energía?", e.get("ev_menos_energia","")),
-        ("¿Tomas por lo menos 8 vasos de agua al día?", e.get("ev_8_vasos","")),
+        # ELIMINADO en P3: ("¿Tomas por lo menos 8 vasos de agua al día?", e.get("ev_8_vasos","")),
         ("¿Practicas actividad física al menos 3 veces/semana?", e.get("ev_actividad","")),
         ("¿Has intentado algo antes para verte/estar mejor? (Gym, Dieta, App, Otros)", e.get("ev_intentos","")),
         ("¿Qué es lo que más se te complica? (Constancia, Alimentación, Motivación, Otros)", e.get("ev_complica","")),
+        ("¿Consideras que cuidar de ti es una prioridad?", e.get("ev_prioridad_personal","")),  # NUEVO
+        ("¿Consideras valioso optimizar tu presupuesto y darle prioridad a comidas y bebidas que aporten a tu bienestar y objetivos?",
+         e.get("ev_valora_optimizar","")),  # NUEVO
     ]
     metas = [
         ("Perder Peso", bool(m.get("perder_peso"))),
