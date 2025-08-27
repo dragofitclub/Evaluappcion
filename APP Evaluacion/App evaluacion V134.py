@@ -806,7 +806,7 @@ def pantalla3():
         key="ev_valora_optimizar"
     )
 
-    st.write("¿Que te pareció la información que has recibido en esta evaluación?")
+    st.write("Hasta aqui, ¿Que te parece la información que has recibido en esta evaluación?")
 
     # ======= PERSISTENCIA EXPLÍCITA PARA EXPORTACIÓN =======
     st.session_state.estilo_vida.update({
