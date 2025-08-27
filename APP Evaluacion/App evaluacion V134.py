@@ -421,9 +421,7 @@ def _render_card(titulo:str, items:List[str], descuento_pct:int=0, seleccionable
                 precio_html += " <span style='font-size:13px; opacity:.8'>($1.744 al dia)</span>"
             elif st.session_state.get("country_code") == "CO":
                 precio_html += " <span style='font-size:13px; opacity:.8'>($6.693 al dia)</span>"
-            # ==== NUEVO: España (cálculo dinámico en euros) ====
             elif st.session_state.get("country_code") in ("ES-PEN", "ES-CAN"):
-                # misma lógica: precio con 5% / 22 días
                 diario = round(precio_desc / 22.0, 2)
                 precio_html += f" <span style='font-size:13px; opacity:.8'>(€{diario:.2f} al dia)</span>"
     else:
@@ -544,13 +542,13 @@ def pantalla1():
             nombre = st.text_input("¿Cuál es tu nombre completo?")
             email  = st.text_input("¿Cuál es tu correo electrónico?")
             movil  = st.text_input("¿Cuál es tu número de teléfono?")
+            ciudad = st.text_input("¿En que ciudad vives?")  # (ya estaba en tu versión)
         with col2:
             fecha_nac = st.date_input("¿Cuál es tu fecha de nacimiento?",
                                       value=date(1990,1,1), min_value=date(1900,1,1), max_value=date.today())
             genero = st.selectbox("¿Cuál es tu género?", ["HOMBRE", "MUJER"])
 
         st.subheader("País")
-        # >>> incluye Colombia y España <<<
         pais = st.selectbox(
             "Selecciona tu país",
             ["Perú", "Chile", "Colombia", "España (Península)", "España (Canarias)"],
@@ -577,22 +575,27 @@ def pantalla1():
         st.subheader("Análisis de Nutrición y Salud")
         c1, c2 = st.columns(2)
         with c1:
-            despierta     = st.text_input("A que hora despiertas?")
-            dormir        = st.text_input("A que hora vas a dormir?")
-            desayuna      = st.text_input("Tomas desayuno cada mañana?")
-            a_que_hora    = st.text_input("A que hora desayunas?")
-            que_desayunas = st.text_input("Qué desayunas?")
+            # CAMBIO 1: unificar despertar + dormir
+            horarios     = st.text_input("¿A qué hora despiertas y a qué hora te vas a dormir?")
+            # CAMBIO 2: unificar desayuno + hora
+            desayuno_h   = st.text_input("¿Tomas desayuno todos los días? ¿A qué hora?")
+            # CAMBIO 3: reemplazar texto de desayuno
+            que_desayunas = st.text_input("¿Qué sueles desayunar?")
         with c2:
-            meriendas     = st.text_input("Comes entre comidas?")
+            # CAMBIO 4: reemplazar “Comes entre comidas?” por versión extendida
+            meriendas     = st.text_input("¿Comes entre comidas? ¿Qué sueles comer?")
             porciones     = st.text_input("Cuantas porciones de frutas y verduras comes al dia?")
             comer_noche   = st.text_input("Tiendes a comer de más por las noches?")
             reto          = st.text_input("Cuál es tu mayor reto respecto a la comida?")
-            alcohol       = st.text_input("Cuantas bebidas alcohólicas tomas por semana?")
+            # CAMBIO 5: agregar 8 vasos de agua después del reto
+            agua8         = st.text_input("¿Tomas por lo menos 8 vasos de agua al dia?")
+            # CAMBIO 6: reemplazar alcohol semanal por mensual y con prefijo
+            alcohol       = st.text_input("¿Tomas bebidas alcohólicas? ¿Cuántas veces al mes?")
 
         enviado = st.form_submit_button("Guardar y continuar ➡️")
         if enviado:
             st.session_state.datos.update({
-                "nombre": nombre, "email": email, "movil": movil,
+                "nombre": nombre, "email": email, "movil": movil, "ciudad": ciudad,
                 "fecha_nac": str(fecha_nac), "genero": genero
             })
             _apply_country_config(pais)
@@ -600,12 +603,17 @@ def pantalla1():
                 "perder_peso": perder_peso, "tonificar": tonificar, "masa_muscular": masa_muscular,
                 "energia": energia, "rendimiento": rendimiento, "salud": salud, "otros": otros
             })
+            # Persistir con NUEVAS claves alineadas a las nuevas preguntas
             st.session_state.estilo_vida.update({
-                "despierta": despierta, "dormir": dormir, "desayuna": desayuna, "a_que_hora": a_que_hora,
-                "que_desayunas": que_desayunas,
-                "meriendas": meriendas, "porciones": porciones,
-                "comer_noche": comer_noche, "reto": reto,
-                "alcohol": alcohol
+                "horarios": horarios,                      # unificado despertar+dormir
+                "desayuno_h": desayuno_h,                 # unificado desayuno+hora
+                "que_desayunas": que_desayunas,           # texto reemplazado
+                "meriendas": meriendas,                   # texto reemplazado
+                "porciones": porciones,
+                "comer_noche": comer_noche,
+                "reto": reto,
+                "agua8_p1": agua8,                        # nueva pregunta en P1
+                "alcohol_mes": alcohol                    # alcohol mensual
             })
             go(next=True)
 
@@ -792,20 +800,17 @@ def pantalla3():
     st.write("¿Que te pareció la información que has recibido en esta evaluación?")
 
     # ======= PERSISTENCIA EXPLÍCITA PARA EXPORTACIÓN =======
-    # Hábitos/energía
     st.session_state.estilo_vida.update({
         "ev_menos_energia": st.session_state.get("ev_menos_energia", ""),
         "ev_8_vasos":       st.session_state.get("ev_8_vasos", ""),
         "ev_actividad":     st.session_state.get("ev_actividad", ""),
         "ev_intentos":      st.session_state.get("ev_intentos", ""),
         "ev_complica":      st.session_state.get("ev_complica", ""),
-        # Presupuesto
         "presu_comida":     st.session_state.get("presu_comida", 0.0),
         "presu_cafe":       st.session_state.get("presu_cafe", 0.0),
         "presu_alcohol":    st.session_state.get("presu_alcohol", 0.0),
         "presu_deliveries": st.session_state.get("presu_deliveries", 0.0),
     })
-    # Objetivos -> guardados dentro de 'metas'
     st.session_state.metas.update({
         "obj_talla":      st.session_state.get("obj_talla",""),
         "obj_partes":     st.session_state.get("obj_partes",""),
@@ -951,6 +956,7 @@ def _excel_bytes():
         ("¿Cuál es tu nombre completo?", d.get("nombre","")),
         ("¿Cuál es tu correo electrónico?", d.get("email","")),
         ("¿Cuál es su número de teléfono?", d.get("movil","")),
+        ("¿En que ciudad vives?", d.get("ciudad","")),
         ("¿Cuál es tu fecha de nacimiento?", d.get("fecha_nac","")),
         ("¿Cuál es tu género?", d.get("genero","")),
         ("País seleccionado", st.session_state.get("country_name","Perú")),
@@ -958,17 +964,18 @@ def _excel_bytes():
         ("Peso (kg)", peso_kg),
         ("% de grasa estimado", grasa_pct),
     ]
+    # >>> Sección ESTILO actualizada con las NUEVAS preguntas de Pantalla 1
     estilo = [
-        ("A que hora despiertas?", e.get("despierta","")),
-        ("A que hora vas a dormir?", e.get("dormir","")),
-        ("Tomas desayuno cada mañana?", e.get("desayuna","")),
-        ("A que hora desayunas?", e.get("a_que_hora","")),
-        ("Qué desayunas?", e.get("que_desayunas","")),
-        ("Comes entre comidas?", e.get("meriendas","")),
+        ("¿A qué hora despiertas y a qué hora te vas a dormir?", e.get("horarios","")),
+        ("¿Tomas desayuno todos los días? ¿A qué hora?", e.get("desayuno_h","")),
+        ("¿Qué sueles desayunar?", e.get("que_desayunas","")),
+        ("¿Comes entre comidas? ¿Qué sueles comer?", e.get("meriendas","")),
         ("Cuantas porciones de frutas y verduras comes al dia?", e.get("porciones","")),
         ("Tiendes a comer de más por las noches?", e.get("comer_noche","")),
         ("Cuál es tu mayor reto respecto a la comida?", e.get("reto","")),
-        ("Cuantas bebidas alcohólicas tomas por semana?", e.get("alcohol","")),
+        ("¿Tomas por lo menos 8 vasos de agua al dia?", e.get("agua8_p1","")),
+        ("¿Tomas bebidas alcohólicas? ¿Cuántas veces al mes?", e.get("alcohol_mes","")),
+        # De Pantalla 3 (se mantienen como en tu versión)
         ("¿En qué momento del día sientes menos energía?", e.get("ev_menos_energia","")),
         ("¿Tomas por lo menos 8 vasos de agua al día?", e.get("ev_8_vasos","")),
         ("¿Practicas actividad física al menos 3 veces/semana?", e.get("ev_actividad","")),
