@@ -897,7 +897,7 @@ def pantalla5():
 
     testimonios = [
         ("jessiyroi.jpg","Jessi y Roi son papás de 3 niños",
-         ["El aumento 8kg de masa muscular y ella controló 14kg post parto en 3 meses",
+         ["El aumentó 8kg de masa muscular y ella controló 14kg post parto en 3 meses",
           "Lo que más valoran es la energía que tienen a diario para jugar y disfrutar de sus hijos."]),
         ("alexisylyn.jpg","Alexis y Lyn — Recomposición corporal",
          ["Ambos pesan lo mismo en ambas fotos. El 74 y ella 60kg.",
