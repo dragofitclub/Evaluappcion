@@ -896,38 +896,23 @@ def pantalla5():
     """, unsafe_allow_html=True)
 
     testimonios = [
-        ("jessiyroi.jpg","Jessi y Roi — Padres de 3",
-         ["Roi **+8 kg** de masa muscular.",
-          "Jessi **−14 kg** post parto en 3 meses.",
-          "Energía para jugar y disfrutar de sus hijos."]),
+        ("jessiyroi.jpg","Jessi y Roi son papás de 3 niños",
+         ["El aumento 8kg de masa muscular y ella controló 14kg post parto en 3 meses",
+          "Lo que más valoran es la energía que tienen a diario para jugar y disfrutar de sus hijos."]),
         ("alexisylyn.jpg","Alexis y Lyn — Recomposición corporal",
-         ["Alexis **74 kg** en ambas fotos.",
-          "Lyn **60 kg** en ambas fotos.",
-          "Mejora notable en tono muscular y composición."]),
-        ("nicolasyscarlett.jpg","Nicolás y Scarlett — 18 años",
-         ["Nicolás **+20 kg** de masa muscular.",
-          "Scarlett **+14 kg** de masa muscular.",
-          "Acompañamiento nutricional y de entrenamiento."]),
+         ["Ambos pesan lo mismo en ambas fotos. El 74 y ella 60kg.",
+          "Ambos lograron una mejora notable en el tono muscular y pérdida de grasa."]),
+        ("nicolasyscarlett.jpg","Nicolás y Scarlett jovenes de 18 años",
+         ["Ambos aumentaron peso en masa muscular. El 20 kilos y ella 14."]),
         ("wagnerysonia.jpg","Wagner y Sonia — Tercera edad",
-         ["Sonia tenia problemas de salud y dolor en las rodillas y talones.",
-          "Solo le recetaban calmantes e inyecciones argumentando que eran problemas de la edad.",
-          "Controlo 12kg a los 2 meses de sumarse a la comunidad",
-          "Mejoro salud, se fueron los dolores y se llenó de energia."]),
+         ["Ambos empezaron el programa con más de 60 años, con dolores de rodillas y probelmas de salud. Los médicos solo argumentaban que eran problemas propios de la edad.",
+          "Controlaron peso, mejoraron su salud y se llenaron de energía."]),
         ("mayraymariaantonieta.jpg","Mayra y María Antonieta — Hipotiroidismo",
-         ["Ambas pensaban que por su condición no podian tener resultados",
-          "Mayra **-20kg** de grasa.",
-          "Maria Antonieta **-15kg** de grasa."]),
-        ("reynaldoyandreina.jpg","Reynaldo y Andreina — Padres de 4 y prediabéticos",
-         ["Andreina **−15 kg** post cesárea de mellizos.",
-          "Reynaldo intento todas las dietas sin tener resultado.",
-          "Perdia peso temporalmente y luego lo recuperaba",
-          "Controló 25kg con la comunidad los cuales sostiene hasta ahora."]),
+         ["Ambas pensaban que debido a su condición no podían tener resultados. Mayra controló 20 kg y María Antonieta 15."]),
+        ("reynaldoyandreina.jpg","Reynaldo y Andreina — Prediabéticos y papás de 4",
+         ["Vivían a dietas sin tener resultados sostenibles. Perdían peso y lo recuperaban. Él controló 25 kg y ella 15 kg después de su última cesárea de mellizos"]),
         ("aldoycristina.jpg","Aldo y Cristina — Sin tiempo",
-         ["Aldo, arquitecto se amanecia en la oficina.",
-          "Controló **25kg**.",
-          "Cristina es doctora y tenia turnos de 24 a 48 horas",
-          "Su alimentación era muy desordenada.",
-          "Controló **12 kg** de grasa."]),
+         ["Aldo, arquitecto, se amanecía trabajando en la oficina. Cristina, médico, con turnos de 24 a 48 horas.  Ambos con una alimentación muy desordenada. Él controló 25 kg y ella 12 kg."]),
     ]
 
     for fname, titulo, bullets in testimonios:
@@ -1061,8 +1046,8 @@ def pantalla6():
     st.header("6) Plan Personalizado")
 
     st.write(
-        "Para asegurar estos resultados nos apoyamos en la nutrición celular del Batido de Herbalife. "
-        "El cual nos permite cubrir deficiencias nutricionales de nuestro día a día de manera rica, rápida y práctica."
+        "Para asegurar los resultados que te has propuesto nos apoyamos en la nutrición celular del Batido de Herbalife. "
+        "El cual te permite cubrir deficiencias nutricionales de nuestro día a día de manera rica, rápida y práctica."
     )
 
     hay = any(st.session_state.get(k, False) for k in P3_FLAGS)
@@ -1106,28 +1091,24 @@ def pantalla6():
     st.divider()
     st.subheader("Servicio")
     st.write(
-        "**Durante los primeros 10 dias vamos a trabajar muy de cerca contigo, son dias clave para construir tus resultados y hábitos sostenibles.** "
-        "Tendrás **citas diarias de coaching y seguimiento personalizado** para ayudarte a establecer los hábitos que viniste a desarrollar. "
-        "Nos reuniremos cada dia para revisar tu diario de comidas, con el objetivo de ayudarte a tomar conciencia de tu alimentación y a reconocer "
-        "como lo que comes impacta en como te sientes. "
-        "Sabemos que en los primeros dias es cuando los hábitos antiguos presentan mayor resistencia. Por eso "
-        "**el acompañamiento diario es fundamental para sostener el enfoque, aclarar dudas y ajustar lo que sea necesario en tiempo real.** "
-        "No estaras solo: estamos aqui para guiarte paso a paso desde el inicio."
+        "**Los primeros 10 días son clave** para ti y vamos a trabajar muy de cerca contigo para construir resultados y hábitos sostenibles. "
+        "Tendrás citas continuas de coaching y seguimiento personalizado. Nos reuniremos para revisar tu diario de comidas, con el objetivo de ayudarte a tomar conciencia de tu alimentación y a reconocer como lo que comes impacta en como te sientes."
     )
     st.write(
-        "**Además, contarás con herramientas clave para acompañar tu proceso**: "
-        "Herramientas para conocer tus requerimientos diarios de **proteína** e **hidratación**. "
-        "Un **tracker de alimentación diaria** para ayudarte a mantener el enfoque y medir tu progreso. "
-        "**Recomendaciones de alimentos** alineadas con tus objetivos personales."
+        "Sabemos que en los primeros dias es cuando los hábitos antiguos presentan mayor resistencia. Por eso "
+        "**el acompañamiento diario es fundamental para sostener el enfoque, aclarar dudas y ajustar lo que sea necesario en tiempo real.** "
+    )
+    st.write(
+        "Además, contarás con herramientas clave, como conocer tus requerimientos diarios de proteína e hidratación. Un tracker de alimentación diaria que calculará si estás alcanzando tus requerimientos diarios. Así como recomendaciones de alimentos alineadas con tus objetivos personales."
     )
     st.write(
         "También tendrás: "
         "**Acceso a nuestros grupos de soporte y compromiso**, donde compartimos motivación, aprendizajes y acompañamiento con otros miembros. "
-        "**Ingreso a nuestra plataforma de entrenamientos**, tanto presenciales como virtuales, para que puedas moverte y activarte desde donde estés."
+        "**Ingreso a nuestra plataforma de entrenamientos** para que puedas moverte y activarte desde donde estés."
     )
     st.write(
         "Todos los productos tienen del 5 al 10% de descuento según la cantidad que elijas para empezar tu programa por las próximas 48 horas. "
-        "Entonces, ¿Con qué programa te permites empezar?"
+        "Te muestro las opciones más indicadas a tus necesidades y me compartes, ¿Con qué programa te permites empezar?"
     )
 
     _init_promo_deadline()
