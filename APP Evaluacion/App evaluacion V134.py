@@ -849,7 +849,7 @@ def emoji_y_texto(n):
 
 def pantalla4():
     st.header("4) Valoración de Servicio")
-    st.write("La empresa valora la calidad de mi servicio según la cantidad de personas a las cuales **les quieres regalar la misma evaluación**. 1 significa que no te gusto, 5 significa que te encantó.")
+    st.write("La empresa valora la calidad de mi servicio según la cantidad de personas a las cuales **les quieres regalar la misma evaluación**. 1 persona significa que no te gusto y 5 personas significa que te encantó. Entonces...")
 
     if "valoracion_contactos" not in st.session_state:
         st.session_state.valoracion_contactos = []
