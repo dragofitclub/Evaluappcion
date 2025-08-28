@@ -1028,9 +1028,9 @@ def _excel_bytes():
         ("¿Qué eventos tienes en los próximos 3 o 6 meses?", m.get("obj_eventos","")),
         ("Nivel de compromiso (1-10)", m.get("obj_compromiso","")),
         (f"Gasto diario en comida ({cur}.)", e.get("presu_comida","")),
-        (f"Gasto diario en café ({cur}.)", e.get("presu_cafe","")),
-        (f"Gasto semanal en alcohol ({cur}.)", e.get("presu_alcohol","")),
-        (f"Gasto semanal en deliveries/salidas ({cur}.)", e.get("presu_deliveries","")),
+        (f"Gasto diario en postres/snacks/dulces ({cur}.)", e.get("presu_cafe","")),
+        (f"Gasto semanal en bebidas ({cur}.)", e.get("presu_alcohol","")),
+        (f"Gasto semanal en deliveries/salidas a comer ({cur}.)", e.get("presu_deliveries","")),
     ]
     composicion = [
         ("IMC", imc_val),
