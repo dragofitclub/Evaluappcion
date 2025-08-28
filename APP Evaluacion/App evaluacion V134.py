@@ -25,16 +25,16 @@ COUNTRY_CONFIG: Dict[str, Dict] = {
         "currency_symbol": "S/",
         "thousands_sep": ".",
         "prices": {
-            "Batido": 184,
-            "Té de Hierbas": 145,
-            "Aloe Concentrado": 180,
-            "Beverage Mix": 159,
-            "Beta Heart": 231,
-            "Fibra Activa": 168,
-            "Golden Beverage": 154,
-            "NRG": 112,
-            "Herbalifeline": 180,
-            "PDM": 234,
+                "Batido": 184,
+                "Té de Hierbas": 145,
+                "Aloe Concentrado": 180,
+                "Beverage Mix": 159,
+                "Beta Heart": 231,
+                "Fibra Activa": 168,
+                "Golden Beverage": 154,
+                "NRG": 112,
+                "Herbalifeline": 180,
+                "PDM": 234,
         },
         "available_products": [
             "Batido","Té de Hierbas","Aloe Concentrado","Beverage Mix","Beta Heart",
@@ -667,57 +667,71 @@ def pantalla2():
 
     st.divider()
     st.subheader("Resultados")
+    # Persistimos lo ingresado
     st.session_state.datos["altura_cm"] = altura_cm
     st.session_state.datos["peso_kg"]   = peso_kg
     st.session_state.datos["grasa_pct"] = grasa_pct
 
+    # ==== Cálculos (se mantienen para compatibilidad con Excel de Pantalla 6) ====
     edad   = _calcular_edad(st.session_state.datos.get("fecha_nac"))
     genero = st.session_state.datos.get("genero", "HOMBRE")
 
     imc_val = imc(peso_kg, altura_cm)
-    st.metric("IMC", imc_val, help="Peso/(Altura en m)^2")
-    st.write(_imc_texto_narrativo(imc_val))
-    st.caption("IMC ideal 18.6 – 24.9")
 
     datos = st.session_state.get('datos', {})
     genero_ref = (datos.get('genero') or 'Hombre')
     fecha_nac  = (datos.get('fecha_nac'))
     edad_ref   = edad_desde_fecha(fecha_nac) or int(datos.get('edad', 30))
     rmin, rmax = _rango_grasa_referencia(genero_ref, edad_ref)
-    st.markdown(f"**% GRASA de referencia** para {genero_ref.upper()} y {edad_ref} años: {rmin:.1f}% – {rmax:.1f}%.")
-
-    es_mujer = str(genero_ref).strip().lower().startswith("muj")
-    if es_mujer:
-        st.markdown(
-            f"Una **mujer** de tu edad tiene **{rmin:.1f}%** de grasa en el mejor de los casos "
-            f"y **{rmax:.1f}%** de grasa en el peor de los casos. "
-            f"Tú tienes **{grasa_pct}%**."
-        )
-    else:
-        st.markdown(
-            f"Un **hombre** de tu edad tiene **{rmin:.1f}%** de grasa en el mejor de los casos "
-            f"y **{rmax:.1f}%** de grasa en el peor de los casos. "
-            f"Tú tienes **{grasa_pct}%**."
-        )
 
     agua_ml = req_hidratacion_ml(peso_kg)
-    prote_g = req_proteina(genero, st.session_state.metas, peso_kg)
+    prote_g = req_proteina(genero, st.session_state.metas, peso_kg)  # calculado aunque no se muestre
     bmr     = bmr_mifflin(genero, peso_kg, altura_cm, edad)
 
-    st.metric("Requerimiento de hidratación (ml/día)", f"{agua_ml:,}")
-    st.metric("Requerimiento de proteína (g/día)", f"{prote_g:,}")
-    st.metric("Metabolismo en reposo (kcal/día)", f"{bmr:,}")
-
-    st.subheader("Resultado Final")
     meta_masa = st.session_state.metas.get("masa_muscular", False)
     objetivo_kcal = bmr + 250 if meta_masa else bmr - 250
-    st.success(
-        f"Para alcanzar tu objetivo debes consumir **{agua_ml/1000:.2f} litros de agua**, "
-        f"**{prote_g} g de proteína** y mantener tu ingesta diaria de calorías en **{objetivo_kcal:,.0f} kcal/día**."
+    # ==== FIN cálculos ====
+
+    st.write("En base a los datos introducidos, la aplicación arroja los siguientes resultados:")
+
+    # ==== NUEVO CONTENIDO (sustituye todo lo que mostraba la 1ra imagen) ====
+    st.write(
+        f"Tu IMC, Índice de Masa Corporal, es la relación entre tu peso y tu estatura. "
+        f"El tuyo es de {imc_val:.1f}, eso indica que tienes {_imc_categoria_y_sintomas(imc_val)[0]} "
+        f"y eres propenso a {_imc_categoria_y_sintomas(imc_val)[1] or '—'}. "
+        f"Como referencia, el IMC ideal es de 18.6 a 24.9."
     )
 
-    st.write("**Referencias útiles:**")
-    st.write(comparativos_proteina(prote_g))
+    genero_pal = "mujer" if str(genero).strip().upper().startswith("M") else "hombre"
+    articulo = "Una" if genero_pal == "mujer" else "Un"
+    st.write(
+        f"Sobre tu % de grasa. {articulo} {genero_pal} de {edad_ref} años como tú tiene "
+        f"{rmin:.1f} % de grasa en el mejor de los casos y {rmax:.1f} % en el peor de los casos. "
+        f"Tú tienes {grasa_pct}%"
+    )
+
+    st.write(f"Respecto a tu hidratación, tu requerimiento es de {agua_ml:,} ml/día. "
+                f"(Alcanzar tu requerimiento de hidratación facilita el tránsito intestinal, favorece la absorción de nutrientes y mantiene la piel firme.)" 
+    )
+
+    st.write(
+        f"El resultado de metabolismo en reposo es de {bmr:,} y para alcanzar tu objetivo "
+        f"se recomienda una ingesta diaria de {objetivo_kcal:,} calorías. "
+        f"(No exceder tu requerimiento de calorías diarias te permite mantener un peso saludable.)"
+    )
+
+    # ===== LÍNEA NUEVA SOLICITADA (después de metabolismo en reposo) =====
+    pollo_g = int(round((prote_g / 22.5) * 100))
+    huevos_n = int(round(prote_g / 5.5))
+    st.write(
+        f"Tu requerimiento de proteína según el objetivo que te has propuesto es de {prote_g} gramos al día. "
+        f"Como referencia, esto equivale a {pollo_g} g de pechuga de pollo o {huevos_n} huevos. "
+        f"(Alcanzar tu requerimiento de proteína diario te permite preservar músculo durante la perdida de peso, evitando la flacidez.)"
+    )
+
+    # ===== FIN LÍNEA NUEVA =====
+
+    # ==== FIN NUEVO CONTENIDO ====
 
     bton_nav()
 
@@ -815,8 +829,8 @@ def pantalla3():
         "ev_actividad":          st.session_state.get("ev_actividad", ""),
         "ev_intentos":           st.session_state.get("ev_intentos", ""),
         "ev_complica":           st.session_state.get("ev_complica", ""),
-        "ev_prioridad_personal": st.session_state.get("ev_prioridad_personal",""),   # NUEVO
-        "ev_valora_optimizar":   st.session_state.get("ev_valora_optimizar",""),     # NUEVO
+        "ev_prioridad_personal": st.session_state.get("ev_prioridad_personal",""),
+        "ev_valora_optimizar":   st.session_state.get("ev_valora_optimizar",""),
         # Presupuesto
         "presu_comida":          st.session_state.get("presu_comida", 0.0),
         "presu_cafe":            st.session_state.get("presu_cafe", 0.0),
@@ -993,9 +1007,9 @@ def _excel_bytes():
         ("¿Practicas actividad física al menos 3 veces/semana?", e.get("ev_actividad","")),
         ("¿Has intentado algo antes para verte/estar mejor? (Gym, Dieta, App, Otros)", e.get("ev_intentos","")),
         ("¿Qué es lo que más se te complica? (Constancia, Alimentación, Motivación, Otros)", e.get("ev_complica","")),
-        ("¿Consideras que cuidar de ti es una prioridad?", e.get("ev_prioridad_personal","")),  # NUEVO
+        ("¿Consideras que cuidar de ti es una prioridad?", e.get("ev_prioridad_personal","")),
         ("¿Consideras valioso optimizar tu presupuesto y darle prioridad a comidas y bebidas que aporten a tu bienestar y objetivos?",
-         e.get("ev_valora_optimizar","")),  # NUEVO
+         e.get("ev_valora_optimizar","")),
     ]
     metas = [
         ("Perder Peso", bool(m.get("perder_peso"))),
@@ -1057,7 +1071,7 @@ def _excel_bytes():
         if refs:
             pd.DataFrame(refs).to_excel(writer, index=False, sheet_name="Referidos")
         if seleccion:
-            pd.DataFrame(seleccion, columns=["Detalle","Valor"]).to_excel(writer, index=False, sheet_name="Selección")
+            pd.DataFrame(seleccion, columnas=["Detalle","Valor"]).to_excel(writer, index=False, sheet_name="Selección")
     buf.seek(0)
     return buf.getvalue()
 
