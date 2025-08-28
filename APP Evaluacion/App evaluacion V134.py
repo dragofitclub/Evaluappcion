@@ -575,21 +575,15 @@ def pantalla1():
         st.subheader("Análisis de Nutrición y Salud")
         c1, c2 = st.columns(2)
         with c1:
-            # CAMBIO 1: unificar despertar + dormir
             horarios     = st.text_input("¿A qué hora despiertas y a qué hora te vas a dormir?")
-            # CAMBIO 2: unificar desayuno + hora
             desayuno_h   = st.text_input("¿Tomas desayuno todos los días? ¿A qué hora?")
-            # CAMBIO 3: reemplazar texto de desayuno
             que_desayunas = st.text_input("¿Qué sueles desayunar?")
         with c2:
-            # CAMBIO 4: reemplazar “Comes entre comidas?” por versión extendida
             meriendas     = st.text_input("¿Comes entre comidas? ¿Qué sueles comer?")
             porciones     = st.text_input("Cuantas porciones de frutas y verduras comes al dia?")
             comer_noche   = st.text_input("Tiendes a comer de más por las noches?")
             reto          = st.text_input("Cuál es tu mayor reto respecto a la comida?")
-            # CAMBIO 5: agregar 8 vasos de agua después del reto
             agua8         = st.text_input("¿Tomas por lo menos 8 vasos de agua al dia?")
-            # CAMBIO 6: reemplazar alcohol semanal por mensual y con prefijo
             alcohol       = st.text_input("¿Tomas bebidas alcohólicas? ¿Cuántas veces al mes?")
 
         enviado = st.form_submit_button("Guardar y continuar ➡️")
@@ -603,17 +597,16 @@ def pantalla1():
                 "perder_peso": perder_peso, "tonificar": tonificar, "masa_muscular": masa_muscular,
                 "energia": energia, "rendimiento": rendimiento, "salud": salud, "otros": otros
             })
-            # Persistir con NUEVAS claves alineadas a las nuevas preguntas
             st.session_state.estilo_vida.update({
-                "horarios": horarios,                      # unificado despertar+dormir
-                "desayuno_h": desayuno_h,                 # unificado desayuno+hora
-                "que_desayunas": que_desayunas,           # texto reemplazado
-                "meriendas": meriendas,                   # texto reemplazado
+                "horarios": horarios,
+                "desayuno_h": desayuno_h,
+                "que_desayunas": que_desayunas,
+                "meriendas": meriendas,
                 "porciones": porciones,
                 "comer_noche": comer_noche,
                 "reto": reto,
-                "agua8_p1": agua8,                        # nueva pregunta en P1
-                "alcohol_mes": alcohol                    # alcohol mensual
+                "agua8_p1": agua8,
+                "alcohol_mes": alcohol
             })
             go(next=True)
 
@@ -694,7 +687,6 @@ def pantalla2():
 
     st.write("En base a los datos introducidos, la aplicación arroja los siguientes resultados:")
 
-    # ==== NUEVO CONTENIDO (sustituye todo lo que mostraba la 1ra imagen) ====
     st.write(
         f"Tu IMC, **Índice de Masa Corporal**, es la relación entre tu peso y tu estatura. "
         f"El tuyo es de **{imc_val:.1f}**, eso indica que tienes **{_imc_categoria_y_sintomas(imc_val)[0]}** "
@@ -720,7 +712,6 @@ def pantalla2():
         f"(No exceder tu requerimiento de calorías diarias te permite mantener un peso saludable.)"
     )
 
-    # ===== LÍNEA NUEVA SOLICITADA (después de metabolismo en reposo) =====
     pollo_g = int(round((prote_g / 22.5) * 100))
     huevos_n = int(round(prote_g / 5.5))
     st.write(
@@ -728,10 +719,6 @@ def pantalla2():
         f"Como referencia, esto equivale a {pollo_g} g de pechuga de pollo o {huevos_n} huevos. "
         f"(Alcanzar tu requerimiento de proteína diario te permite preservar músculo durante la perdida de peso, evitando la flacidez.)"
     )
-
-    # ===== FIN LÍNEA NUEVA =====
-
-    # ==== FIN NUEVO CONTENIDO ====
 
     bton_nav()
 
@@ -745,11 +732,9 @@ def pantalla3():
     c1, c2 = st.columns(2)
     with c1:
         st.text_input("¿En qué momento del día sientes menos energía?", key="ev_menos_energia")
-        # ELIMINADO: ¿Tomas por lo menos 8 vasos de agua al día?
         st.text_input("¿Practicas actividad física al menos 3 veces/semana?", key="ev_actividad")
         st.text_input("¿Has intentado algo antes para verte/estar mejor? (Gym, Dieta, App, Otros)", key="ev_intentos")
         st.text_input("¿Qué es lo que más se te complica? (Constancia, Alimentación, Motivación, Otros)", key="ev_complica")
-        # NUEVO: Prioridad personal (después de "lo que más se te complica")
         st.text_input("¿Consideras que cuidar de ti es una prioridad?", key="ev_prioridad_personal")
     with c2:
         st.write("Presentas alguna de las siguientes condiciones?")
@@ -804,19 +789,14 @@ def pantalla3():
     with col[3]:
         st.number_input(f"Cuanto gastas a la semana en deliveries/salidas a comer? ({cur}.)", min_value=0.0, step=0.1, key="presu_deliveries")
 
-    # Promedio (visual)
     prom_diario = round((
         float(st.session_state.get("presu_comida", 0.0)) +
         float(st.session_state.get("presu_cafe", 0.0)) +
         (float(st.session_state.get("presu_alcohol", 0.0))/7.0) +
         (float(st.session_state.get("presu_deliveries", 0.0))/7.0)
     ), 2)
-    # OCULTO: se elimina el widget visual con números grandes
-    # st.metric(f"Promedio de gastos diarios ({cur}.)", f"{prom_diario:.2f}")
 
-    # FRASE solicitada acompañando el promedio
     st.write(f"La aplicación nos arroja que tu promedio de gastos diarios es de {cur} {prom_diario:.2f}.")
-    # NUEVO: pregunta después del promedio
     st.text_input(
         "¿Consideras valioso optimizar tu presupuesto y darle prioridad a comidas y bebidas que aporten a tu bienestar y objetivos?",
         key="ev_valora_optimizar"
@@ -827,13 +807,11 @@ def pantalla3():
     # ======= PERSISTENCIA EXPLÍCITA PARA EXPORTACIÓN =======
     st.session_state.estilo_vida.update({
         "ev_menos_energia":      st.session_state.get("ev_menos_energia", ""),
-        # ELIMINADO: "ev_8_vasos"
         "ev_actividad":          st.session_state.get("ev_actividad", ""),
         "ev_intentos":           st.session_state.get("ev_intentos", ""),
         "ev_complica":           st.session_state.get("ev_complica", ""),
         "ev_prioridad_personal": st.session_state.get("ev_prioridad_personal",""),
         "ev_valora_optimizar":   st.session_state.get("ev_valora_optimizar",""),
-        # Presupuesto
         "presu_comida":          st.session_state.get("presu_comida", 0.0),
         "presu_cafe":            st.session_state.get("presu_cafe", 0.0),
         "presu_alcohol":         st.session_state.get("presu_alcohol", 0.0),
@@ -992,7 +970,6 @@ def _excel_bytes():
         ("Peso (kg)", peso_kg),
         ("% de grasa estimado", grasa_pct),
     ]
-    # >>> Sección ESTILO (incluye P1 y P3). Actualizada según cambios de Pantalla 3
     estilo = [
         ("¿A qué hora despiertas y a qué hora te vas a dormir?", e.get("horarios","")),
         ("¿Tomas desayuno todos los días? ¿A qué hora?", e.get("desayuno_h","")),
@@ -1003,9 +980,7 @@ def _excel_bytes():
         ("Cuál es tu mayor reto respecto a la comida?", e.get("reto","")),
         ("¿Tomas por lo menos 8 vasos de agua al dia?", e.get("agua8_p1","")),
         ("¿Tomas bebidas alcohólicas? ¿Cuántas veces al mes?", e.get("alcohol_mes","")),
-        # De Pantalla 3
         ("¿En qué momento del día sientes menos energía?", e.get("ev_menos_energia","")),
-        # ELIMINADO en P3: ("¿Tomas por lo menos 8 vasos de agua al día?", e.get("ev_8_vasos","")),
         ("¿Practicas actividad física al menos 3 veces/semana?", e.get("ev_actividad","")),
         ("¿Has intentado algo antes para verte/estar mejor? (Gym, Dieta, App, Otros)", e.get("ev_intentos","")),
         ("¿Qué es lo que más se te complica? (Constancia, Alimentación, Motivación, Otros)", e.get("ev_complica","")),
@@ -1073,7 +1048,8 @@ def _excel_bytes():
         if refs:
             pd.DataFrame(refs).to_excel(writer, index=False, sheet_name="Referidos")
         if seleccion:
-            pd.DataFrame(seleccion, columnas=["Detalle","Valor"]).to_excel(writer, index=False, sheet_name="Selección")
+            # FIX: 'columns' (no 'columnas')
+            pd.DataFrame(seleccion, columns=["Detalle","Valor"]).to_excel(writer, index=False, sheet_name="Selección")
     buf.seek(0)
     return buf.getvalue()
 
