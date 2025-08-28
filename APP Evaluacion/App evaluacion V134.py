@@ -811,7 +811,9 @@ def pantalla3():
         (float(st.session_state.get("presu_alcohol", 0.0))/7.0) +
         (float(st.session_state.get("presu_deliveries", 0.0))/7.0)
     ), 2)
-    st.metric(f"Promedio de gastos diarios ({cur}.)", f"{prom_diario:.2f}")
+    # OCULTO: se elimina el widget visual con números grandes
+    # st.metric(f"Promedio de gastos diarios ({cur}.)", f"{prom_diario:.2f}")
+
     # FRASE solicitada acompañando el promedio
     st.write(f"La aplicación nos arroja que tu promedio de gastos diarios es de {cur} {prom_diario:.2f}.")
     # NUEVO: pregunta después del promedio
