@@ -696,9 +696,9 @@ def pantalla2():
 
     # ==== NUEVO CONTENIDO (sustituye todo lo que mostraba la 1ra imagen) ====
     st.write(
-        f"Tu IMC, Índice de Masa Corporal, es la relación entre tu peso y tu estatura. "
-        f"El tuyo es de {imc_val:.1f}, eso indica que tienes {_imc_categoria_y_sintomas(imc_val)[0]} "
-        f"y eres propenso a {_imc_categoria_y_sintomas(imc_val)[1] or '—'}. "
+        f"Tu IMC, **Índice de Masa Corporal**, es la relación entre tu peso y tu estatura. "
+        f"El tuyo es de **{imc_val:.1f}**, eso indica que tienes **{_imc_categoria_y_sintomas(imc_val)[0]}** "
+        f"y eres propenso a **{_imc_categoria_y_sintomas(imc_val)[1] or '—'}**. "
         f"Como referencia, el IMC ideal es de 18.6 a 24.9."
     )
 
@@ -706,17 +706,17 @@ def pantalla2():
     articulo = "Una" if genero_pal == "mujer" else "Un"
     st.write(
         f"Sobre tu % de grasa. {articulo} {genero_pal} de {edad_ref} años como tú tiene "
-        f"{rmin:.1f} % de grasa en el mejor de los casos y {rmax:.1f} % en el peor de los casos. "
-        f"Tú tienes {grasa_pct}%"
+        f"**{rmin:.1f} % de grasa en el mejor de los casos y {rmax:.1f} % en el peor de los casos. "
+        f"Tú tienes {grasa_pct}%**"
     )
 
-    st.write(f"Respecto a tu hidratación, tu requerimiento es de {agua_ml:,} ml/día. "
+    st.write(f"Respecto a tu **hidratación**, tu requerimiento es de **{agua_ml:,} ml/día.** "
                 f"(Alcanzar tu requerimiento de hidratación facilita el tránsito intestinal, favorece la absorción de nutrientes y mantiene la piel firme.)" 
     )
 
     st.write(
         f"El resultado de metabolismo en reposo es de {bmr:,} y para alcanzar tu objetivo "
-        f"se recomienda una ingesta diaria de {objetivo_kcal:,} calorías. "
+        f"**se recomienda una ingesta diaria de {objetivo_kcal:,} calorías.** "
         f"(No exceder tu requerimiento de calorías diarias te permite mantener un peso saludable.)"
     )
 
@@ -724,7 +724,7 @@ def pantalla2():
     pollo_g = int(round((prote_g / 22.5) * 100))
     huevos_n = int(round(prote_g / 5.5))
     st.write(
-        f"Tu requerimiento de proteína según el objetivo que te has propuesto es de {prote_g} gramos al día. "
+        f"Tu **requerimiento de proteína** según el objetivo que te has propuesto es de **{prote_g} gramos al día.** "
         f"Como referencia, esto equivale a {pollo_g} g de pechuga de pollo o {huevos_n} huevos. "
         f"(Alcanzar tu requerimiento de proteína diario te permite preservar músculo durante la perdida de peso, evitando la flacidez.)"
     )
