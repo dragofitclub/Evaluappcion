@@ -128,6 +128,28 @@ COUNTRY_CONFIG: Dict[str, Dict] = {
             "Fibra Activa","Golden Beverage","NRG","Herbalifeline","PDM"
         ],
     },
+    # ==== NUEVO: Italia ====
+    "Italia": {
+        "code": "IT",
+        "currency_symbol": "€",
+        "thousands_sep": ".",
+        "prices": {
+            "Batido": 61.60,
+            "Té de Hierbas": 41.11,
+            "Aloe Concentrado": 54.56,
+            "Beverage Mix": 48.41,
+            "Beta Heart": 54.33,
+            "Fibra Activa": 43.34,
+            "Golden Beverage": 40.84,
+            "NRG": 69.87,
+            "Herbalifeline": 40.54,
+            "PDM": 72.69,
+        },
+        "available_products": [
+            "Batido","Té de Hierbas","Aloe Concentrado","Beverage Mix","Beta Heart",
+            "Fibra Activa","Golden Beverage","NRG","Herbalifeline","PDM"
+        ],
+    },
 }
 
 # =========================
@@ -387,14 +409,14 @@ def _producto_disponible(nombre: str) -> bool:
 # ——— NOMBRE MOSTRADO (sin afectar precios) ———
 def _display_name(product: str) -> str:
     cc = st.session_state.get("country_code")
-    # España: mapeos solicitados
-    if cc in ("ES-PEN", "ES-CAN"):
+    # España/Italia: mapeos solicitados
+    if cc in ("ES-PEN", "ES-CAN", "IT"):
         if product == "NRG":
             return "High Protein Iced Coffee"
         if product in ("Beverage", "Beverage Mix"):
             return "PPP"
         if product == "Golden Beverage":
-            return "Collagen Booster"
+            return "Herbalifeline" if cc == "IT" else "Collagen Booster"
     # Chile: caso especial existente
     if (
         cc == "CL"
@@ -551,7 +573,7 @@ def pantalla1():
         st.subheader("País")
         pais = st.selectbox(
             "Selecciona tu país",
-            ["Perú", "Chile", "Colombia", "España (Península)", "España (Canarias)"],
+            ["Perú", "Chile", "Colombia", "España (Península)", "España (Canarias)", "Italia"],
             index=0,
             help="Esto ajustará los precios y la moneda en las recomendaciones."
         )
@@ -1075,7 +1097,7 @@ def pantalla6():
         if st.session_state.get("p3_colesterol_alto", False):
             st.write("• Para mejorar tus niveles de colesterol nos apoyamos del **Herbalifeline**, unas cápsulas de concentrado de **omega 3** con sabor a menta y tomillo. Riquísimas.")
         if st.session_state.get("p3_baja_energia", False):
-            nrg_name = "High Protein Iced Coffee" if st.session_state.get("country_code") in ("ES-PEN","ES-CAN") else "NRG"
+            nrg_name = "High Protein Iced Coffee" if st.session_state.get("country_code") in ("ES-PEN","ES-CAN","IT") else "NRG"
             st.write(f"• Con el **té concentrado de hierbas** y su efecto termogénico puedes disparar tus niveles de energía y de paso quemar unas calorías extra al día. Si lo combinas con el **{nrg_name}** vas a estar totalmente lúcida y enérgica en cuerpo y mente.")
         if st.session_state.get("p3_dolor_muscular", False):
             st.write("• Para el dolor muscular se recomienda una buena ingesta de **proteína**, por lo cual el **PDM** resulta ideal al sumar de 9 a 18 g adicionales según tus requerimientos.")
@@ -1090,13 +1112,15 @@ def pantalla6():
                 st.write("• Para el **dolor articular** está el **Collagen Drink**, ideal para mantener el cartilago sano.")
             elif st.session_state.get("country_code") in ("ES-PEN","ES-CAN"):
                 st.write("• Para el **dolor articular** está el **Collagen Booster**, ideal para mantener el cartilago sano.")
+            elif st.session_state.get("country_code") == "IT":
+                st.write("• Para el **dolor articular** está el **Herbalifeline**, ideal para mantener el cartílago sano.")
             else:
                 st.write("• Para el **dolor articular** está el **Golden Beverage**, una bebida de **cúrcuma** ideal para desinflamar las articulaciones.")
         if st.session_state.get("p3_ansiedad_por_comer", False):
-            bev_name = "PPP" if st.session_state.get("country_code") in ("ES-PEN","ES-CAN") else "Beverage"
+            bev_name = "PPP" if st.session_state.get("country_code") in ("ES-PEN","ES-CAN","IT") else "Beverage"
             st.write(f"• La **ansiedad por comer** es síntoma de un déficit en la ingesta de proteína diaria. El **PDM** y el **{bev_name}** son ideales para aportar de 15 a 18 g adicionales al día y generar sensación de saciedad y control de antojos.")
         if st.session_state.get("p3_jaquecas_migranas", False):
-            nrg_name = "High Protein Iced Coffee" if st.session_state.get("country_code") in ("ES-PEN","ES-CAN") else "NRG"
+            nrg_name = "High Protein Iced Coffee" if st.session_state.get("country_code") in ("ES-PEN","ES-CAN","IT") else "NRG"
             st.write(f"• Para ayudarte a aliviar las **jaquecas/migranas**, el **{nrg_name}** contiene la dosis ideal de cafeína natural, además de brindarte lucidez mental.")
         if st.session_state.get("p3_diabetes_antecedentes_familiares", False):
             st.write("• Para ayudar con la **diabetes** recomendamos el **Beta Heart**, bebida **alta en fibra** que permite reducir el índice glucémico de nuestra alimentación.")
