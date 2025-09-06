@@ -150,6 +150,28 @@ COUNTRY_CONFIG: Dict[str, Dict] = {
             "Fibra Activa","Golden Beverage","NRG","Herbalifeline","PDM"
         ],
     },
+    # ==== NUEVO: Argentina ====
+    "Argentina": {
+        "code": "AR",
+        "currency_symbol": "$",
+        "thousands_sep": ".",
+        "prices": {
+            "Batido": 80.124,
+            "Té de Hierbas": 60.756,
+            "Aloe Concentrado": 81.199,
+            "Beverage Mix": 83.412,
+            "Beta Heart": 114.722,
+            "Fibra Activa": 80.303,
+            "Golden Beverage": 68.287,
+            "NRG": 49.293,
+            "Herbalifeline": 90.878,
+            "PDM": 133.342,
+        },
+        "available_products": [
+            "Batido","Té de Hierbas","Aloe Concentrado","Beverage Mix","Beta Heart",
+            "Fibra Activa","Golden Beverage","NRG","Herbalifeline","PDM"
+        ],
+    },
 }
 
 # =========================
@@ -583,7 +605,7 @@ def pantalla1():
         st.subheader("País")
         pais = st.selectbox(
             "Selecciona tu país",
-            ["Perú", "Chile", "Colombia", "España (Península)", "España (Canarias)", "Italia"],
+            ["Perú", "Chile", "Colombia", "España (Península)", "España (Canarias)", "Italia", "Argentina"],
             index=0,
             help="Esto ajustará los precios y la moneda en las recomendaciones."
         )
