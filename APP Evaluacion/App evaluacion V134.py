@@ -409,14 +409,15 @@ def _producto_disponible(nombre: str) -> bool:
 # ——— NOMBRE MOSTRADO (sin afectar precios) ———
 def _display_name(product: str) -> str:
     cc = st.session_state.get("country_code")
-    # España/Italia: mapeos solicitados
+    # España e Italia: mapeos solicitados
     if cc in ("ES-PEN", "ES-CAN", "IT"):
         if product == "NRG":
             return "High Protein Iced Coffee"
         if product in ("Beverage", "Beverage Mix"):
             return "PPP"
         if product == "Golden Beverage":
-            return "Herbalifeline" if cc == "IT" else "Collagen Booster"
+            # España -> Collagen Booster; Italia -> Herbalifeline
+            return "Collagen Booster" if cc in ("ES-PEN", "ES-CAN") else "Herbalifeline"
     # Chile: caso especial existente
     if (
         cc == "CL"
@@ -435,7 +436,7 @@ def _render_card(titulo:str, items:List[str], descuento_pct:int=0, seleccionable
         precio_desc = round(total * (1 - descuento_pct/100))
         tachado = f"<span style='text-decoration:line-through; opacity:.6; margin-right:8px'>{_mon(total)}</span>"
         precio_html = f"{tachado}<strong style='font-size:20px'>{_mon(precio_desc)}</strong> {_chip_desc(descuento_pct)}"
-        # Perú y Chile: texto bajo precio sólo para Batido 5%
+        # Texto bajo precio para Batido 5% en PE/CL/CO/ES/IT
         if titulo.strip().lower() == "batido nutricional" and descuento_pct == 5:
             if st.session_state.get("country_code") == "PE":
                 precio_html += " <span style='font-size:13px; opacity:.8'>(S/7.9 al dia)</span>"
@@ -443,7 +444,7 @@ def _render_card(titulo:str, items:List[str], descuento_pct:int=0, seleccionable
                 precio_html += " <span style='font-size:13px; opacity:.8'>($1.744 al dia)</span>"
             elif st.session_state.get("country_code") == "CO":
                 precio_html += " <span style='font-size:13px; opacity:.8'>($6.693 al dia)</span>"
-            elif st.session_state.get("country_code") in ("ES-PEN", "ES-CAN"):
+            elif st.session_state.get("country_code") in ("ES-PEN", "ES-CAN", "IT"):
                 diario = round(precio_desc / 22.0, 2)
                 precio_html += f" <span style='font-size:13px; opacity:.8'>(€{diario:.2f} al dia)</span>"
     else:
@@ -543,6 +544,15 @@ def mostrar_opciones_pantalla6():
                 any_combo_rendered = True
     if not any_combo_rendered:
         st.info("Elige una o más opciones en la Pantalla 3 para ver aquí los combos recomendados con 10% de descuento.")
+
+    # —— NUEVO: Mostrar SIEMPRE como última opción el “Batido + Chupapanza” (10% dscto)
+    _render_card(
+        "Batido + Chupapanza",
+        ["Batido", "Té de Hierbas", "Fibra Activa", "Aloe Concentrado"],
+        10,
+        seleccionable=True,
+        key_sufijo="chupapanza"
+    )
 
     if st.session_state.combo_elegido:
         e = st.session_state.combo_elegido
