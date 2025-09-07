@@ -172,6 +172,27 @@ COUNTRY_CONFIG: Dict[str, Dict] = {
             "Fibra Activa","Golden Beverage","NRG","Herbalifeline","PDM"
         ],
     },
+    # ==== NUEVO: Estados Unidos ====
+    "Estados Unidos": {
+        "code": "US",
+        "currency_symbol": "$",
+        "thousands_sep": ",",
+        "prices": {
+            "Batido": 72.24,
+            "Té de Hierbas": 46.28,
+            "Aloe Concentrado": 56.50,
+            "Beverage Mix": 47.88,
+            "Fibra Activa": 52.30,
+            "Golden Beverage": 82.25,
+            "NRG": 38.71,
+            "Herbalifeline": 57.94,
+            "PDM": 87.05,
+        },
+        "available_products": [
+            "Batido","Té de Hierbas","Aloe Concentrado","Beverage Mix",
+            "Fibra Activa","Golden Beverage","NRG","Herbalifeline","PDM"
+        ],
+    },
 }
 
 # =========================
@@ -440,9 +461,9 @@ def _display_name(product: str) -> str:
         if product == "Golden Beverage":
             # España -> Collagen Booster; Italia -> Herbalifeline
             return "Collagen Booster" if cc in ("ES-PEN", "ES-CAN") else "Herbalifeline"
-    # Chile: caso especial existente
+    # Chile y Estados Unidos: caso especial para dolor articular
     if (
-        cc == "CL"
+        cc in ("CL", "US")
         and st.session_state.get("p3_dolor_articular")
         and product == "Golden Beverage"
     ):
@@ -458,17 +479,21 @@ def _render_card(titulo:str, items:List[str], descuento_pct:int=0, seleccionable
         precio_desc = round(total * (1 - descuento_pct/100))
         tachado = f"<span style='text-decoration:line-through; opacity:.6; margin-right:8px'>{_mon(total)}</span>"
         precio_html = f"{tachado}<strong style='font-size:20px'>{_mon(precio_desc)}</strong> {_chip_desc(descuento_pct)}"
-        # Texto bajo precio para Batido 5% en PE/CL/CO/ES/IT
+        # Texto bajo precio para Batido 5% en PE/CL/CO/ES/IT/US
         if titulo.strip().lower() == "batido nutricional" and descuento_pct == 5:
-            if st.session_state.get("country_code") == "PE":
+            cc = st.session_state.get("country_code")
+            if cc == "PE":
                 precio_html += " <span style='font-size:13px; opacity:.8'>(S/7.9 al dia)</span>"
-            elif st.session_state.get("country_code") == "CL":
+            elif cc == "CL":
                 precio_html += " <span style='font-size:13px; opacity:.8'>($1.744 al dia)</span>"
-            elif st.session_state.get("country_code") == "CO":
+            elif cc == "CO":
                 precio_html += " <span style='font-size:13px; opacity:.8'>($6.693 al dia)</span>"
-            elif st.session_state.get("country_code") in ("ES-PEN", "ES-CAN", "IT"):
+            elif cc in ("ES-PEN", "ES-CAN", "IT"):
                 diario = round(precio_desc / 22.0, 2)
                 precio_html += f" <span style='font-size:13px; opacity:.8'>(€{diario:.2f} al dia)</span>"
+            elif cc == "US":
+                diario = round(precio_desc / 30.0, 2)
+                precio_html += f" <span style='font-size:13px; opacity:.8'>(${diario:.2f} al dia)</span>"
     else:
         precio_desc = total
         precio_html = f"<strong style='font-size:20px'>{_mon(precio_desc)}</strong>"
@@ -522,7 +547,8 @@ def _combos_por_flags() -> List[Dict]:
     if ss.get("p3_hemorroides"):
         combos.append(("Batido + Aloe", ["Batido", "Aloe Concentrado"]))
     if ss.get("p3_hipertension"):
-        combos.append((f"Batido + {_display_name('Beta Heart')}", ["Batido", "Beta Heart"]))
+        # Reemplazado: Beta Heart -> Fibra Activa
+        combos.append((f"Batido + {_display_name('Fibra Activa')}", ["Batido", "Fibra Activa"]))
     if ss.get("p3_dolor_articular"):
         combos.append((f"Batido + {_display_name('Golden Beverage')}", ["Batido", "Golden Beverage"]))
     if ss.get("p3_ansiedad_por_comer"):
@@ -530,7 +556,8 @@ def _combos_por_flags() -> List[Dict]:
     if ss.get("p3_jaquecas_migranas"):
         combos.append((f"Batido + {_display_name('NRG')}", ["Batido", "NRG"]))
     if ss.get("p3_diabetes_antecedentes_familiares"):
-        combos.append((f"Batido + {_display_name('Beta Heart')}", ["Batido", "Beta Heart"]))
+        # Reemplazado: Beta Heart -> Fibra Activa
+        combos.append((f"Batido + {_display_name('Fibra Activa')}", ["Batido", "Fibra Activa"]))
     return combos
 
 # ------------------------------
@@ -605,7 +632,7 @@ def pantalla1():
         st.subheader("País")
         pais = st.selectbox(
             "Selecciona tu país",
-            ["Perú", "Chile", "Colombia", "España (Península)", "España (Canarias)", "Italia", "Argentina"],
+            ["Perú", "Chile", "Colombia", "España (Península)", "España (Canarias)", "Italia", "Argentina", "Estados Unidos"],
             index=0,
             help="Esto ajustará los precios y la moneda en las recomendaciones."
         )
@@ -1138,9 +1165,10 @@ def pantalla6():
         if st.session_state.get("p3_hemorroides", False):
             st.write("• Para la gastritis, el reflujo, **hemorroides** y similares, el **aloe** es el indicado. Desinflama, cicatriza y alivia todo el tracto digestivo y mejora la absorción de nutrientes.")
         if st.session_state.get("p3_hipertension", False):
-            st.write("• Para ayudarte con la **hipertensión** te recomiendo el **Beta Heart** que contiene **betaglucanos de avena** que ayudan a reducir el colesterol malo.")
+            # Reemplazado: Beta Heart -> Fibra Activa
+            st.write("• Para ayudarte con la **hipertensión** te recomiendo la **Fibra Activa**, bebida alta en fibra que contribuye al control del perfil lipídico.")
         if st.session_state.get("p3_dolor_articular", False):
-            if st.session_state.get("country_code") == "CL":
+            if st.session_state.get("country_code") in ("CL", "US"):
                 st.write("• Para el **dolor articular** está el **Collagen Drink**, ideal para mantener el cartilago sano.")
             elif st.session_state.get("country_code") in ("ES-PEN","ES-CAN"):
                 st.write("• Para el **dolor articular** está el **Collagen Booster**, ideal para mantener el cartilago sano.")
@@ -1155,7 +1183,8 @@ def pantalla6():
             nrg_name = "High Protein Iced Coffee" if st.session_state.get("country_code") in ("ES-PEN","ES-CAN","IT") else "NRG"
             st.write(f"• Para ayudarte a aliviar las **jaquecas/migranas**, el **{nrg_name}** contiene la dosis ideal de cafeína natural, además de brindarte lucidez mental.")
         if st.session_state.get("p3_diabetes_antecedentes_familiares", False):
-            st.write("• Para ayudar con la **diabetes** recomendamos el **Beta Heart**, bebida **alta en fibra** que permite reducir el índice glucémico de nuestra alimentación.")
+            # Reemplazado: Beta Heart -> Fibra Activa
+            st.write("• Para ayudar con la **diabetes** recomendamos la **Fibra Activa**, bebida **alta en fibra** que permite reducir el índice glucémico de nuestra alimentación.")
         st.write("")
 
     st.divider()
