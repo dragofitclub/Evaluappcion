@@ -796,11 +796,20 @@ def pantalla2():
                 f"(Alcanzar tu requerimiento de hidratación facilita el tránsito intestinal, favorece la absorción de nutrientes y mantiene la piel firme.)" 
     )
 
-    st.write(
-        f"El resultado de metabolismo en reposo es de {bmr:,} y para alcanzar tu objetivo "
-        f"**se recomienda una ingesta diaria de {objetivo_kcal:,} calorías.** "
-        f"(No exceder tu requerimiento de calorías diarias te permite mantener un peso saludable.)"
-    )
+    # ======== MODIFICACIÓN SOLICITADA (texto para metabolismo en reposo con tope 1,200) ========
+    if objetivo_kcal < 1200:
+        st.write(
+            f"El resultado de metabolismo en reposo es de {bmr:,} y para alcanzar tu objetivo "
+            f"se recomienda una ingesta diaria de 1,200 calorías. "
+            f"(No exceder tu requerimiento de calorías diarias te permite mantener un peso saludable.)"
+        )
+    else:
+        st.write(
+            f"El resultado de metabolismo en reposo es de {bmr:,} y para alcanzar tu objetivo "
+            f"**se recomienda una ingesta diaria de {objetivo_kcal:,} calorías.** "
+            f"(No exceder tu requerimiento de calorías diarias te permite mantener un peso saludable.)"
+        )
+    # ======== FIN MODIFICACIÓN ========
 
     pollo_g = int(round((prote_g / 22.5) * 100))
     huevos_n = int(round(prote_g / 5.5))
