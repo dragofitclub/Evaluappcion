@@ -768,12 +768,21 @@ def pantalla2():
 
     st.write("En base a los datos introducidos, la aplicación arroja los siguientes resultados:")
 
-    st.write(
-        f"Tu IMC, **Índice de Masa Corporal**, es la relación entre tu peso y tu estatura. "
-        f"El tuyo es de **{imc_val:.1f}**, eso indica que tienes **{_imc_categoria_y_sintomas(imc_val)[0]}** "
-        f"y eres propenso a **{_imc_categoria_y_sintomas(imc_val)[1] or '—'}**. "
-        f"Como referencia, el IMC ideal es de 18.6 a 24.9."
-    )
+    # === AJUSTE SOLICITADO PARA PESO NORMAL ===
+    if 18.6 <= imc_val <= 24.9:
+        st.write(
+            f"Tu IMC, Índice de Masa Corporal, es la relación entre tu peso y tu estatura. "
+            f"El tuyo es de {imc_val:.1f}, eso indica que tienes PESO NORMAL lo que significa que deberías tener buena condición física, "
+            f"vitalidad y buen nivel de energía, ¿Te sientes así? . Como referencia, el IMC ideal es de 18.6 a 24.9."
+        )
+    else:
+        st.write(
+            f"Tu IMC, **Índice de Masa Corporal**, es la relación entre tu peso y tu estatura. "
+            f"El tuyo es de **{imc_val:.1f}**, eso indica que tienes **{_imc_categoria_y_sintomas(imc_val)[0]}** "
+            f"y eres propenso a **{_imc_categoria_y_sintomas(imc_val)[1] or '—'}**. "
+            f"Como referencia, el IMC ideal es de 18.6 a 24.9."
+        )
+    # === FIN AJUSTE ===
 
     genero_pal = "mujer" if str(genero).strip().upper().startswith("M") else "hombre"
     articulo = "Una" if genero_pal == "mujer" else "Un"
