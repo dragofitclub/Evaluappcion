@@ -193,6 +193,28 @@ COUNTRY_CONFIG: Dict[str, Dict] = {
             "Fibra Activa","Golden Beverage","NRG","Herbalifeline","PDM"
         ],
     },
+    # ==== NUEVO: Canada ====
+    "Canada": {
+        "code": "CA",
+        "currency_symbol": "$",
+        "thousands_sep": ",",
+        "prices": {
+            "Batido": 71.20,
+            "Té de Hierbas": 43.60,
+            "Aloe Concentrado": 54.25,
+            "Beverage Mix": 45.05,
+            "Beta Heart": 49.90,
+            "Fibra Activa": 49.90,
+            "Golden Beverage": 85.20,
+            "NRG": 34.80,
+            "Herbalifeline": 55.90,
+            "PDM": 87.50,
+        },
+        "available_products": [
+            "Batido","Té de Hierbas","Aloe Concentrado","Beverage Mix","Beta Heart",
+            "Fibra Activa","Golden Beverage","NRG","Herbalifeline","PDM"
+        ],
+    },
 }
 
 # =========================
@@ -452,6 +474,14 @@ def _producto_disponible(nombre: str) -> bool:
 # ——— NOMBRE MOSTRADO (sin afectar precios) ———
 def _display_name(product: str) -> str:
     cc = st.session_state.get("country_code")
+    # Canada: mapeos solicitados para pantalla 6
+    if cc == "CA":
+        if product == "Golden Beverage":
+            return "Collagen Beauty Drink"
+        if product == "NRG":
+            return "LiftOff"
+        if product == "Beta Heart":
+            return "Fibra Activa"
     # España e Italia: mapeos solicitados
     if cc in ("ES-PEN", "ES-CAN", "IT"):
         if product == "NRG":
@@ -475,28 +505,44 @@ def _render_card(titulo:str, items:List[str], descuento_pct:int=0, seleccionable
         return None
 
     total, faltantes = _precio_sumado(items)
-    if descuento_pct:
-        precio_desc = round(total * (1 - descuento_pct/100))
-        tachado = f"<span style='text-decoration:line-through; opacity:.6; margin-right:8px'>{_mon(total)}</span>"
-        precio_html = f"{tachado}<strong style='font-size:20px'>{_mon(precio_desc)}</strong> {_chip_desc(descuento_pct)}"
-        # Texto bajo precio para Batido 5% en PE/CL/CO/ES/IT/US
-        if titulo.strip().lower() == "batido nutricional" and descuento_pct == 5:
-            cc = st.session_state.get("country_code")
-            if cc == "PE":
-                precio_html += " <span style='font-size:13px; opacity:.8'>(S/7.9 al dia)</span>"
-            elif cc == "CL":
-                precio_html += " <span style='font-size:13px; opacity:.8'>($1.744 al dia)</span>"
-            elif cc == "CO":
-                precio_html += " <span style='font-size:13px; opacity:.8'>($6.693 al dia)</span>"
-            elif cc in ("ES-PEN", "ES-CAN", "IT"):
-                diario = round(precio_desc / 22.0, 2)
-                precio_html += f" <span style='font-size:13px; opacity:.8'>(€{diario:.2f} al dia)</span>"
-            elif cc == "US":
-                diario = round(precio_desc / 30.0, 2)
-                precio_html += f" <span style='font-size:13px; opacity:.8'>(${diario:.2f} al dia)</span>"
+
+    # ========= LÓGICA ESPECIAL SOLO PARA CANADÁ =========
+    if st.session_state.get("country_code") == "CA" and titulo.strip() != "Batido + Chupapanza":
+        # 1) Sumar $15 al paquete
+        base_con_recargo = int(round(total + 15))
+        # 2) Aplicar el descuento (si existe) SOBRE el precio con recargo
+        if descuento_pct:
+            precio_desc = int(round(base_con_recargo * (1 - descuento_pct/100)))
+            tachado = f"<span style='text-decoration:line-through; opacity:.6; margin-right:8px'>{_mon(base_con_recargo)}</span>"
+            precio_html = f"{tachado}<strong style='font-size:20px'>{_mon(precio_desc)}</strong> {_chip_desc(descuento_pct)}"
+        else:
+            precio_desc = base_con_recargo
+            precio_html = f"<strong style='font-size:20px'>{_mon(precio_desc)}</strong>"
+
+    # ========= Resto de países (sin cambios) =========
     else:
-        precio_desc = total
-        precio_html = f"<strong style='font-size:20px'>{_mon(precio_desc)}</strong>"
+        if descuento_pct:
+            precio_desc = round(total * (1 - descuento_pct/100))
+            tachado = f"<span style='text-decoration:line-through; opacity:.6; margin-right:8px'>{_mon(total)}</span>"
+            precio_html = f"{tachado}<strong style='font-size:20px'>{_mon(precio_desc)}</strong> {_chip_desc(descuento_pct)}"
+            # Texto bajo precio para Batido 5% en PE/CL/CO/ES/IT/US
+            if titulo.strip().lower() == "batido nutricional" and descuento_pct == 5:
+                cc = st.session_state.get("country_code")
+                if cc == "PE":
+                    precio_html += " <span style='font-size:13px; opacity:.8'>(S/7.9 al dia)</span>"
+                elif cc == "CL":
+                    precio_html += " <span style='font-size:13px; opacity:.8'>($1.744 al dia)</span>"
+                elif cc == "CO":
+                    precio_html += " <span style='font-size:13px; opacity:.8'>($6.693 al dia)</span>"
+                elif cc in ("ES-PEN", "ES-CAN", "IT"):
+                    diario = round(precio_desc / 22.0, 2)
+                    precio_html += f" <span style='font-size:13px; opacity:.8'>(€{diario:.2f} al dia)</span>"
+                elif cc == "US":
+                    diario = round(precio_desc / 30.0, 2)
+                    precio_html += f" <span style='font-size:13px; opacity:.8'>(${diario:.2f} al dia)</span>"
+        else:
+            precio_desc = total
+            precio_html = f"<strong style='font-size:20px'>{_mon(precio_desc)}</strong>"
 
     faltante_txt = ""
     if faltantes:
@@ -632,7 +678,7 @@ def pantalla1():
         st.subheader("País")
         pais = st.selectbox(
             "Selecciona tu país",
-            ["Perú", "Chile", "Colombia", "España (Península)", "España (Canarias)", "Italia", "Argentina", "Estados Unidos"],
+            ["Perú", "Chile", "Colombia", "España (Península)", "España (Canarias)", "Italia", "Argentina", "Estados Unidos", "Canada"],
             index=0,
             help="Esto ajustará los precios y la moneda en las recomendaciones."
         )
@@ -1174,7 +1220,7 @@ def pantalla6():
         if st.session_state.get("p3_colesterol_alto", False):
             st.write("• Para mejorar tus niveles de colesterol nos apoyamos del **Herbalifeline**, unas cápsulas de concentrado de **omega 3** con sabor a menta y tomillo. Riquísimas.")
         if st.session_state.get("p3_baja_energia", False):
-            nrg_name = "High Protein Iced Coffee" if st.session_state.get("country_code") in ("ES-PEN","ES-CAN","IT") else "NRG"
+            nrg_name = "LiftOff" if st.session_state.get("country_code") == "CA" else ("High Protein Iced Coffee" if st.session_state.get("country_code") in ("ES-PEN","ES-CAN","IT") else "NRG")
             st.write(f"• Con el **té concentrado de hierbas** y su efecto termogénico puedes disparar tus niveles de energía y de paso quemar unas calorías extra al día. Si lo combinas con el **{nrg_name}** vas a estar totalmente lúcida y enérgica en cuerpo y mente.")
         if st.session_state.get("p3_dolor_muscular", False):
             st.write("• Para el dolor muscular se recomienda una buena ingesta de **proteína**, por lo cual el **PDM** resulta ideal al sumar de 9 a 18 g adicionales según tus requerimientos.")
@@ -1192,13 +1238,15 @@ def pantalla6():
                 st.write("• Para el **dolor articular** está el **Collagen Booster**, ideal para mantener el cartilago sano.")
             elif st.session_state.get("country_code") == "IT":
                 st.write("• Para el **dolor articular** está el **Herbalifeline**, ideal para mantener el cartílago sano.")
+            elif st.session_state.get("country_code") == "CA":
+                st.write("• Para el **dolor articular** está el **Collagen Beauty Drink**, ideal para mantener el cartílago sano.")
             else:
                 st.write("• Para el **dolor articular** está el **Golden Beverage**, una bebida de **cúrcuma** ideal para desinflamar las articulaciones.")
         if st.session_state.get("p3_ansiedad_por_comer", False):
             bev_name = "PPP" if st.session_state.get("country_code") in ("ES-PEN","ES-CAN","IT") else "Beverage"
             st.write(f"• La **ansiedad por comer** es síntoma de un déficit en la ingesta de proteína diaria. El **PDM** y el **{bev_name}** son ideales para aportar de 15 a 18 g adicionales al día y generar sensación de saciedad y control de antojos.")
         if st.session_state.get("p3_jaquecas_migranas", False):
-            nrg_name = "High Protein Iced Coffee" if st.session_state.get("country_code") in ("ES-PEN","ES-CAN","IT") else "NRG"
+            nrg_name = "LiftOff" if st.session_state.get("country_code") == "CA" else ("High Protein Iced Coffee" if st.session_state.get("country_code") in ("ES-PEN","ES-CAN","IT") else "NRG")
             st.write(f"• Para ayudarte a aliviar las **jaquecas/migranas**, el **{nrg_name}** contiene la dosis ideal de cafeína natural, además de brindarte lucidez mental.")
         if st.session_state.get("p3_diabetes_antecedentes_familiares", False):
             # Reemplazado: Beta Heart -> Fibra Activa
