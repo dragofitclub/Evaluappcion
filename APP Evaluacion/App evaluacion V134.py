@@ -510,23 +510,28 @@ def _render_card(titulo:str, items:List[str], descuento_pct:int=0, seleccionable
     if st.session_state.get("country_code") == "CA" and titulo.strip() != "Batido + Chupapanza":
         # 1) Sumar $15 al paquete
         base_con_recargo = int(round(total + 15))
-        # 2) Aplicar el descuento (si existe) SOBRE el precio con recargo
+        # 2) Mostrar precio inflado como "regular" y el real (con recargo) como "promocional"
         if descuento_pct:
-            precio_desc = int(round(base_con_recargo * (1 - descuento_pct/100)))
-            tachado = f"<span style='text-decoration:line-through; opacity:.6; margin-right:8px'>{_mon(base_con_recargo)}</span>"
-            precio_html = f"{tachado}<strong style='font-size:20px'>{_mon(precio_desc)}</strong> {_chip_desc(descuento_pct)}"
+            precio_promocional = base_con_recargo  # precio real que pagará
+            inflado = int(round(precio_promocional / (1 - descuento_pct/100)))
+            tachado = f"<span style='text-decoration:line-through; opacity:.6; margin-right:8px'>{_mon(inflado)}</span>"
+            precio_html = f"{tachado}<strong style='font-size:20px'>{_mon(precio_promocional)}</strong> {_chip_desc(descuento_pct)}"
         else:
-            precio_desc = base_con_recargo
-            precio_html = f"<strong style='font-size:20px'>{_mon(precio_desc)}</strong>"
+            precio_promocional = base_con_recargo
+            precio_html = f"<strong style='font-size:20px'>{_mon(precio_promocional)}</strong>"
 
-    # ========= Resto de países (sin cambios) =========
+        precio_desc = precio_promocional  # mantener compatibilidad con variables usadas abajo
+
+    # ========= Resto de países =========
     else:
         if descuento_pct:
-            precio_desc = round(total * (1 - descuento_pct/100))
-            tachado = f"<span style='text-decoration:line-through; opacity:.6; margin-right:8px'>{_mon(total)}</span>"
-            precio_html = f"{tachado}<strong style='font-size:20px'>{_mon(precio_desc)}</strong> {_chip_desc(descuento_pct)}"
+            # Precio real = total. Precio "regular" mostrado = total / (1 - d%)
+            precio_promocional = int(round(total))
+            inflado = int(round(precio_promocional / (1 - descuento_pct/100)))
+            tachado = f"<span style='text-decoration:line-through; opacity:.6; margin-right:8px'>{_mon(inflado)}</span>"
+            precio_html = f"{tachado}<strong style='font-size:20px'>{_mon(precio_promocional)}</strong> {_chip_desc(descuento_pct)}"
             # Texto bajo precio para Batido 5% en PE/CL/CO/ES/IT/US
-            if titulo.strip().lower() == "batido nutricional" and descuento_pct == 5:
+            if titulo.strip().lower() in ("batido nutricional", "batido") and descuento_pct == 5:
                 cc = st.session_state.get("country_code")
                 if cc == "PE":
                     precio_html += " <span style='font-size:13px; opacity:.8'>(S/7.9 al dia)</span>"
@@ -535,11 +540,12 @@ def _render_card(titulo:str, items:List[str], descuento_pct:int=0, seleccionable
                 elif cc == "CO":
                     precio_html += " <span style='font-size:13px; opacity:.8'>($6.693 al dia)</span>"
                 elif cc in ("ES-PEN", "ES-CAN", "IT"):
-                    diario = round(precio_desc / 22.0, 2)
+                    diario = round(precio_promocional / 22.0, 2)
                     precio_html += f" <span style='font-size:13px; opacity:.8'>(€{diario:.2f} al dia)</span>"
                 elif cc == "US":
-                    diario = round(precio_desc / 30.0, 2)
+                    diario = round(precio_promocional / 30.0, 2)
                     precio_html += f" <span style='font-size:13px; opacity:.8'>(${diario:.2f} al dia)</span>"
+            precio_desc = precio_promocional
         else:
             precio_desc = total
             precio_html = f"<strong style='font-size:20px'>{_mon(precio_desc)}</strong>"
@@ -561,10 +567,23 @@ def _render_card(titulo:str, items:List[str], descuento_pct:int=0, seleccionable
         unsafe_allow_html=True
     )
 
+    # Para coherencia con lo mostrado: precio_regular será el inflado cuando aplique,
+    # y precio_final el promocional (real). Si no hay descuento, ambos son el total normal.
+    if st.session_state.get("country_code") == "CA" and titulo.strip() != "Batido + Chupapanza":
+        if descuento_pct:
+            precio_regular_for_payload = int(round(precio_desc / (1 - descuento_pct/100)))
+        else:
+            precio_regular_for_payload = precio_desc
+    else:
+        if descuento_pct:
+            precio_regular_for_payload = int(round(precio_desc / (1 - descuento_pct/100)))
+        else:
+            precio_regular_for_payload = precio_desc
+
     payload = {
         "titulo": titulo,
         "items": items,
-        "precio_regular": total,
+        "precio_regular": precio_regular_for_payload,
         "descuento_pct": descuento_pct,
         "precio_final": precio_desc,
     }
@@ -593,7 +612,6 @@ def _combos_por_flags() -> List[Dict]:
     if ss.get("p3_hemorroides"):
         combos.append(("Batido + Aloe", ["Batido", "Aloe Concentrado"]))
     if ss.get("p3_hipertension"):
-        # Reemplazado: Beta Heart -> Fibra Activa
         combos.append((f"Batido + {_display_name('Fibra Activa')}", ["Batido", "Fibra Activa"]))
     if ss.get("p3_dolor_articular"):
         combos.append((f"Batido + {_display_name('Golden Beverage')}", ["Batido", "Golden Beverage"]))
@@ -602,7 +620,6 @@ def _combos_por_flags() -> List[Dict]:
     if ss.get("p3_jaquecas_migranas"):
         combos.append((f"Batido + {_display_name('NRG')}", ["Batido", "NRG"]))
     if ss.get("p3_diabetes_antecedentes_familiares"):
-        # Reemplazado: Beta Heart -> Fibra Activa
         combos.append((f"Batido + {_display_name('Fibra Activa')}", ["Batido", "Fibra Activa"]))
     return combos
 
@@ -628,19 +645,8 @@ def _render_countdown():
 
 def mostrar_opciones_pantalla6():
     st.markdown("### Opciones recomendadas")
-    _render_card("Batido Nutricional", ["Batido"], 5, seleccionable=True, key_sufijo="batido")
-
-    any_combo_rendered = False
-    combos = _combos_por_flags()
-    if combos:
-        for i, (titulo, items) in enumerate(combos, start=1):
-            r = _render_card(titulo, items, 10, seleccionable=True, key_sufijo=f"combo_{i}")
-            if r is not None:
-                any_combo_rendered = True
-    if not any_combo_rendered:
-        st.info("Elige una o más opciones en la Pantalla 3 para ver aquí los combos recomendados con 10% de descuento.")
-
-    # —— NUEVO: Mostrar SIEMPRE como última opción el “Batido + Chupapanza” (10% dscto)
+    _render_card("Batido", ["Batido"], 5, seleccionable=True, key_sufijo="batido")
+    _render_card("Batido + Te", ["Batido", "Té de Hierbas"], 10, seleccionable=True, key_sufijo="batido_te")
     _render_card(
         "Batido + Chupapanza",
         ["Batido", "Té de Hierbas", "Fibra Activa", "Aloe Concentrado"],
@@ -657,6 +663,85 @@ def mostrar_opciones_pantalla6():
             f"({e['descuento_pct']}% dscto)"
         )
 
+# ========= CORREGIDO: Sección de Personalización =========
+def _render_personaliza_programa():
+    st.divider()
+    st.subheader("🧩 Personaliza tu programa")
+
+    precios = _get_precios()
+    disponibles = st.session_state.get("available_products") or set(precios.keys())
+    productos_ordenados = [p for p in precios.keys() if p in disponibles]
+
+    # Cabecera de tabla
+    cols = st.columns([3, 2, 2])
+    with cols[0]:
+        st.markdown("**Producto**")
+    with cols[1]:
+        st.markdown("**Precio unitario**")
+    with cols[2]:
+        st.markdown("**Cantidad**")
+
+    cantidades = {}
+    for prod in productos_ordenados:
+        c = st.columns([3, 2, 2])
+        with c[0]:
+            st.write(_display_name(prod))
+        with c[1]:
+            st.write(_mon(precios.get(prod, 0)))
+        with c[2]:
+            cantidades[prod] = st.selectbox(
+                " ",
+                options=list(range(0, 11)),
+                index=0,
+                key=f"custom_qty_{prod}",
+                label_visibility="collapsed"
+            )
+
+    # Cálculo de totales
+    total_items = sum(int(q) for q in cantidades.values())
+    total_base = 0
+    for prod, q in cantidades.items():
+        precio_u = precios.get(prod, 0)
+        total_base += int(q) * (precio_u if isinstance(precio_u, (int, float)) else 0)
+
+    # Regla de descuento
+    if total_items <= 0:
+        descuento_pct = 0
+    elif total_items == 1:
+        descuento_pct = 5
+    else:
+        descuento_pct = 10
+
+    # Recargo Canadá: +15 si hay al menos 1 ítem
+    cc = st.session_state.get("country_code")
+    recargo_ca = 15 if (cc == "CA" and total_items > 0) else 0
+
+    # Precio real (promocional)
+    precio_promocional = int(round(total_base + recargo_ca))
+
+    # Precio regular “inflado” cuando hay descuento (coherente con tarjetas)
+    if descuento_pct > 0:
+        precio_regular_inflado = int(round(precio_promocional / (1 - descuento_pct/100)))
+        html_total = (
+            f"<span style='text-decoration:line-through; opacity:.6; margin-right:8px'>{_mon(precio_regular_inflado)}</span>"
+            f"<strong style='font-size:20px'>{_mon(precio_promocional)}</strong> "
+            f"{_chip_desc(descuento_pct)}"
+        )
+    else:
+        html_total = f"<strong style='font-size:20px'>{_mon(precio_promocional)}</strong>"
+
+    # MISMA tarjeta que las opciones (legible en modo oscuro)
+    st.markdown(
+        f"""
+        <div style='border:1px solid #e8e8e8; border-radius:16px; padding:14px; margin:10px 0; box-shadow:0 2px 8px rgba(0,0,0,.04)'>
+          <div style='font-weight:800; font-size:17px; margin-bottom:6px'>Total del programa</div>
+          <div>{html_total}</div>
+        </div>
+        """,
+        unsafe_allow_html=True
+    )
+# ========= FIN CORRECCIÓN =========
+
 # -------------------------------------------------------------
 # STEP 1 - Perfil de Bienestar
 # -------------------------------------------------------------
@@ -669,7 +754,7 @@ def pantalla1():
             nombre = st.text_input("¿Cuál es tu nombre completo?")
             email  = st.text_input("¿Cuál es tu correo electrónico?")
             movil  = st.text_input("¿Cuál es tu número de teléfono?")
-            ciudad = st.text_input("¿En que ciudad vives?")  # (ya estaba en tu versión)
+            ciudad = st.text_input("¿En que ciudad vives?")
         with col2:
             fecha_nac = st.date_input("¿Cuál es tu fecha de nacimiento?",
                                       value=date(1990,1,1), min_value=date(1900,1,1), max_value=date.today())
@@ -787,12 +872,10 @@ def pantalla2():
 
     st.divider()
     st.subheader("Resultados")
-    # Persistimos lo ingresado
     st.session_state.datos["altura_cm"] = altura_cm
     st.session_state.datos["peso_kg"]   = peso_kg
     st.session_state.datos["grasa_pct"] = grasa_pct
 
-    # ==== Cálculos (se mantienen para compatibilidad con Excel de Pantalla 6) ====
     edad   = _calcular_edad(st.session_state.datos.get("fecha_nac"))
     genero = st.session_state.datos.get("genero", "HOMBRE")
 
@@ -805,16 +888,14 @@ def pantalla2():
     rmin, rmax = _rango_grasa_referencia(genero_ref, edad_ref)
 
     agua_ml = req_hidratacion_ml(peso_kg)
-    prote_g = req_proteina(genero, st.session_state.metas, peso_kg)  # calculado aunque no se muestre
+    prote_g = req_proteina(genero, st.session_state.metas, peso_kg)
     bmr     = bmr_mifflin(genero, peso_kg, altura_cm, edad)
 
     meta_masa = st.session_state.metas.get("masa_muscular", False)
     objetivo_kcal = bmr + 250 if meta_masa else bmr - 250
-    # ==== FIN cálculos ====
 
     st.write("En base a los datos introducidos, la aplicación arroja los siguientes resultados:")
 
-    # === AJUSTE SOLICITADO PARA PESO NORMAL ===
     if 18.6 <= imc_val <= 24.9:
         st.write(
             f"Tu IMC, Índice de Masa Corporal, es la relación entre tu peso y tu estatura. "
@@ -828,7 +909,6 @@ def pantalla2():
             f"y eres propenso a **{_imc_categoria_y_sintomas(imc_val)[1] or '—'}**. "
             f"Como referencia, el IMC ideal es de 18.6 a 24.9."
         )
-    # === FIN AJUSTE ===
 
     genero_pal = "mujer" if str(genero).strip().upper().startswith("M") else "hombre"
     articulo = "Una" if genero_pal == "mujer" else "Un"
@@ -842,7 +922,6 @@ def pantalla2():
                 f"(Alcanzar tu requerimiento de hidratación facilita el tránsito intestinal, favorece la absorción de nutrientes y mantiene la piel firme.)" 
     )
 
-    # ======== MODIFICACIÓN SOLICITADA (texto para metabolismo en reposo con tope 1,200) ========
     if objetivo_kcal < 1200:
         st.write(
             f"El resultado de metabolismo en reposo es de {bmr:,} y para alcanzar tu objetivo "
@@ -855,7 +934,6 @@ def pantalla2():
             f"**se recomienda una ingesta diaria de {objetivo_kcal:,} calorías.** "
             f"(No exceder tu requerimiento de calorías diarias te permite mantener un peso saludable.)"
         )
-    # ======== FIN MODIFICACIÓN ========
 
     pollo_g = int(round((prote_g / 22.5) * 100))
     huevos_n = int(round(prote_g / 5.5))
@@ -898,7 +976,6 @@ def pantalla3():
             jaquecas    = st.checkbox("¿Jaquecas / Migrañas?")
             diabetes_fam= st.checkbox("Diabetes (antecedentes familiares)")
 
-    # Guardar flags de P3
     st.session_state.p3_estrenimiento                      = bool(estre)
     st.session_state.p3_colesterol_alto                    = bool(colesterol)
     st.session_state.p3_baja_energia                       = bool(baja_ene)
@@ -949,7 +1026,6 @@ def pantalla3():
 
     st.write("Hasta aqui, ¿Que te parece la información que has recibido en esta evaluación?")
 
-    # ======= PERSISTENCIA EXPLÍCITA PARA EXPORTACIÓN =======
     st.session_state.estilo_vida.update({
         "ev_menos_energia":      st.session_state.get("ev_menos_energia", ""),
         "ev_actividad":          st.session_state.get("ev_actividad", ""),
@@ -970,10 +1046,8 @@ def pantalla3():
         "obj_eventos":    st.session_state.get("obj_eventos",""),
         "obj_compromiso": st.session_state.get("obj_compromiso",""),
     })
-    # ======= FIN PERSISTENCIA =======
 
     bton_nav()
-
 
 # -------------------------------------------------------------
 # STEP 4 - Valoración de Servicio
@@ -1193,7 +1267,6 @@ def _excel_bytes():
         if refs:
             pd.DataFrame(refs).to_excel(writer, index=False, sheet_name="Referidos")
         if seleccion:
-            # FIX: 'columns' (no 'columnas')
             pd.DataFrame(seleccion, columns=["Detalle","Valor"]).to_excel(writer, index=False, sheet_name="Selección")
     buf.seek(0)
     return buf.getvalue()
@@ -1229,7 +1302,6 @@ def pantalla6():
         if st.session_state.get("p3_hemorroides", False):
             st.write("• Para la gastritis, el reflujo, **hemorroides** y similares, el **aloe** es el indicado. Desinflama, cicatriza y alivia todo el tracto digestivo y mejora la absorción de nutrientes.")
         if st.session_state.get("p3_hipertension", False):
-            # Reemplazado: Beta Heart -> Fibra Activa
             st.write("• Para ayudarte con la **hipertensión** te recomiendo la **Fibra Activa**, bebida alta en fibra que contribuye al control del perfil lipídico.")
         if st.session_state.get("p3_dolor_articular", False):
             if st.session_state.get("country_code") in ("CL", "US"):
@@ -1249,7 +1321,6 @@ def pantalla6():
             nrg_name = "LiftOff" if st.session_state.get("country_code") == "CA" else ("High Protein Iced Coffee" if st.session_state.get("country_code") in ("ES-PEN","ES-CAN","IT") else "NRG")
             st.write(f"• Para ayudarte a aliviar las **jaquecas/migranas**, el **{nrg_name}** contiene la dosis ideal de cafeína natural, además de brindarte lucidez mental.")
         if st.session_state.get("p3_diabetes_antecedentes_familiares", False):
-            # Reemplazado: Beta Heart -> Fibra Activa
             st.write("• Para ayudar con la **diabetes** recomendamos la **Fibra Activa**, bebida **alta en fibra** que permite reducir el índice glucémico de nuestra alimentación.")
         st.write("")
 
@@ -1279,6 +1350,9 @@ def pantalla6():
     _init_promo_deadline()
     _render_countdown()
     mostrar_opciones_pantalla6()
+
+    # Sección "Personaliza tu programa" (corregida)
+    _render_personaliza_programa()
 
     st.markdown("### 📥 Descargar Evaluación")
     excel_bytes = _excel_bytes()
