@@ -1327,24 +1327,22 @@ def pantalla6():
     st.divider()
     st.subheader("Servicio")
     st.write(
-        "**Los primeros 10 días son clave** para ti y vamos a trabajar muy de cerca contigo para construir resultados y hábitos sostenibles. "
-        "Tendrás citas continuas de coaching y seguimiento personalizado. Nos reuniremos para revisar tu diario de comidas, con el objetivo de ayudarte a tomar conciencia de tu alimentación y a reconocer como lo que comes impacta en como te sientes."
+        "**Los primeros 10 días son clave** y estaremos contigo de cerca para construir resultados y hábitos sostenibles. "
+        "Tendrás **coaching continuo, seguimiento personalizado** y revisaremos tu **diario de comidas** para que tomes conciencia de cómo tu alimentación impacta en cómo te sientes."
     )
     st.write(
         "Sabemos que en los primeros dias es cuando los hábitos antiguos presentan mayor resistencia. Por eso "
         "**el acompañamiento diario es fundamental para sostener el enfoque, aclarar dudas y ajustar lo que sea necesario en tiempo real.** "
     )
     st.write(
-        "Además, contarás con herramientas clave, como conocer tus requerimientos diarios de proteína e hidratación. Un tracker de alimentación diaria que calculará si estás alcanzando tus requerimientos diarios. Así como recomendaciones de alimentos alineadas con tus objetivos personales."
+        "Contarás con **herramientas clave**: tus requerimientos diarios de proteína e hidratación, un **tracker de alimentación** que calcula tu progreso, y **recomendaciones de alimentos** alineadas a tus objetivos."
     )
     st.write(
-        "También tendrás: "
-        "**Acceso a nuestros grupos de soporte y compromiso**, donde compartimos motivación, aprendizajes y acompañamiento con otros miembros. "
-        "**Ingreso a nuestra plataforma de entrenamientos** para que puedas moverte y activarte desde donde estés."
+        "Además tendrás: acceso a **grupos de soporte y compromiso** con motivación y aprendizajes, y a nuestra **plataforma de entrenamientos** para activarte desde donde estés."        
     )
     st.write(
-        "Todos los productos tienen del 5 al 10% de descuento según la cantidad que elijas para empezar tu programa por las próximas 48 horas. "
-        "Te muestro las opciones más indicadas a tus necesidades y me compartes, ¿Con qué programa te permites empezar?"
+        "Y por las próximas 48 horas, todos los programas tienen 5% a 10% de descuento según los productos que elijas. Te muestro las opciones más indicadas, y dime: "
+        "**¿Con qué programa te permites empezar?**"
     )
 
     _init_promo_deadline()
