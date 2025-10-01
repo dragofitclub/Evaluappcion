@@ -289,6 +289,170 @@ def _rango_grasa_referencia(genero: str, edad: int):
 st.set_page_config(page_title="Evaluación de Bienestar", page_icon="🧭", layout="wide")
 APP_DIR = Path(__file__).parent.resolve()
 
+# =========================
+# THEME (paleta inspirada en la plantilla Wix del enlace)
+# =========================
+def inject_theme():
+    st.markdown("""
+    <style>
+      :root{
+        /* Paleta: tonos cálidos crema + acentos verde salvia */
+        --rd-bg-start:#FFF9F4;      /* crema muy claro */
+        --rd-bg-end:#F7F3EE;        /* beige suave */
+        --rd-card:#FFFFFF;
+        --rd-border:#EAE6E1;
+        --rd-accent:#3A6B64;        /* verde salvia principal */
+        --rd-accent-2:#8BBFB5;      /* verde menta suave */
+        --rd-text:#1F2A2E;          /* gris petróleo */
+        --rd-muted:#6C7A7E;
+        --rd-pill-bg:#EAF6F3;
+        --rd-shadow:0 10px 24px rgba(20,40,40,.08);
+        --rd-radius:18px;
+        --rd-input-bg:#EEF4F2;      /* verde oliva muy claro */
+        --rd-input-border:#D5E2DE;  /* borde suave */
+      }
+
+      /* Fondo general y tipografía */
+      [data-testid="stAppViewContainer"]{
+        background: linear-gradient(180deg,var(--rd-bg-start),var(--rd-bg-end)) fixed;
+        color: var(--rd-text);
+        font-family: "Inter",-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;
+      }
+
+      /* Contenedor central más ancho */
+      .block-container{ max-width: 1200px; }
+
+      /* Sidebar */
+      [data-testid="stSidebar"]{
+        background: #ffffffE6;
+        border-right: 1px solid var(--rd-border);
+        backdrop-filter: blur(2px);
+      }
+      [data-testid="stSidebar"] h1, [data-testid="stSidebar"] h2, [data-testid="stSidebar"] h3{
+        color: var(--rd-accent);
+        font-weight: 800;
+      }
+
+      /* Títulos */
+      h1, h2, h3{
+        font-family: ui-serif, Georgia, "Times New Roman", serif !important;
+        color: var(--rd-accent);
+        letter-spacing:.2px;
+      }
+      h1{
+        position: relative;
+        display: inline-block;
+        padding-bottom: .25rem;
+      }
+      h1:after{
+        content:"";
+        position:absolute; left:0; bottom:0;
+        width: 56%;
+        height: 8px;
+        background: linear-gradient(90deg,var(--rd-accent-2),transparent);
+        border-radius: 999px;
+        opacity:.6;
+      }
+
+      /* Texto y enlaces */
+      p, li, label, span, div{ color: var(--rd-text); }
+      a{ color: var(--rd-accent); text-decoration: none; }
+      a:hover{ text-decoration: underline; }
+
+      /* Botones con estilo pastilla (texto siempre visible) */
+      .stButton>button{
+        background: var(--rd-accent) !important;
+        color: #fff !important;
+        padding: .75rem 1.1rem !important;
+        border-radius: 999px !important;
+        border: 1px solid var(--rd-accent) !important;
+        box-shadow: var(--rd-shadow) !important;
+        font-weight: 700 !important;
+        transition: transform .03s ease, background .2s ease;
+        opacity: 1 !important;
+      }
+      .stButton>button *, .stButton>button svg{ color:#fff !important; fill:#fff !important; opacity:1 !important; }
+      .stButton>button:hover{ background:#2F5A53 !important; transform: translateY(-1px); }
+      .stButton>button:focus{ outline: 3px solid var(--rd-accent-2) !important; }
+
+      /* === NUEVO: mismo look para st.form_submit_button === */
+      [data-testid="stFormSubmitter"] > div > button,
+      [data-testid="baseButton-primaryFormSubmit"],
+      [data-testid="baseButton-secondaryFormSubmit"]{
+        background: var(--rd-accent) !important;
+        color: #fff !important;
+        padding: .75rem 1.1rem !important;
+        border-radius: 999px !important;
+        border: 1px solid var(--rd-accent) !important;
+        box-shadow: var(--rd-shadow) !important;
+        font-weight: 700 !important;
+        transition: transform .03s ease, background .2s ease;
+        opacity: 1 !important;
+      }
+      [data-testid="stFormSubmitter"] > div > button:hover,
+      [data-testid="baseButton-primaryFormSubmit"]:hover,
+      [data-testid="baseButton-secondaryFormSubmit"]:hover{
+        background:#2F5A53 !important; transform: translateY(-1px);
+      }
+      [data-testid="stFormSubmitter"] > div > button:focus,
+      [data-testid="baseButton-primaryFormSubmit"]:focus,
+      [data-testid="baseButton-secondaryFormSubmit"]:focus{
+        outline: 3px solid var(--rd-accent-2) !important;
+      }
+
+      /* Inputs redondeados */
+      input, textarea{ border-radius: 14px !important; }
+      .stSelectbox [data-baseweb="select"]{ border-radius: 14px !important; }
+
+      /* === Campos de entrada más claros (verde oliva suave) === */
+      [data-testid="stTextInput"] input,
+      [data-testid="stTextArea"] textarea,
+      [data-testid="stNumberInput"] input,
+      [data-testid="stDateInput"] input,
+      .stSelectbox [data-baseweb="select"] > div{
+        background: var(--rd-input-bg) !important;
+        border: 1px solid var(--rd-input-border) !important;
+        color: var(--rd-text) !important;
+        box-shadow: none !important;
+      }
+      [data-testid="stTextInput"] input::placeholder,
+      [data-testid="stTextArea"] textarea::placeholder{
+        color: rgba(31,42,46,.55) !important;
+      }
+      [data-testid="stTextInput"] input:focus,
+      [data-testid="stTextArea"] textarea:focus,
+      [data-testid="stNumberInput"] input:focus,
+      [data-testid="stDateInput"] input:focus,
+      .stSelectbox [data-baseweb="select"] > div:focus-within{
+        border-color: var(--rd-accent) !important;
+        outline: 2px solid var(--rd-accent-2) !important;
+      }
+      [data-testid="stTextInput"] input,
+      [data-testid="stTextArea"] textarea{ caret-color: var(--rd-accent) !important; }
+
+      /* Tarjetas reutilizables */
+      .rd-card{
+        background: var(--rd-card);
+        border: 1px solid var(--rd-border);
+        border-radius: var(--rd-radius);
+        box-shadow: var(--rd-shadow);
+        padding: 16px 18px;
+      }
+
+      /* Chips / etiquetas de descuento */
+      .rd-pill{ background: var(--rd-pill-bg); color: var(--rd-accent); padding:2px 10px; border-radius:999px; font-size:12px; font-weight:700; }
+
+      /* Tablas y contenedores */
+      .stTable { border-radius: var(--rd-radius); overflow:hidden; box-shadow: var(--rd-shadow); }
+
+      /* Divisor sutil */
+      hr, .stDivider { opacity:.6; border-color: var(--rd-border) !important; }
+
+      /* Countdown destacado */
+      .rd-countdown{ background:#ffffffcc; backdrop-filter:saturate(1.2) blur(3px); padding:.6rem .9rem; display:inline-block; border:1px solid var(--rd-border); border-radius:999px; box-shadow: var(--rd-shadow); }
+    </style>
+    """, unsafe_allow_html=True)
+
 # -------------------------------------------------------------
 # Helpers / Estado
 # -------------------------------------------------------------
@@ -356,9 +520,9 @@ def bton_nav(id_pantalla: int | None = None):
             id_pantalla = 1
     c1, c2 = st.columns([1, 1])
     with c1:
-        st.button("⬅️ Anterior", key=f"prev_{id_pantalla}", on_click=ir_prev)
+        st.button("⬅️ Anterior", key=f"prev_{id_pantalla}", on_click=ir_prev, type="primary")
     with c2:
-        st.button("Siguiente ➡️", key=f"next_{id_pantalla}", on_click=ir_next)
+        st.button("Siguiente ➡️", key=f"next_{id_pantalla}", on_click=ir_next, type="primary")
 
 def imc(peso_kg: float, altura_cm: float) -> float:
     if not peso_kg or not altura_cm:
@@ -465,7 +629,8 @@ def _precio_sumado(items: List[str]):
     return total, faltantes
 
 def _chip_desc(pct:int):
-    return f"<span style='background:#e7f8ee; color:#0a7f44; padding:2px 8px; border-radius:999px; font-size:12px'>-{pct}%</span>"
+    # Colores ajustados a la nueva paleta (no cambia el texto)
+    return f"<span class='rd-pill'>-{pct}%</span>"
 
 def _producto_disponible(nombre: str) -> bool:
     disp = st.session_state.get("available_products")
@@ -557,7 +722,7 @@ def _render_card(titulo:str, items:List[str], descuento_pct:int=0, seleccionable
     items_txt = " + ".join(_display_name(i) for i in items)
     st.markdown(
         f"""
-        <div style='border:1px solid #e8e8e8; border-radius:16px; padding:14px; margin:10px 0; box-shadow:0 2px 8px rgba(0,0,0,.04)'>
+        <div class='rd-card' style='margin:10px 0'>
           <div style='font-weight:800; font-size:17px; margin-bottom:4px'>{titulo}</div>
           <div style='font-size:13px; margin-bottom:8px'>{items_txt}</div>
           <div>{precio_html}</div>
@@ -639,9 +804,9 @@ def _render_countdown():
     h, rem = divmod(total_seg, 3600)
     m, s = divmod(rem, 60)
     if total_seg > 0:
-        st.markdown(f"### ⏳ Promoción válida por **{h:02d}:{m:02d}:{s:02d}**")
+        st.markdown(f"<div class='rd-countdown'>⏳ Promoción válida por <strong>{h:02d}:{m:02d}:{s:02d}</strong></div>", unsafe_allow_html=True)
     else:
-        st.markdown("### ⏳ **Promoción finalizada**")
+        st.markdown("<div class='rd-countdown'><strong>⏳ Promoción finalizada</strong></div>", unsafe_allow_html=True)
 
 def mostrar_opciones_pantalla6():
     st.markdown("### Opciones recomendadas")
@@ -730,10 +895,10 @@ def _render_personaliza_programa():
     else:
         html_total = f"<strong style='font-size:20px'>{_mon(precio_promocional)}</strong>"
 
-    # MISMA tarjeta que las opciones (legible en modo oscuro)
+    # Tarjeta visual
     st.markdown(
         f"""
-        <div style='border:1px solid #e8e8e8; border-radius:16px; padding:14px; margin:10px 0; box-shadow:0 2px 8px rgba(0,0,0,.04)'>
+        <div class='rd-card' style='margin:10px 0'>
           <div style='font-weight:800; font-size:17px; margin-bottom:6px'>Total del programa</div>
           <div>{html_total}</div>
         </div>
@@ -768,8 +933,6 @@ def pantalla1():
             help="Esto ajustará los precios y la moneda en las recomendaciones."
         )
 
-        st.form_submit_button("Continuar")
-
         st.subheader("Metas físicas y de bienestar")
         st.markdown("**¿Cuáles son tus metas? Puedes elegir más de una.**")
         c1, c2, c3 = st.columns(3)
@@ -798,7 +961,7 @@ def pantalla1():
             agua8         = st.text_input("¿Tomas por lo menos 8 vasos de agua al dia?")
             alcohol       = st.text_input("¿Tomas bebidas alcohólicas? ¿Cuántas veces al mes?")
 
-        enviado = st.form_submit_button("Guardar y continuar ➡️")
+        enviado = st.form_submit_button("Guardar y continuar ➡️", use_container_width=True, type="primary")
         if enviado:
             st.session_state.datos.update({
                 "nombre": nombre, "email": email, "movil": movil, "ciudad": ciudad,
@@ -1392,6 +1555,7 @@ def sidebar_nav():
 # -------------------------------------------------------------
 def main():
     init_state()
+    inject_theme()  # <<< aplica la nueva paleta/estilos inspirada en la plantilla Wix
     sidebar_nav()
     s = st.session_state.step
     if s == 1: pantalla1()
