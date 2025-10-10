@@ -215,6 +215,28 @@ COUNTRY_CONFIG: Dict[str, Dict] = {
             "Fibra Activa","Golden Beverage","NRG","Herbalifeline","PDM"
         ],
     },
+    # ==== NUEVO: Mexico ====
+    "Mexico": {
+        "code": "MX",
+        "currency_symbol": "$",
+        "thousands_sep": ",",
+        "prices": {
+            "Batido": 893,
+            "Té de Hierbas": 487,
+            "Aloe Concentrado": 642,
+            "Beverage Mix": 228,
+            "Beta Heart": 1350,
+            "Fibra Activa": 736,
+            "Golden Beverage": 1271,
+            "NRG": 396,
+            "Herbalifeline": 887,
+            "PDM": 1220,
+        },
+        "available_products": [
+            "Batido","Té de Hierbas","Aloe Concentrado","Beverage Mix","Beta Heart",
+            "Fibra Activa","Golden Beverage","NRG","Herbalifeline","PDM"
+        ],
+    },
 }
 
 # =========================
@@ -429,6 +451,34 @@ def inject_theme():
       }
       [data-testid="stTextInput"] input,
       [data-testid="stTextArea"] textarea{ caret-color: var(--rd-accent) !important; }
+
+      /* === LISTA DESPLEGABLE MÁS CLARA (selectbox abierto) === */
+      /* Fondo del menú (en el popover de BaseWeb) */
+      .stSelectbox [data-baseweb="select"] [role="listbox"],
+      [data-baseweb="popover"] [role="listbox"]{
+        background: var(--rd-input-bg) !important;   /* verde claro */
+        border: 1px solid var(--rd-input-border) !important;
+        color: var(--rd-text) !important;
+      }
+      /* Opción normal */
+      .stSelectbox [data-baseweb="select"] [role="option"],
+      [data-baseweb="popover"] [role="option"]{
+        color: var(--rd-text) !important;
+        background: transparent !important;
+      }
+      /* Hover/selección: verde menta suave para contraste */
+      .stSelectbox [data-baseweb="select"] [role="option"]:hover,
+      [data-baseweb="popover"] [role="option"]:hover,
+      .stSelectbox [data-baseweb="select"] [role="option"][aria-selected="true"],
+      [data-baseweb="popover"] [role="option"][aria-selected="true"]{
+        background: var(--rd-pill-bg) !important;    /* #EAF6F3 */
+        color: var(--rd-accent) !important;
+      }
+      /* Borde del control cuando está abierto/enfocado */
+      .stSelectbox [data-baseweb="select"] > div:focus-within{
+        border-color: var(--rd-accent) !important;
+        box-shadow: 0 0 0 2px var(--rd-accent-2) inset !important;
+      }
 
       /* Tarjetas reutilizables */
       .rd-card{
@@ -663,6 +713,9 @@ def _display_name(product: str) -> str:
         and product == "Golden Beverage"
     ):
         return "Collagen Drink"
+    # === NUEVO: Mexico muestra Collagen Beauty Drink en lugar de Golden Beverage (última página/listados) ===
+    if cc == "MX" and product == "Golden Beverage":
+        return "Collagen Beauty Drink"
     return product
 
 def _render_card(titulo:str, items:List[str], descuento_pct:int=0, seleccionable:bool=False, key_sufijo:str=""):
@@ -928,7 +981,7 @@ def pantalla1():
         st.subheader("País")
         pais = st.selectbox(
             "Selecciona tu país",
-            ["Perú", "Chile", "Colombia", "España (Península)", "España (Canarias)", "Italia", "Argentina", "Estados Unidos", "Canada"],
+            ["Perú", "Chile", "Colombia", "España (Península)", "España (Canarias)", "Italia", "Argentina", "Estados Unidos", "Canada", "Mexico"],
             index=0,
             help="Esto ajustará los precios y la moneda en las recomendaciones."
         )
@@ -1337,7 +1390,7 @@ def _excel_bytes():
     agua_ml   = req_hidratacion_ml(peso_kg or 0)
     prote_g   = req_proteina(genero, m, peso_kg or 0)
     bmr_val   = bmr_mifflin(genero, peso_kg or 0, altura_cm or 0, max(edad_calc, 16))
-    objetivo_kcal = bmr_val + 250 if m.get("masa_muscular") else bmr_val - 250
+    objetivo_kcal = m.get("masa_muscular") and (bmr_val + 250) or (bmr_val - 250)
 
     cur = st.session_state.get("currency_symbol", "S/")
     perfil = [
@@ -1474,6 +1527,8 @@ def pantalla6():
             elif st.session_state.get("country_code") == "IT":
                 st.write("• Para el **dolor articular** está el **Herbalifeline**, ideal para mantener el cartílago sano.")
             elif st.session_state.get("country_code") == "CA":
+                st.write("• Para el **dolor articular** está el **Collagen Beauty Drink**, ideal para mantener el cartílago sano.")
+            elif st.session_state.get("country_code") == "MX":
                 st.write("• Para el **dolor articular** está el **Collagen Beauty Drink**, ideal para mantener el cartílago sano.")
             else:
                 st.write("• Para el **dolor articular** está el **Golden Beverage**, una bebida de **cúrcuma** ideal para desinflamar las articulaciones.")
