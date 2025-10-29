@@ -1327,7 +1327,7 @@ def show_img(filename: str, caption: str = ""):
 def pantalla5():
     st.header("5) Quiénes somos")
     st.write(
-        "Somos **Fitclub**, una comunidad que educa a las personas en hábitos saludables de vida para que puedan alcanzar resultados "
+        "Somos **La Tribu Pro**, una comunidad que educa a las personas en hábitos saludables de vida para que puedan alcanzar resultados "
         "de bienestar y puesta en forma, y sostenerlos para siempre.\n\n"
         "Contamos con una comunidad con más de 10,000 personas con resultados más allá de sus expectativas iniciales. "
         "A continuación te voy a mostrar algunos testimonios de nuestra comunidad."
