@@ -262,12 +262,11 @@ def _imc_texto_narrativo(imc: float):
     cat, sintomas = _imc_categoria_y_sintomas(imc)
     imc_str = f"{imc:.1f}" if imc is not None else "0"
     if cat == "PESO NORMAL":
-        return (f"Tu IMC es el Índice de Masa Corporal. Es la relación entre tu peso y tu tamaño. "
-                f"El tuyo es de {imc_str}, eso indica que tienes PESO NORMAL y deberías sentirte con buen nivel de energía, "
+        return (f"Tu Índice de Masa Corporal (IMC) es de {imc_str}, eso indica que tienes PESO NORMAL y deberías sentirte con buen nivel de energía, "
                 f"vitalidad y buena condición física. ¿Te sientes así?")
     else:
-        return (f"Tu IMC es el Índice de Masa Corporporal. Es la relación entre tu peso y tu tamaño. "
-                f"El tuyo es de {imc_str}, eso indica que tienes {cat} y podrías estar sufriendo de {sintomas}.")
+        return (f"Tu Índice de Masa Corporal (IMC) es de {imc_str}, eso indica que tienes {cat} y eres propenso a {sintomas}.")
+                
 
 # =========================
 # Edad desde fecha
@@ -1114,14 +1113,12 @@ def pantalla2():
 
     if 18.6 <= imc_val <= 24.9:
         st.write(
-            f"Tu IMC, Índice de Masa Corporal, es la relación entre tu peso y tu estatura. "
-            f"El tuyo es de {imc_val:.1f}, eso indica que tienes PESO NORMAL lo que significa que deberías tener buena condición física, "
+            f"Tu Índice de Masa Corporal (IMC) es de {imc_val:.1f}, eso indica que tienes PESO NORMAL lo que significa que deberías tener buena condición física, "
             f"vitalidad y buen nivel de energía, ¿Te sientes así? . Como referencia, el IMC ideal es de 18.6 a 24.9."
         )
     else:
         st.write(
-            f"Tu IMC, **Índice de Masa Corporal**, es la relación entre tu peso y tu estatura. "
-            f"El tuyo es de **{imc_val:.1f}**, eso indica que tienes **{_imc_categoria_y_sintomas(imc_val)[0]}** "
+            f"Tu Índice de Masa Corporal (IMC) es de **{imc_val:.1f}**, eso indica que tienes **{_imc_categoria_y_sintomas(imc_val)[0]}** "
             f"y eres propenso a **{_imc_categoria_y_sintomas(imc_val)[1] or '—'}**. "
             f"Como referencia, el IMC ideal es de 18.6 a 24.9."
         )
@@ -1129,24 +1126,24 @@ def pantalla2():
     genero_pal = "mujer" if str(genero).strip().upper().startswith("M") else "hombre"
     articulo = "Una" if genero_pal == "mujer" else "Un"
     st.write(
-        f"Sobre tu % de grasa. {articulo} {genero_pal} de {edad_ref} años como tú tiene "
+        f"{articulo} {genero_pal} de {edad_ref} años como tú tiene "
         f"**{rmin:.1f} % de grasa en el mejor de los casos y {rmax:.1f} % en el peor de los casos. "
         f"Tú tienes {grasa_pct}%**"
     )
 
-    st.write(f"Respecto a tu **hidratación**, tu requerimiento es de **{agua_ml:,} ml/día.** "
-                f"(Alcanzar tu requerimiento de hidratación facilita el tránsito intestinal, favorece la absorción de nutrientes y mantiene la piel firme.)" 
+    st.write(f"Tu requerimiento diario y mínimo de hidratación es de **{agua_ml:,} ml/día.** "
+                f"Es indispensable para facilitar el tránsito intestinal, mejorar la función cerebral, transportar nutrientes, entre muchas mas funciones." 
     )
 
     if objetivo_kcal < 1200:
         st.write(
-            f"El resultado de metabolismo en reposo es de {bmr:,} y para alcanzar tu objetivo "
+            f"Tu metabolismo en reposo es de {bmr:,} y para alcanzar tu objetivo "
             f"se recomienda una ingesta diaria de 1,200 calorías. "
             f"(No exceder tu requerimiento de calorías diarias te permite mantener un peso saludable.)"
         )
     else:
         st.write(
-            f"El resultado de metabolismo en reposo es de {bmr:,} y para alcanzar tu objetivo "
+            f"Tu metabolismo en resposo es de {bmr:,} y para alcanzar tu objetivo "
             f"**se recomienda una ingesta diaria de {objetivo_kcal:,} calorías.** "
             f"(No exceder tu requerimiento de calorías diarias te permite mantener un peso saludable.)"
         )
@@ -1154,10 +1151,12 @@ def pantalla2():
     pollo_g = int(round((prote_g / 22.5) * 100))
     huevos_n = int(round(prote_g / 5.5))
     st.write(
-        f"Tu **requerimiento de proteína** según el objetivo que te has propuesto es de **{prote_g} gramos al día.** "
+        f"Finalmente tu **requerimiento de proteína** según el objetivo que te has propuesto es de **{prote_g} gramos al día.** "
         f"Como referencia, esto equivale a {pollo_g} g de pechuga de pollo o {huevos_n} huevos. "
         f"(Alcanzar tu requerimiento de proteína diario te permite preservar músculo durante la perdida de peso, evitando la flacidez.)"
     )
+
+    st.write("Tómale foto a esta información, puede cambiar de manera significativa el rumbo de tu bienestar.")
 
     bton_nav()
 
@@ -1207,13 +1206,13 @@ def pantalla3():
     st.subheader("Objetivos")
     c1, c2 = st.columns(2)
     with c1:
-        st.text_input("¿Qué talla te gustaría ser?", key="obj_talla")
-        st.text_input("¿Qué partes del cuerpo te gustaría mejorar?", key="obj_partes")
-        st.text_input("¿Qué tienes en tu ropero que podamos usar como meta?", key="obj_ropero")
+        st.text_input("¿Qué talla de ropa te gustaría ser o mantener?", key="obj_talla")
+        st.text_input("¿Qué prenda tienes en tu ropero que podamos usar como meta?", key="obj_ropero")
+        st.text_input("¿Qué partes de tu cuerpo te gustaría mejorar?", key="obj_partes")
     with c2:
-        st.text_input("¿Cómo te beneficia alcanzar tu meta?", key="obj_beneficio")
-        st.text_input("¿Qué eventos tienes en los próximos 3 o 6 meses?", key="obj_eventos")
-        st.text_input("Del 1 al 10, ¿cual es tu nivel de compromiso en alcanzar una mejor versión de ti?", key="obj_compromiso")
+        st.text_input("¿Cómo mejoraría tu vida al alcanzar tus objetivos de bienestar?", key="obj_beneficio")
+        st.text_input("¿Qué eventos tienes en los próximos 3 o 6 meses que te inspiren a lograr tus objetivos?", key="obj_eventos")
+        st.text_input("Del 1 al 10, ¿cuál es tu nivel de compromiso en alcanzar una mejor versión de ti?", key="obj_compromiso")
 
     st.subheader("Análisis de presupuesto")
     col = st.columns(4)
@@ -1269,16 +1268,18 @@ def pantalla3():
 # STEP 4 - Valoración de Servicio
 # -------------------------------------------------------------
 def emoji_y_texto(n):
-    if n <= 0: return "😡", "PÉSIMO"
-    if n == 1: return "😠", "NO ME GUSTÓ"
-    if n == 2: return "😐", "ME GUSTÓ POCO"
-    if n == 3: return "🙂", "ME GUSTÓ"
-    if n == 4: return "😁", "ME GUSTÓ MUCHO"
+    if n <= 0: return "😡", "PÉSIMO (Ayúdame a mejorar mi calificación)"
+    if n == 1: return "😠", "NO ME GUSTÓ (Ayúdame a mejorar mi calificación)" 
+    if n == 2: return "😐", "ME GUSTÓ POCO (Sólo faltan 3 mas)"
+    if n == 3: return "🙂", "ME GUSTÓ (¡Sólo 2 más!)"
+    if n == 4: return "😁", "ME GUSTÓ MUCHO (¡El último y terminamos!)"
     return "🤩", "ME ENCANTÓ"
 
 def pantalla4():
     st.header("4) Valoración de Servicio")
-    st.write("La empresa valora la calidad de mi servicio según la cantidad de personas a las cuales **les quieres regalar la misma evaluación**. 1 persona significa que no te gusto y 5 personas significa que te encantó. Entonces...")
+    st.write(
+        "La empresa valora la calidad de mi servicio según la cantidad de personas a las cuales **les quieres regalar la misma evaluación**."
+        "Mencionar 1 persona significa que no te gusto y 5 personas significa que te encantó. Entonces...")
 
     if "valoracion_contactos" not in st.session_state:
         st.session_state.valoracion_contactos = []
@@ -1306,7 +1307,7 @@ def pantalla4():
     st.markdown(f"### {cara}  {texto}")
 
     st.divider()
-    st.write("Muchas gracias por tu ayuda, con ello concluimos la evaluación. Antes de despedirnos **¿Te gustaría que te explique cómo, a través de la comunidad, podemos ayudarte a alcanzar los objetivos que te has propuesto?**")
+    st.write("Muchas gracias por ayudarme con la evaluación. Antes de despedirme **¿Te gustaría que te explique cómo, a través de nuestra TRIBU, podemos ayudarte a alcanzar tus objetivos ?**")
 
     bton_nav()
 
@@ -1327,9 +1328,8 @@ def show_img(filename: str, caption: str = ""):
 def pantalla5():
     st.header("5) Quiénes somos")
     st.write(
-        "Somos **La Tribu Pro**, una comunidad que educa a las personas en hábitos saludables de vida para que puedan alcanzar resultados "
-        "de bienestar y puesta en forma, y sostenerlos para siempre.\n\n"
-        "Contamos con una comunidad con más de 10,000 personas con resultados más allá de sus expectativas iniciales. "
+        "Somos **LA TRIBU PRO**, una comunidad que educa a las personas en hábitos saludables de vida para que puedan alcanzar resultados "
+        "de bienestar y puesta en forma, y sostenerlos en el tiempo.\n\n"
         "A continuación te voy a mostrar algunos testimonios de nuestra comunidad."
     )
     st.subheader("Testimonios")
@@ -1491,7 +1491,7 @@ def _excel_bytes():
 # STEP 6 - Plan Personalizado
 # -------------------------------------------------------------
 def pantalla6():
-    st.header("6) Plan Personalizado")
+    st.header("6) Únete a LA TRIBU PRO con nuestro programa personalizado")
 
     st.write(
         "Para asegurar los resultados que te has propuesto nos apoyamos en la nutrición celular del Batido de Herbalife. "
