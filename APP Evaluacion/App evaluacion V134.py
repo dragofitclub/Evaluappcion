@@ -1005,9 +1005,9 @@ def pantalla1():
             horarios     = st.text_input("¿A qué hora despiertas y a qué hora te vas a dormir?")
             desayuno_h   = st.text_input("¿Tomas desayuno todos los días? ¿A qué hora?")
             que_desayunas = st.text_input("¿Qué sueles desayunar?")
-        with c2:
             meriendas     = st.text_input("¿Comes entre comidas? ¿Qué sueles comer?")
             porciones     = st.text_input("Cuantas porciones de frutas y verduras comes al dia?")
+        with c2:
             comer_noche   = st.text_input("Tiendes a comer de más por las noches?")
             reto          = st.text_input("Cuál es tu mayor reto respecto a la comida?")
             agua8         = st.text_input("¿Tomas por lo menos 8 vasos de agua al dia?")
@@ -1487,6 +1487,561 @@ def _excel_bytes():
     buf.seek(0)
     return buf.getvalue()
 
+# ------------------------------
+# Cuenta regresiva (48 horas)
+# ------------------------------
+def _init_promo_deadline():
+    if not st.session_state.promo_deadline:
+        st.session_state.promo_deadline = (datetime.now() + timedelta(hours=48)).isoformat()
+
+def _render_countdown():
+    if HAVE_AUTOREFRESH:
+        st_autorefresh(interval=1000, key="promo_timer_tick")
+    deadline = datetime.fromisoformat(st.session_state.promo_deadline)
+    restante = max(deadline - datetime.now(), timedelta(0))
+    total_seg = int(restante.total_seconds())
+    h, rem = divmod(total_seg, 3600)
+    m, s = divmod(rem, 60)
+    if total_seg > 0:
+        st.markdown(
+            "<div class='rd-countdown'>⏳ Promoción válida por "
+            f"<strong>{h:02d}:{m:02d}:{s:02d}</strong></div>",
+            unsafe_allow_html=True
+        )
+    else:
+        st.markdown("<div class='rd-countdown'><strong>⏳ Promoción finalizada</strong></div>", unsafe_allow_html=True)
+
+# ========= NUEVO: util para cargar imágenes locales (APP_DIR o /mnt/data) =========
+def _carga_img_local(nombre: str):
+    # 1) mismo folder de la app
+    p1 = APP_DIR / nombre
+    if p1.exists():
+        try:
+            return Image.open(p1)
+        except Exception:
+            pass
+    # 2) fallback: carpeta /mnt/data (usada en ChatGPT)
+    p2 = Path("/mnt/data") / nombre
+    if p2.exists():
+        try:
+            return Image.open(p2)
+        except Exception:
+            pass
+    return None  # si no hay imagen, el card mostrará un aviso
+
+# ========= NUEVO: calcula precios manteniendo la misma lógica que las tarjetas actuales =========
+def _precio_programa_html_y_payload(titulo: str, items: List[str], descuento_pct: int):
+    total, faltantes = _precio_sumado(items)
+    cc = st.session_state.get("country_code")
+
+    # Canadá (recargo +15 y presentación especial salvo Chupapanza)
+    if cc == "CA" and titulo.strip() != "Batido + Chupapanza":
+        base_con_recargo = int(round(total + 15))
+        if descuento_pct:
+            precio_promocional = base_con_recargo
+            inflado = int(round(precio_promocional / (1 - descuento_pct/100)))
+            tachado = f"<span style='text-decoration:line-through; opacity:.6; margin-right:8px'>{_mon(inflado)}</span>"
+            precio_html = f"{tachado}<strong style='font-size:20px'>{_mon(precio_promocional)}</strong> {_chip_desc(descuento_pct)}"
+        else:
+            precio_promocional = base_con_recargo
+            precio_html = f"<strong style='font-size:20px'>{_mon(precio_promocional)}</strong>"
+        precio_final = precio_promocional
+        precio_regular = int(round(precio_final / (1 - descuento_pct/100))) if descuento_pct else precio_final
+
+    # Resto de países
+    else:
+        precio_promocional = int(round(total))
+        if descuento_pct:
+            inflado = int(round(precio_promocional / (1 - descuento_pct/100)))
+            tachado = f"<span style='text-decoration:line-through; opacity:.6; margin-right:8px'>{_mon(inflado)}</span>"
+            precio_html = f"{tachado}<strong style='font-size:20px'>{_mon(precio_promocional)}</strong> {_chip_desc(descuento_pct)}"
+            # nota informativa diaria sólo para Batido 5%
+            if titulo.strip().lower() in ("batido nutricional", "batido") and descuento_pct == 5:
+                if cc == "PE":
+                    precio_html += " <span style='font-size:13px; opacity:.8'>(S/7.9 al dia)</span>"
+                elif cc == "CL":
+                    precio_html += " <span style='font-size:13px; opacity:.8'>($1.744 al dia)</span>"
+                elif cc == "CO":
+                    precio_html += " <span style='font-size:13px; opacity:.8'>($6.693 al dia)</span>"
+                elif cc in ("ES-PEN", "ES-CAN", "IT"):
+                    diario = round(precio_promocional / 22.0, 2)
+                    precio_html += f" <span style='font-size:13px; opacity:.8'>(€{diario:.2f} al dia)</span>"
+                elif cc == "US":
+                    diario = round(precio_promocional / 30.0, 2)
+                    precio_html += f" <span style='font-size:13px; opacity:.8'>(${diario:.2f} al dia)</span>"
+        else:
+            precio_html = f"<strong style='font-size:20px'>{_mon(precio_promocional)}</strong>"
+        precio_final = precio_promocional
+        precio_regular = int(round(precio_final / (1 - descuento_pct/100))) if descuento_pct else precio_final
+
+    payload = {
+        "titulo": titulo,
+        "items": items,
+        "precio_regular": precio_regular,
+        "descuento_pct": descuento_pct,
+        "precio_final": precio_final,
+    }
+    return precio_html, payload, faltantes
+
+# ========= NUEVO: Cards con imagen (formato tipo “tarjeta de curso”) =========
+def mostrar_opciones_pantalla6():
+    st.markdown("""
+    <style>
+      .rd-grid {
+        display: grid;
+        gap: 18px;
+        grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+      }
+      .rd-program-card{
+        background: var(--rd-card);
+        border: 1px solid var(--rd-border);
+        border-radius: 20px;
+        box-shadow: var(--rd-shadow);
+        overflow: hidden;
+        display: flex;
+        flex-direction: column;
+      }
+      .rd-program-card img{
+        width: 100%; height: 220px; object-fit: cover; display: block;
+        background:#fafafa;
+      }
+      .rd-program-body{ padding: 14px 16px 16px 16px; }
+      .rd-program-title{ font-weight: 800; color: var(--rd-accent); font-size: 18px; margin: 0 0 6px 0; }
+      .rd-program-sub{ font-size: 13px; color: var(--rd-muted); margin-bottom: 8px; }
+      .rd-program-price{ margin: 6px 0 12px 0; }
+      .rd-program-btn .stButton>button{ width: 100%; }
+      .rd-miss{ color:#b00020; font-size:12px; margin-top:6px; }
+    </style>
+    """, unsafe_allow_html=True)
+
+    # Definición de los 3 programas con sus imágenes
+    programas = [
+        {
+            "titulo": "Batido",
+            "items": ["Batido"],
+            "desc_pct": 5,
+            "img_name": "Batido.jpg"
+        },
+        {
+            "titulo": "Batido + Te",
+            "items": ["Batido", "Té de Hierbas"],
+            "desc_pct": 10,
+            "img_name": "Batidoyte.jpg"
+        },
+        {
+            "titulo": "Batido + Chupapanza",
+            "items": ["Batido", "Té de Hierbas", "Fibra Activa", "Aloe Concentrado"],
+            "desc_pct": 10,
+            "img_name": "Batidoychupapanza.jpg"
+        },
+    ]
+
+    st.markdown("### Opciones recomendadas")
+    st.markdown("<div class='rd-grid'>", unsafe_allow_html=True)
+
+    for idx, prog in enumerate(programas):
+        # Validación de disponibilidad de productos
+        if not all(_producto_disponible(i) for i in prog["items"]):
+            # Si algún item no está disponible en el país, saltamos la tarjeta
+            continue
+
+        precio_html, payload, faltantes = _precio_programa_html_y_payload(
+            prog["titulo"], prog["items"], prog["desc_pct"]
+        )
+
+        # Cargar imagen
+        img = _carga_img_local(prog["img_name"])
+        if img is None:
+            # Renderiza un contenedor vacío si no hubiera imagen
+            st.markdown(
+                "<div class='rd-program-card'><div style='height:220px;background:#eee"
+                ";display:flex;align-items:center;justify-content:center;color:#888'>"
+                "Imagen no disponible</div>",
+                unsafe_allow_html=True
+            )
+        else:
+            st.image(img, use_container_width=True)
+
+        # Cuerpo de la tarjeta (titulo, items, precio, botón)
+        items_txt = " + ".join(_display_name(i) for i in prog["items"])
+        st.markdown(
+            f"""
+            <div class='rd-program-card' style='margin-top:-8px'>
+              <div class='rd-program-body'>
+                <div class='rd-program-title'>{prog["titulo"]}</div>
+                <div class='rd-program-sub'>{items_txt}</div>
+                <div class='rd-program-price'>{precio_html}</div>
+                {'<div class=\"rd-miss\">Falta configurar precio: ' + ', '.join(faltantes) + '</div>' if faltantes else ''}
+              </div>
+            </div>
+            """,
+            unsafe_allow_html=True
+        )
+
+        # Botón “Elegir este” (con la misma semántica que antes)
+        if st.button("Elegir este", key=f"elegir_prog_{idx}", use_container_width=True):
+            st.session_state.combo_elegido = payload
+            st.success(f"Elegiste: {payload['titulo']} — Total {_mon(payload['precio_final'])}")
+
+    st.markdown("</div>", unsafe_allow_html=True)
+
+    # Mensaje de confirmación si ya hay selección
+    if st.session_state.combo_elegido:
+        e = st.session_state.combo_elegido
+        st.success(f"Seleccionado: **{e['titulo']}** — {_mon(e['precio_final'])} ({e['descuento_pct']}% dscto)")
+
+# ------------------------------
+# Cuenta regresiva (48 horas)
+# ------------------------------
+def _init_promo_deadline():
+    if not st.session_state.promo_deadline:
+        st.session_state.promo_deadline = (datetime.now() + timedelta(hours=48)).isoformat()
+
+def _render_countdown():
+    if HAVE_AUTOREFRESH:
+        st_autorefresh(interval=1000, key="promo_timer_tick")
+    deadline = datetime.fromisoformat(st.session_state.promo_deadline)
+    restante = max(deadline - datetime.now(), timedelta(0))
+    total_seg = int(restante.total_seconds())
+    h, rem = divmod(total_seg, 3600)
+    m, s = divmod(rem, 60)
+    if total_seg > 0:
+        st.markdown(
+            "<div class='rd-countdown'>⏳ Promoción válida por "
+            f"<strong>{h:02d}:{m:02d}:{s:02d}</strong></div>",
+            unsafe_allow_html=True
+        )
+    else:
+        st.markdown("<div class='rd-countdown'><strong>⏳ Promoción finalizada</strong></div>", unsafe_allow_html=True)
+
+# ========= NUEVO: util para cargar imágenes locales (APP_DIR o /mnt/data) =========
+def _carga_img_local(nombre: str):
+    # 1) mismo folder de la app
+    p1 = APP_DIR / nombre
+    if p1.exists():
+        try:
+            return Image.open(p1)
+        except Exception:
+            pass
+    # 2) fallback: carpeta /mnt/data (usada en ChatGPT)
+    p2 = Path("/mnt/data") / nombre
+    if p2.exists():
+        try:
+            return Image.open(p2)
+        except Exception:
+            pass
+    return None  # si no hay imagen, el card mostrará un aviso
+
+# ========= NUEVO: calcula precios manteniendo la misma lógica que las tarjetas actuales =========
+def _precio_programa_html_y_payload(titulo: str, items: List[str], descuento_pct: int):
+    total, faltantes = _precio_sumado(items)
+    cc = st.session_state.get("country_code")
+
+    # Canadá (recargo +15 y presentación especial salvo Chupapanza)
+    if cc == "CA" and titulo.strip() != "Batido + Chupapanza":
+        base_con_recargo = int(round(total + 15))
+        if descuento_pct:
+            precio_promocional = base_con_recargo
+            inflado = int(round(precio_promocional / (1 - descuento_pct/100)))
+            tachado = f"<span style='text-decoration:line-through; opacity:.6; margin-right:8px'>{_mon(inflado)}</span>"
+            precio_html = f"{tachado}<strong style='font-size:20px'>{_mon(precio_promocional)}</strong> {_chip_desc(descuento_pct)}"
+        else:
+            precio_promocional = base_con_recargo
+            precio_html = f"<strong style='font-size:20px'>{_mon(precio_promocional)}</strong>"
+        precio_final = precio_promocional
+        precio_regular = int(round(precio_final / (1 - descuento_pct/100))) if descuento_pct else precio_final
+
+    # Resto de países
+    else:
+        precio_promocional = int(round(total))
+        if descuento_pct:
+            inflado = int(round(precio_promocional / (1 - descuento_pct/100)))
+            tachado = f"<span style='text-decoration:line-through; opacity:.6; margin-right:8px'>{_mon(inflado)}</span>"
+            precio_html = f"{tachado}<strong style='font-size:20px'>{_mon(precio_promocional)}</strong> {_chip_desc(descuento_pct)}"
+            # nota informativa diaria sólo para Batido 5%
+            if titulo.strip().lower() in ("batido nutricional", "batido") and descuento_pct == 5:
+                if cc == "PE":
+                    precio_html += " <span style='font-size:13px; opacity:.8'>(S/7.9 al dia)</span>"
+                elif cc == "CL":
+                    precio_html += " <span style='font-size:13px; opacity:.8'>($1.744 al dia)</span>"
+                elif cc == "CO":
+                    precio_html += " <span style='font-size:13px; opacity:.8'>($6.693 al dia)</span>"
+                elif cc in ("ES-PEN", "ES-CAN", "IT"):
+                    diario = round(precio_promocional / 22.0, 2)
+                    precio_html += f" <span style='font-size:13px; opacity:.8'>(€{diario:.2f} al dia)</span>"
+                elif cc == "US":
+                    diario = round(precio_promocional / 30.0, 2)
+                    precio_html += f" <span style='font-size:13px; opacity:.8'>(${diario:.2f} al dia)</span>"
+        else:
+            precio_html = f"<strong style='font-size:20px'>{_mon(precio_promocional)}</strong>"
+        precio_final = precio_promocional
+        precio_regular = int(round(precio_final / (1 - descuento_pct/100))) if descuento_pct else precio_final
+
+    payload = {
+        "titulo": titulo,
+        "items": items,
+        "precio_regular": precio_regular,
+        "descuento_pct": descuento_pct,
+        "precio_final": precio_final,
+    }
+    return precio_html, payload, faltantes
+
+# ========= NUEVO: Cards con imagen (formato tipo “tarjeta de curso”) =========
+def mostrar_opciones_pantalla6():
+    st.markdown("""
+    <style>
+      .rd-grid {
+        display: grid;
+        gap: 18px;
+        grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+      }
+      .rd-program-card{
+        background: var(--rd-card);
+        border: 1px solid var(--rd-border);
+        border-radius: 20px;
+        box-shadow: var(--rd-shadow);
+        overflow: hidden;
+        display: flex;
+        flex-direction: column;
+      }
+      .rd-program-card img{
+        width: 100%; height: 220px; object-fit: cover; display: block;
+        background:#fafafa;
+      }
+      .rd-program-body{ padding: 14px 16px 16px 16px; }
+      .rd-program-title{ font-weight: 800; color: var(--rd-accent); font-size: 18px; margin: 0 0 6px 0; }
+      .rd-program-sub{ font-size: 13px; color: var(--rd-muted); margin-bottom: 8px; }
+      .rd-program-price{ margin: 6px 0 12px 0; }
+      .rd-program-btn .stButton>button{ width: 100%; }
+      .rd-miss{ color:#b00020; font-size:12px; margin-top:6px; }
+    </style>
+    """, unsafe_allow_html=True)
+
+    # Definición de los 3 programas con sus imágenes
+    programas = [
+        {
+            "titulo": "Batido",
+            "items": ["Batido"],
+            "desc_pct": 5,
+            "img_name": "Batido.jpg"
+        },
+        {
+            "titulo": "Batido + Te",
+            "items": ["Batido", "Té de Hierbas"],
+            "desc_pct": 10,
+            "img_name": "Batidoyte.jpg"
+        },
+        {
+            "titulo": "Batido + Chupapanza",
+            "items": ["Batido", "Té de Hierbas", "Fibra Activa", "Aloe Concentrado"],
+            "desc_pct": 10,
+            "img_name": "Batidoychupapanza.jpg"
+        },
+    ]
+
+    st.markdown("### Opciones recomendadas")
+    st.markdown("<div class='rd-grid'>", unsafe_allow_html=True)
+
+    for idx, prog in enumerate(programas):
+        # Validación de disponibilidad de productos
+        if not all(_producto_disponible(i) for i in prog["items"]):
+            # Si algún item no está disponible en el país, saltamos la tarjeta
+            continue
+
+        precio_html, payload, faltantes = _precio_programa_html_y_payload(
+            prog["titulo"], prog["items"], prog["desc_pct"]
+        )
+
+        # Cargar imagen
+        img = _carga_img_local(prog["img_name"])
+        if img is None:
+            # Renderiza un contenedor vacío si no hubiera imagen
+            st.markdown(
+                "<div class='rd-program-card'><div style='height:220px;background:#eee"
+                ";display:flex;align-items:center;justify-content:center;color:#888'>"
+                "Imagen no disponible</div>",
+                unsafe_allow_html=True
+            )
+        else:
+            st.image(img, use_container_width=True)
+
+        # Cuerpo de la tarjeta (titulo, items, precio, botón)
+        items_txt = " + ".join(_display_name(i) for i in prog["items"])
+        st.markdown(
+            f"""
+            <div class='rd-program-card' style='margin-top:-8px'>
+              <div class='rd-program-body'>
+                <div class='rd-program-title'>{prog["titulo"]}</div>
+                <div class='rd-program-sub'>{items_txt}</div>
+                <div class='rd-program-price'>{precio_html}</div>
+                {'<div class=\"rd-miss\">Falta configurar precio: ' + ', '.join(faltantes) + '</div>' if faltantes else ''}
+              </div>
+            </div>
+            """,
+            unsafe_allow_html=True
+        )
+
+        # Botón “Elegir este” (con la misma semántica que antes)
+        if st.button("Elegir este", key=f"elegir_prog_{idx}", use_container_width=True):
+            st.session_state.combo_elegido = payload
+            st.success(f"Elegiste: {payload['titulo']} — Total {_mon(payload['precio_final'])}")
+
+    st.markdown("</div>", unsafe_allow_html=True)
+
+    # Mensaje de confirmación si ya hay selección
+    if st.session_state.combo_elegido:
+        e = st.session_state.combo_elegido
+        st.success(f"Seleccionado: **{e['titulo']}** — {_mon(e['precio_final'])} ({e['descuento_pct']}% dscto)")
+
+# ------------------------------
+# Cuenta regresiva (48 horas)
+# ------------------------------
+def _init_promo_deadline():
+    if not st.session_state.promo_deadline:
+        st.session_state.promo_deadline = (datetime.now() + timedelta(hours=48)).isoformat()
+
+def _render_countdown():
+    if HAVE_AUTOREFRESH:
+        st_autorefresh(interval=1000, key="promo_timer_tick")
+    deadline = datetime.fromisoformat(st.session_state.promo_deadline)
+    restante = max(deadline - datetime.now(), timedelta(0))
+    total_seg = int(restante.total_seconds())
+    h, rem = divmod(total_seg, 3600)
+    m, s = divmod(rem, 60)
+    if total_seg > 0:
+        st.markdown(
+            "<div class='rd-countdown'>⏳ Promoción válida por "
+            f"<strong>{h:02d}:{m:02d}:{s:02d}</strong></div>",
+            unsafe_allow_html=True
+        )
+    else:
+        st.markdown("<div class='rd-countdown'><strong>⏳ Promoción finalizada</strong></div>", unsafe_allow_html=True)
+
+# ========= util para cargar imágenes locales (APP_DIR o /mnt/data) =========
+def _carga_img_local(nombre: str):
+    p1 = APP_DIR / nombre
+    if p1.exists():
+        try:
+            return Image.open(p1)
+        except Exception:
+            pass
+    p2 = Path("/mnt/data") / nombre
+    if p2.exists():
+        try:
+            return Image.open(p2)
+        except Exception:
+            pass
+    return None
+
+# ========= calcula HTML de precio y payload coherente con tus reglas =========
+def _precio_programa_html_y_payload(titulo: str, items: List[str], descuento_pct: int):
+    total, faltantes = _precio_sumado(items)
+    cc = st.session_state.get("country_code")
+
+    # Canadá (recargo +15 y presentación especial salvo Chupapanza)
+    if cc == "CA" and titulo.strip() != "Batido + Chupapanza":
+        base_con_recargo = int(round(total + 15))
+        if descuento_pct:
+            precio_promocional = base_con_recargo
+            inflado = int(round(precio_promocional / (1 - descuento_pct/100)))
+            tachado = f"<span style='text-decoration:line-through; opacity:.6; margin-right:8px'>{_mon(inflado)}</span>"
+            precio_html = f"{tachado}<strong style='font-size:20px'>{_mon(precio_promocional)}</strong> {_chip_desc(descuento_pct)}"
+        else:
+            precio_promocional = base_con_recargo
+            precio_html = f"<strong style='font-size:20px'>{_mon(precio_promocional)}</strong>"
+        precio_final = precio_promocional
+        precio_regular = int(round(precio_final / (1 - descuento_pct/100))) if descuento_pct else precio_final
+    else:
+        precio_promocional = int(round(total))
+        if descuento_pct:
+            inflado = int(round(precio_promocional / (1 - descuento_pct/100)))
+            tachado = f"<span style='text-decoration:line-through; opacity:.6; margin-right:8px'>{_mon(inflado)}</span>"
+            precio_html = f"{tachado}<strong style='font-size:20px'>{_mon(precio_promocional)}</strong> {_chip_desc(descuento_pct)}"
+            # nota diaria sólo para Batido 5%
+            if titulo.strip().lower() in ("batido nutricional", "batido") and descuento_pct == 5:
+                if cc == "PE":
+                    precio_html += " <span style='font-size:13px; opacity:.8'>(S/7.9 al dia)</span>"
+                elif cc == "CL":
+                    precio_html += " <span style='font-size:13px; opacity:.8'>($1.744 al dia)</span>"
+                elif cc == "CO":
+                    precio_html += " <span style='font-size:13px; opacity:.8'>($6.693 al dia)</span>"
+                elif cc in ("ES-PEN", "ES-CAN", "IT"):
+                    diario = round(precio_promocional / 22.0, 2)
+                    precio_html += f" <span style='font-size:13px; opacity:.8'>(€{diario:.2f} al dia)</span>"
+                elif cc == "US":
+                    diario = round(precio_promocional / 30.0, 2)
+                    precio_html += f" <span style='font-size:13px; opacity:.8'>(${diario:.2f} al dia)</span>"
+        else:
+            precio_html = f"<strong style='font-size:20px'>{_mon(precio_promocional)}</strong>"
+        precio_final = precio_promocional
+        precio_regular = int(round(precio_final / (1 - descuento_pct/100))) if descuento_pct else precio_final
+
+    payload = {
+        "titulo": titulo,
+        "items": items,
+        "precio_regular": precio_regular,
+        "descuento_pct": descuento_pct,
+        "precio_final": precio_final,
+    }
+    return precio_html, payload, faltantes
+
+# ========= Tarjetas en columnas (lado a lado y centradas) =========
+def _tarjeta_programa(col, titulo: str, items: List[str], desc_pct: int, img_name: str, idx: int):
+    if not all(_producto_disponible(i) for i in items):
+        return
+
+    with col:
+        st.markdown(
+            """
+            <style>
+              .rd-card-h {
+                background: var(--rd-card);
+                border: 1px solid var(--rd-border);
+                border-radius: 20px;
+                box-shadow: var(--rd-shadow);
+                overflow: hidden;
+              }
+              .rd-card-h .body { padding: 14px 16px 16px 16px; text-align:center; }
+              .rd-card-h .tit { font-weight:800; color:var(--rd-accent); font-size:18px; margin:0 0 6px 0; }
+              .rd-card-h .sub { font-size:13px; color:var(--rd-muted); margin-bottom:8px; }
+              .rd-card-h .price { margin:8px 0 12px 0; }
+              .rd-miss { color:#b00020; font-size:12px; margin-top:4px; }
+            </style>
+            """,
+            unsafe_allow_html=True
+        )
+
+        st.markdown("<div class='rd-card-h'>", unsafe_allow_html=True)
+
+        img = _carga_img_local(img_name)
+        if img:
+            st.image(img, use_container_width=True)
+        else:
+            st.markdown(
+                "<div style='height:210px;background:#eee;display:flex;align-items:center;justify-content:center;color:#888'>Imagen no disponible</div>",
+                unsafe_allow_html=True
+            )
+
+        precio_html, payload, faltantes = _precio_programa_html_y_payload(titulo, items, desc_pct)
+        items_txt = " + ".join(_display_name(i) for i in items)
+
+        st.markdown(
+            f"""
+            <div class='body'>
+              <div class='tit'>{titulo}</div>
+              <div class='sub'>{items_txt}</div>
+              <div class='price'>{precio_html}</div>
+              {'<div class=\"rd-miss\">Falta configurar precio: ' + ', '.join(faltantes) + '</div>' if faltantes else ''}
+            </div>
+            """,
+            unsafe_allow_html=True
+        )
+        st.markdown("</div>", unsafe_allow_html=True)
+
+        if st.button("Elegir este", key=f"elegir_prog_{idx}", use_container_width=True):
+            st.session_state.combo_elegido = payload
+            st.success(f"Elegiste: {payload['titulo']} — Total {_mon(payload['precio_final'])}")
+
 # -------------------------------------------------------------
 # STEP 6 - Plan Personalizado
 # -------------------------------------------------------------
@@ -1494,8 +2049,9 @@ def pantalla6():
     st.header("6) Únete a LA TRIBU PRO con nuestro programa personalizado")
 
     st.write(
-        "Para asegurar los resultados que te has propuesto nos apoyamos en la nutrición celular del Batido de Herbalife. "
-        "El cual te permite cubrir deficiencias nutricionales de nuestro día a día de manera rica, rápida y práctica."
+        "Para asegurar alcanzar tus resultados los 10 primeros días son clave. "
+        "Y no hay mejor manera que empezar tu proceso de puesta en forma que en tribu "
+        "y en compañía de otras personas caminando en la misma dirección."
     )
 
     hay = any(st.session_state.get(k, False) for k in P3_FLAGS)
@@ -1543,31 +2099,37 @@ def pantalla6():
         st.write("")
 
     st.divider()
-    st.subheader("Servicio")
+    st.subheader("¿Qué incluye el plan personalizado?")
+    st.write("• Suplementación")
+    st.write("• Coaching Continuo")
+    st.write("• Guía y acceso exclusivo a nuestro app de Diario de Comidas")
+    st.write("• Entrenamiento online por niveles")
+    st.write("• Llamada semanal en directo con la TRIBU")
+    st.write("• Grupo privado de Whatsapp")
+    st.write("• Eventos Exclusivos")
     st.write(
-        "**Los primeros 10 días son clave** y estaremos contigo de cerca para construir resultados y hábitos sostenibles. "
-        "Tendrás **coaching continuo, seguimiento personalizado** y revisaremos tu **diario de comidas** para que tomes conciencia de cómo tu alimentación impacta en cómo te sientes."
-    )
-    st.write(
-        "Sabemos que en los primeros dias es cuando los hábitos antiguos presentan mayor resistencia. Por eso "
-        "**el acompañamiento diario es fundamental para sostener el enfoque, aclarar dudas y ajustar lo que sea necesario en tiempo real.** "
-    )
-    st.write(
-        "Contarás con **herramientas clave**: tus requerimientos diarios de proteína e hidratación, un **tracker de alimentación** que calcula tu progreso, y **recomendaciones de alimentos** alineadas a tus objetivos."
-    )
-    st.write(
-        "Además tendrás: acceso a **grupos de soporte y compromiso** con motivación y aprendizajes, y a nuestra **plataforma de entrenamientos** para activarte desde donde estés."        
-    )
-    st.write(
-        "Y por las próximas 48 horas, todos los programas tienen 5% a 10% de descuento según los productos que elijas. Te muestro las opciones más indicadas, y dime: "
+        "Por las próximas 48 horas, tienes un beneficio exclusivo del 5% a 10% de descuento según la opción que elijas. Te muestro las opciones y me cuentas: "
         "**¿Con qué programa te permites empezar?**"
     )
 
     _init_promo_deadline()
     _render_countdown()
-    mostrar_opciones_pantalla6()
 
-    # Sección "Personaliza tu programa" (corregida)
+    # ====== Tarjetas en una fila usando columnas ======
+    st.markdown("### Opciones recomendadas")
+    c_sp_left, c1, c2, c3, c_sp_right = st.columns([1, 3, 3, 3, 1], gap="large")
+
+    _tarjeta_programa(c1, "Batido", ["Batido"], 5, "Batido.jpg", 0)
+    _tarjeta_programa(c2, "Batido + Te", ["Batido", "Té de Hierbas"], 10, "Batidoyte.jpg", 1)
+    _tarjeta_programa(c3, "Batido + Chupapanza",
+                      ["Batido", "Té de Hierbas", "Fibra Activa", "Aloe Concentrado"],
+                      10, "Batidoychupapanza.jpg", 2)
+
+    if st.session_state.combo_elegido:
+        e = st.session_state.combo_elegido
+        st.success(f"Seleccionado: **{e['titulo']}** — {_mon(e['precio_final'])} ({e['descuento_pct']}% dscto)")
+
+    # ====== Personalización y descarga (sin cambios) ======
     _render_personaliza_programa()
 
     st.markdown("### 📥 Descargar Evaluación")
