@@ -9,6 +9,42 @@ import streamlit as st
 from datetime import date, datetime, timedelta
 from PIL import Image
 
+# =========================
+# Logo fijo superior derecho (membrete)
+# =========================
+import base64
+from pathlib import Path
+import streamlit as st
+
+# Ruta del logo
+logo_path = Path(__file__).parent / "logo.png"
+
+# Convertir el logo a base64 (para incrustarlo en HTML)
+if logo_path.exists():
+    with open(logo_path, "rb") as f:
+        logo_base64 = base64.b64encode(f.read()).decode()
+
+    st.markdown(
+        f"""
+        <style>
+        [data-testid="stAppViewContainer"] {{
+            position: relative;
+        }}
+        .logo-fixed {{
+            position: fixed;
+            top: 40px;
+            right: 25px;
+            width: 160px;
+            z-index: 1000;
+        }}
+        </style>
+        <img src="data:image/png;base64,{logo_base64}" class="logo-fixed">
+        """,
+        unsafe_allow_html=True
+    )
+else:
+    st.warning("⚠️ No se encontró el archivo 'logo.png' en la carpeta del proyecto.")
+
 # ——— Autorefresh opcional (recomendado para el contador) ———
 try:
     from streamlit_autorefresh import st_autorefresh
@@ -2150,7 +2186,7 @@ def pantalla6():
 # -------------------------------------------------------------
 def sidebar_nav():
     with st.sidebar:
-        st.title("APP EVALUACIONES")
+        st.title("Evalución de Bienestar")
         st.caption(f"País: {st.session_state.get('country_name','Perú')}  ·  Moneda: {st.session_state.get('currency_symbol','S/')}")
         for i, titulo in [
             (1, "Perfil de Bienestar"),
