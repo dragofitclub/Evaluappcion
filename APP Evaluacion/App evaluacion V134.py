@@ -2090,6 +2090,36 @@ def pantalla6():
         "y en compañía de otras personas caminando en la misma dirección."
     )
 
+    st.subheader("¿Qué incluye el plan personalizado?")
+    st.write("• Suplementación")
+    st.write("• Coaching Continuo")
+    st.write("• Guía y acceso exclusivo a nuestro app de Diario de Comidas")
+    st.write("• Entrenamiento online por niveles")
+    st.write("• Llamada semanal en directo con la TRIBU")
+    st.write("• Grupo privado de Whatsapp")
+    st.write("• Eventos Exclusivos")
+    st.write(
+        "Por las próximas 48 horas, tienes un beneficio exclusivo del 5% a 10% de descuento según la opción que elijas. Te muestro las opciones y me cuentas: "
+        "**¿Con qué programa te permites empezar?**"
+    )
+
+    _init_promo_deadline()
+    _render_countdown()
+
+    # ====== Tarjetas en una fila usando columnas ======
+    st.markdown("### Opciones recomendadas")
+    c_sp_left, c1, c2, c3, c_sp_right = st.columns([1, 3, 3, 3, 1], gap="large")
+
+    _tarjeta_programa(c1, "Batido", ["Batido"], 5, "Batido.jpg", 0)
+    _tarjeta_programa(c2, "Batido + Te", ["Batido", "Té de Hierbas"], 10, "Batidoyte.jpg", 1)
+    _tarjeta_programa(c3, "Batido + Chupapanza",
+                      ["Batido", "Té de Hierbas", "Fibra Activa", "Aloe Concentrado"],
+                      10, "Batidoychupapanza.jpg", 2)
+
+    if st.session_state.combo_elegido:
+        e = st.session_state.combo_elegido
+        st.success(f"Seleccionado: **{e['titulo']}** — {_mon(e['precio_final'])} ({e['descuento_pct']}% dscto)")
+
     hay = any(st.session_state.get(k, False) for k in P3_FLAGS)
     if hay:
         st.write(
@@ -2097,7 +2127,7 @@ def pantalla6():
             "a cubrir de manera específica las necesidades que me compartiste."
         )
         if st.session_state.get("p3_estrenimiento", False):
-            st.write("• Para ayudarte con el estreñimiento y tengas una salud digestiva adecuada está la **fibra con sabor a manzana** para que todo te salga bien.")
+            st.write("• Para ayudarte con el estreñimiento y tengas una salud digestiva adecuada está la **fibra con sabor a manzana**.")
         if st.session_state.get("p3_colesterol_alto", False):
             st.write("• Para mejorar tus niveles de colesterol nos apoyamos del **Herbalifeline**, unas cápsulas de concentrado de **omega 3** con sabor a menta y tomillo. Riquísimas.")
         if st.session_state.get("p3_baja_energia", False):
@@ -2135,35 +2165,7 @@ def pantalla6():
         st.write("")
 
     st.divider()
-    st.subheader("¿Qué incluye el plan personalizado?")
-    st.write("• Suplementación")
-    st.write("• Coaching Continuo")
-    st.write("• Guía y acceso exclusivo a nuestro app de Diario de Comidas")
-    st.write("• Entrenamiento online por niveles")
-    st.write("• Llamada semanal en directo con la TRIBU")
-    st.write("• Grupo privado de Whatsapp")
-    st.write("• Eventos Exclusivos")
-    st.write(
-        "Por las próximas 48 horas, tienes un beneficio exclusivo del 5% a 10% de descuento según la opción que elijas. Te muestro las opciones y me cuentas: "
-        "**¿Con qué programa te permites empezar?**"
-    )
 
-    _init_promo_deadline()
-    _render_countdown()
-
-    # ====== Tarjetas en una fila usando columnas ======
-    st.markdown("### Opciones recomendadas")
-    c_sp_left, c1, c2, c3, c_sp_right = st.columns([1, 3, 3, 3, 1], gap="large")
-
-    _tarjeta_programa(c1, "Batido", ["Batido"], 5, "Batido.jpg", 0)
-    _tarjeta_programa(c2, "Batido + Te", ["Batido", "Té de Hierbas"], 10, "Batidoyte.jpg", 1)
-    _tarjeta_programa(c3, "Batido + Chupapanza",
-                      ["Batido", "Té de Hierbas", "Fibra Activa", "Aloe Concentrado"],
-                      10, "Batidoychupapanza.jpg", 2)
-
-    if st.session_state.combo_elegido:
-        e = st.session_state.combo_elegido
-        st.success(f"Seleccionado: **{e['titulo']}** — {_mon(e['precio_final'])} ({e['descuento_pct']}% dscto)")
 
     # ====== Personalización y descarga (sin cambios) ======
     _render_personaliza_programa()
