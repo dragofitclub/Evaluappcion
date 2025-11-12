@@ -45,6 +45,51 @@ if logo_path.exists():
 else:
     st.warning("⚠️ No se encontró el archivo 'logo.png' en la carpeta del proyecto.")
 
+# =========================
+# Forzar estilo del botón "Guardar y continuar"
+# =========================
+st.markdown("""
+<style>
+[data-testid="stFormSubmitButton"] > button {
+    background-color: #3A6B64 !important;   /* mismo verde que la barra lateral */
+    color: #ffffff !important;              /* texto blanco puro */
+    border: none !important;
+    border-radius: 999px !important;
+    font-weight: 700 !important;            /* mismo grosor que la barra lateral */
+    font-family: "Source Sans Pro", sans-serif !important;  /* misma fuente Streamlit */
+    letter-spacing: 0.3px !important;       /* mismo espaciado */
+    font-size: 1rem !important;
+    padding: 0.75rem 1.2rem !important;     /* corregido con ceros */
+    width: 100% !important;
+    box-shadow: 0px 2px 4px rgba(0,0,0,0.15) !important;
+    transition: all 0.2s ease-in-out !important;
+    text-transform: none !important;
+}
+
+/* Hover: tono más oscuro */
+[data-testid="stFormSubmitButton"] > button:hover {
+    background-color: #2F5A53 !important;
+    color: #ffffff !important;
+    transform: translateY(-1px);
+}
+
+/* Focus: borde verde menta */
+[data-testid="stFormSubmitButton"] > button:focus {
+    outline: 3px solid #8BBFB5 !important;
+    outline-offset: 2px;
+}
+
+/* Forzar el estilo del texto interno (span dentro del botón) */
+[data-testid="stFormSubmitButton"] > button span {
+    color: #ffffff !important;
+    font-family: "Source Sans Pro", sans-serif !important;
+    font-weight: 700 !important;
+    letter-spacing: 0.3px !important;
+    font-size: 1rem !important;
+}
+</style>
+""", unsafe_allow_html=True)
+
 # ——— Autorefresh opcional (recomendado para el contador) ———
 try:
     from streamlit_autorefresh import st_autorefresh
@@ -2091,13 +2136,14 @@ def pantalla6():
     )
 
     st.subheader("¿Qué incluye el plan personalizado?")
-    st.write("• Suplementación")
-    st.write("• Coaching Continuo")
     st.write("• Guía y acceso exclusivo a nuestro app de Diario de Comidas")
+    st.write("• Coaching Continuo")
     st.write("• Entrenamiento online por niveles")
     st.write("• Llamada semanal en directo con la TRIBU")
     st.write("• Grupo privado de Whatsapp")
     st.write("• Eventos Exclusivos")
+    st.write("• Suplementación")
+
     st.write(
         "Por las próximas 48 horas, tienes un beneficio exclusivo del 5% a 10% de descuento según la opción que elijas. Te muestro las opciones y me cuentas: "
         "**¿Con qué programa te permites empezar?**"
