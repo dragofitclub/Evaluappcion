@@ -1087,10 +1087,10 @@ def pantalla1():
             desayuno_h   = st.text_input("¿Tomas desayuno todos los días? ¿A qué hora?")
             que_desayunas = st.text_input("¿Qué sueles desayunar?")
             meriendas     = st.text_input("¿Comes entre comidas? ¿Qué sueles comer?")
-            porciones     = st.text_input("Cuantas porciones de frutas y verduras comes al dia?")
+            porciones     = st.text_input("¿Cuántas porciones de frutas y verduras comes al dia?")
         with c2:
-            comer_noche   = st.text_input("Tiendes a comer de más por las noches?")
-            reto          = st.text_input("Cuál es tu mayor reto respecto a la comida?")
+            comer_noche   = st.text_input("¿Tiendes a comer de más por las noches?")
+            reto          = st.text_input("¿Cuál es tu mayor reto respecto a la comida?")
             agua8         = st.text_input("¿Tomas por lo menos 8 vasos de agua al dia?")
             alcohol       = st.text_input("¿Tomas bebidas alcohólicas? ¿Cuántas veces al mes?")
 
