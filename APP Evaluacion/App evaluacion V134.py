@@ -1052,8 +1052,8 @@ def pantalla1():
             nombre = st.text_input("¿Cuál es tu nombre completo?")
             email  = st.text_input("¿Cuál es tu correo electrónico?")
             movil  = st.text_input("¿Cuál es tu número de teléfono?")
-            ciudad = st.text_input("¿En que ciudad vives?")
         with col2:
+            ciudad = st.text_input("¿En que ciudad vives?")
             fecha_nac = st.date_input("¿Cuál es tu fecha de nacimiento?",
                                       value=date(1990,1,1), min_value=date(1900,1,1), max_value=date.today())
             genero = st.selectbox("¿Cuál es tu género?", ["HOMBRE", "MUJER"])
@@ -1296,31 +1296,51 @@ def pantalla3():
         st.text_input("Del 1 al 10, ¿cuál es tu nivel de compromiso en alcanzar una mejor versión de ti?", key="obj_compromiso")
 
     st.subheader("Análisis de presupuesto")
+
     col = st.columns(4)
     cur = st.session_state.get("currency_symbol", "S/")
+
     with col[0]:
-        st.number_input(f"Cuanto gastas diariamente en tu comida? ({cur}.)", min_value=0.0, step=0.1, key="presu_comida")
+        st.number_input(f"¿Cuánto gastas a la semana en tu comida? ({cur})", min_value=0.0, step=0.1, key="presu_comida")
     with col[1]:
-        st.number_input(f"Cuanto gastas diariamente en postres, snacks, dulces, etc? ({cur}.)", min_value=0.0, step=0.1, key="presu_cafe")
+        st.number_input(f"¿Cuánto de este monto corresponde a dulces, golosinas y/o snacks salados? ({cur})", min_value=0.0, step=0.1, key="presu_snacks")
     with col[2]:
-        st.number_input(f"Cuanto gastas a la semana en bebidas? ({cur}.)", min_value=0.0, step=0.1, key="presu_alcohol")
+        st.number_input(f"¿Cuánto de este monto corresponde a bebidas/gaseosas/agua/refrescos/alcohol? ({cur})", min_value=0.0, step=0.1, key="presu_bebidas")
     with col[3]:
-        st.number_input(f"Cuanto gastas a la semana en deliveries/salidas a comer? ({cur}.)", min_value=0.0, step=0.1, key="presu_deliveries")
+        st.number_input(f"¿Cuánto de este monto corresponde a deliveries/salidas a comer? ({cur})", min_value=0.0, step=0.1, key="presu_deliveries")
 
-    prom_diario = round((
-        float(st.session_state.get("presu_comida", 0.0)) +
-        float(st.session_state.get("presu_cafe", 0.0)) +
-        (float(st.session_state.get("presu_alcohol", 0.0))/7.0) +
-        (float(st.session_state.get("presu_deliveries", 0.0))/7.0)
-    ), 2)
+    # ================================
+    # Cálculos de presupuestos diarios
+    # ================================
+    presu_comida_diario = round(float(st.session_state.get("presu_comida", 0.0)) / 7, 2)
+    presu_snacks_diario = round(float(st.session_state.get("presu_snacks", 0.0)) / 7, 2)
+    presu_bebidas_diario = round(float(st.session_state.get("presu_bebidas", 0.0)) / 7, 2)
+    presu_deliveries_diario = round(float(st.session_state.get("presu_deliveries", 0.0)) / 7, 2)
 
-    st.write(f"La aplicación nos arroja que tu promedio de gastos diarios es de {cur} {prom_diario:.2f}.")
+    prom_diario_total = round(
+        presu_comida_diario +
+        presu_snacks_diario +
+        presu_bebidas_diario +
+        presu_deliveries_diario, 2
+    )
+
+    # ================================
+    # Resultados
+    # ================================
+    st.markdown("### Presupuesto diario estimado:")
+    st.write(f"- **Comida:** {cur} {presu_comida_diario:.2f}")
+    st.write(f"- **Golosinas/snacks:** {cur} {presu_snacks_diario:.2f}")
+    st.write(f"- **Bebidas:** {cur} {presu_bebidas_diario:.2f}")
+    st.write(f"- **Restaurantes/deliveries:** {cur} {presu_deliveries_diario:.2f}")
+    st.markdown("---")
+    st.success(f"💰 Tu presupuesto diario total estimado es de **{cur} {prom_diario_total:.2f}**.")
+
     st.text_input(
         "¿Consideras valioso optimizar tu presupuesto y darle prioridad a comidas y bebidas que aporten a tu bienestar y objetivos?",
         key="ev_valora_optimizar"
     )
 
-    st.write("Hasta aqui, ¿Que te parece la información que has recibido en esta evaluación?")
+    st.write("Hasta aqui, ¿Qué te parece la información que has recibido en esta evaluación?")
 
     st.session_state.estilo_vida.update({
         "ev_menos_energia":      st.session_state.get("ev_menos_energia", ""),
@@ -1330,10 +1350,11 @@ def pantalla3():
         "ev_prioridad_personal": st.session_state.get("ev_prioridad_personal",""),
         "ev_valora_optimizar":   st.session_state.get("ev_valora_optimizar",""),
         "presu_comida":          st.session_state.get("presu_comida", 0.0),
-        "presu_cafe":            st.session_state.get("presu_cafe", 0.0),
-        "presu_alcohol":         st.session_state.get("presu_alcohol", 0.0),
+        "presu_snacks":          st.session_state.get("presu_snacks", 0.0),
+        "presu_bebidas":         st.session_state.get("presu_bebidas", 0.0),
         "presu_deliveries":      st.session_state.get("presu_deliveries", 0.0),
     })
+
     st.session_state.metas.update({
         "obj_talla":      st.session_state.get("obj_talla",""),
         "obj_partes":     st.session_state.get("obj_partes",""),
@@ -1344,7 +1365,6 @@ def pantalla3():
     })
 
     bton_nav()
-
 # -------------------------------------------------------------
 # STEP 4 - Valoración de Servicio
 # -------------------------------------------------------------
