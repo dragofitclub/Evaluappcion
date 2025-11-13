@@ -1333,7 +1333,6 @@ def pantalla3():
     st.write(f"- **Bebidas:** {cur} {presu_bebidas_diario:.2f}")
     st.write(f"- **Restaurantes/deliveries:** {cur} {presu_deliveries_diario:.2f}")
     st.markdown("---")
-    st.success(f"💰 Tu presupuesto diario total estimado es de **{cur} {prom_diario_total:.2f}**.")
 
     st.text_input(
         "¿Consideras valioso optimizar tu presupuesto y darle prioridad a comidas y bebidas que aporten a tu bienestar y objetivos?",
