@@ -2146,6 +2146,7 @@ def _tarjeta_programa(col, titulo: str, items: List[str], desc_pct: int, img_nam
 # STEP 6 - Plan Personalizado
 # -------------------------------------------------------------
 def pantalla6():
+
     st.header("6) Únete a LA TRIBU PRO con nuestro programa personalizado")
 
     st.write(
@@ -2154,100 +2155,156 @@ def pantalla6():
         "y en compañía de otras personas caminando en la misma dirección."
     )
 
-    st.subheader("¿Qué incluye el plan personalizado?")
-    st.write("• Guía y acceso exclusivo a nuestro app de Diario de Comidas")
-    st.write("• Coaching Continuo")
-    st.write("• Entrenamiento online por niveles")
-    st.write("• Llamada semanal en directo con la TRIBU")
-    st.write("• Grupo privado de Whatsapp")
-    st.write("• Eventos Exclusivos")
-    st.write("• Suplementación")
+    st.markdown("## ¿Qué incluye el plan personalizado?")
 
-    st.write(
-        "Por las próximas 48 horas, tienes un beneficio exclusivo del 5% a 10% de descuento según la opción que elijas. Te muestro las opciones y me cuentas: "
-        "**¿Con qué programa te permites empezar?**"
+    # === Beneficios en cuadrícula de 3 columnas ===
+    beneficios = [
+        ("diariodecomidas.png", "Guía y acceso exclusivo a nuestro app de Diario de Comidas"),
+        ("coachingcontinuo.png", "Coaching continuo y seguimiento personalizado"),
+        ("entrenamiento.png", "Entrenamiento online por niveles"),
+        ("llamadaclientes.png", "Llamada semanal en directo con la TRIBU"),
+        ("whatsapp.png", "Grupo privado de Whatsapp"),
+        ("eventostribu.png", "Eventos exclusivos de la TRIBU"),
+        ("suplementacion.png", "Guía de suplementación personalizada"),
+    ]
+
+    icons_dir = APP_DIR / "icons"
+
+    # =============================
+    #   🔥 CSS MODIFICADO AQUÍ 🔥
+    # =============================
+    st.markdown(
+        """
+        <style>
+        .benef-title{
+            font-weight: 800;
+            font-size: 1.1rem;
+            margin-top: 0.8rem;
+            text-align: center;
+            color: #29453A;
+        }
+        .benef-card{
+            background-color: #F7F3EE;
+            padding: 18px;
+            border-radius: 16px;
+            box-shadow: 0px 6px 14px rgba(0,0,0,0.06);
+            min-height: 210px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: flex-start;
+            text-align: center;
+        }
+        /* ICONOS MÁS GRANDES Y CENTRADOS */
+        .benef-icon{
+            width: 110px !important;
+            height: 110px !important;
+            object-fit: contain !important;
+            margin-bottom: 10px;
+            display: flex;
+            align-self: center;
+        }
+        </style>
+        """,
+        unsafe_allow_html=True,
+    )
+
+    # Grid de 3 columnas
+    for i in range(0, len(beneficios), 3):
+        cols = st.columns(3)
+        for col, (fname, texto) in zip(cols, beneficios[i:i+3]):
+            with col:
+                st.markdown("<div class='benef-card'>", unsafe_allow_html=True)
+                ruta = icons_dir / fname
+                if ruta.exists():
+                    try:
+                        img = Image.open(ruta)
+                        # 🔥 ICONO MÁS GRANDE y CENTRADO 🔥
+                        st.image(img, width=110, output_format="PNG", use_container_width=False)
+                    except Exception:
+                        st.write(f"(No se pudo cargar el icono {fname})")
+                else:
+                    st.write(f"(Falta icono: {fname})")
+                st.markdown(f"<div class='benef-title'>{texto}</div>", unsafe_allow_html=True)
+                st.markdown("</div>", unsafe_allow_html=True)
+
+    # ==== Cuenta regresiva ====
+    st.markdown(
+        """
+        Por las próximas 48 horas tienes un beneficio exclusivo del 5% a 10% de descuento según la opción que elijas.  
+        Te muestro las opciones y me cuentas: **¿Con qué programa te permites empezar?**
+        """
     )
 
     _init_promo_deadline()
     _render_countdown()
 
-    # ====== Tarjetas en una fila usando columnas ======
+    # ======== Tarjetas de Programas (3 columnas centradas) ========
     st.markdown("### Opciones recomendadas")
-    c_sp_left, c1, c2, c3, c_sp_right = st.columns([1, 3, 3, 3, 1], gap="large")
 
-    _tarjeta_programa(c1, "Batido", ["Batido"], 5, "Batido.jpg", 0)
-    _tarjeta_programa(c2, "Batido + Te", ["Batido", "Té de Hierbas"], 10, "Batidoyte.jpg", 1)
-    _tarjeta_programa(c3, "Batido + Chupapanza",
-                      ["Batido", "Té de Hierbas", "Fibra Activa", "Aloe Concentrado"],
-                      10, "Batidoychupapanza.jpg", 2)
+    _, c1, c2, c3, _ = st.columns([0.3, 1, 1, 1, 0.3])
 
-    if st.session_state.combo_elegido:
+    def _render_programa(col, titulo, items, desc_pct, img_name, key_suffix):
+        if not all(_producto_disponible(i) for i in items):
+            return
+
+        with col:
+            img = _carga_img_local(img_name)
+            if img is not None:
+                st.image(img, use_container_width=True)
+            else:
+                st.write(f"(Falta imagen: {img_name})")
+
+            items_txt = " + ".join(_display_name(i) for i in items)
+            precio_html, payload, faltantes = _precio_programa_html_y_payload(titulo, items, desc_pct)
+
+            st.markdown(f"**{titulo}**")
+            st.caption(items_txt)
+            st.markdown(precio_html, unsafe_allow_html=True)
+
+            if faltantes:
+                st.markdown(
+                    f"<span style='color:#b00020;font-size:12px'>Falta configurar precio: {', '.join(faltantes)}</span>",
+                    unsafe_allow_html=True,
+                )
+
+            if st.button("Elegir este", key=f"elegir_prog_{key_suffix}", use_container_width=True):
+                st.session_state.combo_elegido = payload
+                st.success(f"Elegiste: {payload['titulo']} — Total {_mon(payload['precio_final'])}")
+
+    _render_programa(c1, "Batido", ["Batido"], 5, "Batido.jpg", "batido")
+    _render_programa(c2, "Batido + Te", ["Batido", "Té de Hierbas"], 10, "Batidoyte.jpg", "batido_te")
+    _render_programa(c3, "Batido + Chupapanza", ["Batido", "Té de Hierbas", "Fibra Activa", "Aloe Concentrado"], 10, "Batidoychupapanza.jpg", "chupapanza")
+
+    if st.session_state.get("combo_elegido"):
         e = st.session_state.combo_elegido
-        st.success(f"Seleccionado: **{e['titulo']}** — {_mon(e['precio_final'])} ({e['descuento_pct']}% dscto)")
+        st.success(
+            f"Seleccionado: **{e['titulo']}** — {_mon(e['precio_final'])} "
+            f"({e['descuento_pct']}% dscto)"
+        )
 
     hay = any(st.session_state.get(k, False) for k in P3_FLAGS)
     if hay:
         st.write(
-            "Adicionalmente, según lo que conversamos te voy a recomendar algunos productos que pueden ayudarte "
-            "a cubrir de manera específica las necesidades que me compartiste."
+            "Adicionalmente, según lo que conversamos te voy a recomendar algunos productos específicos…"
         )
-        if st.session_state.get("p3_estrenimiento", False):
-            st.write("• Para ayudarte con el estreñimiento y tengas una salud digestiva adecuada está la **fibra con sabor a manzana**.")
-        if st.session_state.get("p3_colesterol_alto", False):
-            st.write("• Para mejorar tus niveles de colesterol nos apoyamos del **Herbalifeline**, unas cápsulas de concentrado de **omega 3** con sabor a menta y tomillo. Riquísimas.")
-        if st.session_state.get("p3_baja_energia", False):
-            nrg_name = "LiftOff" if st.session_state.get("country_code") == "CA" else ("High Protein Iced Coffee" if st.session_state.get("country_code") in ("ES-PEN","ES-CAN","IT") else "NRG")
-            st.write(f"• Con el **té concentrado de hierbas** y su efecto termogénico puedes disparar tus niveles de energía y de paso quemar unas calorías extra al día. Si lo combinas con el **{nrg_name}** vas a estar totalmente lúcida y enérgica en cuerpo y mente.")
-        if st.session_state.get("p3_dolor_muscular", False):
-            st.write("• Para el dolor muscular se recomienda una buena ingesta de **proteína**, por lo cual el **PDM** resulta ideal al sumar de 9 a 18 g adicionales según tus requerimientos.")
-        if st.session_state.get("p3_gastritis", False):
-            st.write("• Para la **gastritis**, el **reflujo** y similares, el **aloe** es el indicado. Desinflama, cicatriza y alivia todo el tracto digestivo y mejora la absorción de nutrientes.")
-        if st.session_state.get("p3_hemorroides", False):
-            st.write("• Para la gastritis, el reflujo, **hemorroides** y similares, el **aloe** es el indicado. Desinflama, cicatriza y alivia todo el tracto digestivo y mejora la absorción de nutrientes.")
-        if st.session_state.get("p3_hipertension", False):
-            st.write("• Para ayudarte con la **hipertensión** te recomiendo la **Fibra Activa**, bebida alta en fibra que contribuye al control del perfil lipídico.")
-        if st.session_state.get("p3_dolor_articular", False):
-            if st.session_state.get("country_code") in ("CL", "US"):
-                st.write("• Para el **dolor articular** está el **Collagen Drink**, ideal para mantener el cartilago sano.")
-            elif st.session_state.get("country_code") in ("ES-PEN","ES-CAN"):
-                st.write("• Para el **dolor articular** está el **Collagen Booster**, ideal para mantener el cartilago sano.")
-            elif st.session_state.get("country_code") == "IT":
-                st.write("• Para el **dolor articular** está el **Herbalifeline**, ideal para mantener el cartílago sano.")
-            elif st.session_state.get("country_code") == "CA":
-                st.write("• Para el **dolor articular** está el **Collagen Beauty Drink**, ideal para mantener el cartílago sano.")
-            elif st.session_state.get("country_code") == "MX":
-                st.write("• Para el **dolor articular** está el **Collagen Beauty Drink**, ideal para mantener el cartílago sano.")
-            else:
-                st.write("• Para el **dolor articular** está el **Golden Beverage**, una bebida de **cúrcuma** ideal para desinflamar las articulaciones.")
-        if st.session_state.get("p3_ansiedad_por_comer", False):
-            bev_name = "PPP" if st.session_state.get("country_code") in ("ES-PEN","ES-CAN","IT") else "Beverage"
-            st.write(f"• La **ansiedad por comer** es síntoma de un déficit en la ingesta de proteína diaria. El **PDM** y el **{bev_name}** son ideales para aportar de 15 a 18 g adicionales al día y generar sensación de saciedad y control de antojos.")
-        if st.session_state.get("p3_jaquecas_migranas", False):
-            nrg_name = "LiftOff" if st.session_state.get("country_code") == "CA" else ("High Protein Iced Coffee" if st.session_state.get("country_code") in ("ES-PEN","ES-CAN","IT") else "NRG")
-            st.write(f"• Para ayudarte a aliviar las **jaquecas/migranas**, el **{nrg_name}** contiene la dosis ideal de cafeína natural, además de brindarte lucidez mental.")
-        if st.session_state.get("p3_diabetes_antecedentes_familiares", False):
-            st.write("• Para ayudar con la **diabetes** recomendamos la **Fibra Activa**, bebida **alta en fibra** que permite reducir el índice glucémico de nuestra alimentación.")
-        st.write("")
 
     st.divider()
-
-
-    # ====== Personalización y descarga (sin cambios) ======
     _render_personaliza_programa()
 
     st.markdown("### 📥 Descargar Evaluación")
     excel_bytes = _excel_bytes()
-    file_country = st.session_state.get("country_code","PE")
+    file_country = st.session_state.get("country_code", "PE")
+
     st.download_button(
         label="Descargar información",
         data=excel_bytes,
-        file_name=f"Evaluacion_{file_country}_{st.session_state.get('datos',{}).get('nombre','usuario')}.xlsx",
+        file_name=f"Evaluacion_{file_country}_{st.session_state.get('datos', {}).get('nombre', 'usuario')}.xlsx",
         mime="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
-        use_container_width=True
+        use_container_width=True,
     )
 
     bton_nav()
-
 # -------------------------------------------------------------
 # Side Nav
 # -------------------------------------------------------------
