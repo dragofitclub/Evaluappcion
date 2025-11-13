@@ -2170,63 +2170,73 @@ def pantalla6():
 
     icons_dir = APP_DIR / "icons"
 
-    # =============================
-    #   🔥 CSS MODIFICADO AQUÍ 🔥
-    # =============================
+    # === CSS corregido (ICONOS Y TEXTO DENTRO DE LA TARJETA) ===
     st.markdown(
         """
         <style>
-        .benef-title{
-            font-weight: 800;
-            font-size: 1.1rem;
-            margin-top: 0.8rem;
-            text-align: center;
-            color: #29453A;
+        .benef-grid{
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 28px;
+            width: 100%;
+            margin-top: 1.2rem;
+            margin-bottom: 2rem;
         }
         .benef-card{
             background-color: #F7F3EE;
-            padding: 18px;
-            border-radius: 16px;
-            box-shadow: 0px 6px 14px rgba(0,0,0,0.06);
-            min-height: 210px;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            justify-content: flex-start;
-            text-align: center;
+            border-radius: 20px;
+            padding: 25px 20px;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.07);
+            text-align:center;
+            display:flex;
+            flex-direction:column;
+            justify-content:flex-start;
+            align-items:center;
+            min-height:260px;
         }
-        /* ICONOS MÁS GRANDES Y CENTRADOS */
         .benef-icon{
-            width: 110px !important;
-            height: 110px !important;
-            object-fit: contain !important;
-            margin-bottom: 10px;
-            display: flex;
-            align-self: center;
+            width:120px;
+            height:120px;
+            object-fit:contain;
+            margin-bottom:12px;
+        }
+        .benef-title{
+            font-weight:700;
+            color:#29453A;
+            font-size:18px;
+            line-height:1.3;
+            margin-top:8px;
         }
         </style>
         """,
-        unsafe_allow_html=True,
+        unsafe_allow_html=True
     )
 
-    # Grid de 3 columnas
-    for i in range(0, len(beneficios), 3):
-        cols = st.columns(3)
-        for col, (fname, texto) in zip(cols, beneficios[i:i+3]):
-            with col:
-                st.markdown("<div class='benef-card'>", unsafe_allow_html=True)
-                ruta = icons_dir / fname
-                if ruta.exists():
-                    try:
-                        img = Image.open(ruta)
-                        # 🔥 ICONO MÁS GRANDE y CENTRADO 🔥
-                        st.image(img, width=110, output_format="PNG", use_container_width=False)
-                    except Exception:
-                        st.write(f"(No se pudo cargar el icono {fname})")
-                else:
-                    st.write(f"(Falta icono: {fname})")
-                st.markdown(f"<div class='benef-title'>{texto}</div>", unsafe_allow_html=True)
-                st.markdown("</div>", unsafe_allow_html=True)
+    # === Render corregido: icono + texto dentro de la tarjeta ===
+    st.markdown("<div class='benef-grid'>", unsafe_allow_html=True)
+
+    for fname, texto in beneficios:
+        ruta = icons_dir / fname
+        img_html = ""
+
+        if ruta.exists():
+            with open(ruta, "rb") as f:
+                b64 = base64.b64encode(f.read()).decode()
+                img_html = f"<img class='benef-icon' src='data:image/png;base64,{b64}' />"
+        else:
+            img_html = f"<div style='color:#b00;font-size:12px'>(Falta icono: {fname})</div>"
+
+        st.markdown(
+            f"""
+            <div class='benef-card'>
+                {img_html}
+                <div class='benef-title'>{texto}</div>
+            </div>
+            """,
+            unsafe_allow_html=True
+        )
+
+    st.markdown("</div>", unsafe_allow_html=True)
 
     # ==== Cuenta regresiva ====
     st.markdown(
@@ -2274,7 +2284,12 @@ def pantalla6():
 
     _render_programa(c1, "Batido", ["Batido"], 5, "Batido.jpg", "batido")
     _render_programa(c2, "Batido + Te", ["Batido", "Té de Hierbas"], 10, "Batidoyte.jpg", "batido_te")
-    _render_programa(c3, "Batido + Chupapanza", ["Batido", "Té de Hierbas", "Fibra Activa", "Aloe Concentrado"], 10, "Batidoychupapanza.jpg", "chupapanza")
+    _render_programa(c3, "Batido + Chupapanza",
+        ["Batido", "Té de Hierbas", "Fibra Activa", "Aloe Concentrado"],
+        10,
+        "Batidoychupapanza.jpg",
+        "chupapanza"
+    )
 
     if st.session_state.get("combo_elegido"):
         e = st.session_state.combo_elegido
@@ -2282,12 +2297,36 @@ def pantalla6():
             f"Seleccionado: **{e['titulo']}** — {_mon(e['precio_final'])} "
             f"({e['descuento_pct']}% dscto)"
         )
+        
 
     hay = any(st.session_state.get(k, False) for k in P3_FLAGS)
     if hay:
         st.write(
             "Adicionalmente, según lo que conversamos te voy a recomendar algunos productos específicos…"
         )
+
+        if st.session_state.get("p3_estrenimiento"):
+            st.write("• Para ayudarte con el estreñimiento está la **Fibra Activa**.")
+        if st.session_state.get("p3_colesterol_alto"):
+            st.write("• Para el colesterol está **Herbalifeline**.")
+        if st.session_state.get("p3_baja_energia"):
+            st.write("• Para energía rápida: **Té Concentrado de Hierbas** y **NRG**.")
+        if st.session_state.get("p3_dolor_muscular"):
+            st.write("• Para dolor muscular: **PDM**.")
+        if st.session_state.get("p3_gastritis"):
+            st.write("• Para gastritis: **Aloe Concentrado**.")
+        if st.session_state.get("p3_hemorroides"):
+            st.write("• Para hemorroides: **Aloe Concentrado**.")
+        if st.session_state.get("p3_hipertension"):
+            st.write("• Para hipertensión: **Fibra Activa**.")
+        if st.session_state.get("p3_dolor_articular"):
+            st.write("• Para dolor articular: **Collagen / Golden Beverage**.")
+        if st.session_state.get("p3_ansiedad_por_comer"):
+            st.write("• Para ansiedad: **PDM** + Beverage**.")
+        if st.session_state.get("p3_jaquecas_migranas"):
+            st.write("• Para jaquecas/migrañas: **NRG**.")
+        if st.session_state.get("p3_diabetes_antecedentes_familiares"):
+            st.write("• Para control glucosa: **Fibra Activa**.")
 
     st.divider()
     _render_personaliza_programa()
