@@ -8,13 +8,17 @@ import pandas as pd
 import streamlit as st
 from datetime import date, datetime, timedelta
 from PIL import Image
+import base64
+
+# -------------------------------------------------------------
+# Configuración de página (TIENE QUE SER LO PRIMERO DE STREAMLIT)
+# -------------------------------------------------------------
+st.set_page_config(page_title="Evaluación de Bienestar", page_icon="🧭", layout="wide")
+APP_DIR = Path(__file__).parent.resolve()
 
 # =========================
 # Logo fijo superior derecho (membrete)
 # =========================
-import base64
-from pathlib import Path
-import streamlit as st
 
 # Ruta del logo
 logo_path = Path(__file__).parent / "logo.png"
@@ -384,204 +388,6 @@ def _rango_grasa_referencia(genero: str, edad: int):
             return rmin, rmax
     # fallback seguro
     return tabla[0][2], tabla[0][3]
-
-# -------------------------------------------------------------
-# Config
-# -------------------------------------------------------------
-st.set_page_config(page_title="Evaluación de Bienestar", page_icon="🧭", layout="wide")
-APP_DIR = Path(__file__).parent.resolve()
-
-# =========================
-# THEME (paleta inspirada en la plantilla Wix del enlace)
-# =========================
-def inject_theme():
-    st.markdown("""
-    <style>
-      :root{
-        /* Paleta: tonos cálidos crema + acentos verde salvia */
-        --rd-bg-start:#FFF9F4;      /* crema muy claro */
-        --rd-bg-end:#F7F3EE;        /* beige suave */
-        --rd-card:#FFFFFF;
-        --rd-border:#EAE6E1;
-        --rd-accent:#3A6B64;        /* verde salvia principal */
-        --rd-accent-2:#8BBFB5;      /* verde menta suave */
-        --rd-text:#1F2A2E;          /* gris petróleo */
-        --rd-muted:#6C7A7E;
-        --rd-pill-bg:#EAF6F3;
-        --rd-shadow:0 10px 24px rgba(20,40,40,.08);
-        --rd-radius:18px;
-        --rd-input-bg:#EEF4F2;      /* verde oliva muy claro */
-        --rd-input-border:#D5E2DE;  /* borde suave */
-      }
-
-      /* Fondo general y tipografía */
-      [data-testid="stAppViewContainer"]{
-        background: linear-gradient(180deg,var(--rd-bg-start),var(--rd-bg-end)) fixed;
-        color: var(--rd-text);
-        font-family: "Inter",-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;
-      }
-
-      /* Contenedor central más ancho */
-      .block-container{ max-width: 1200px; }
-
-      /* Sidebar */
-      [data-testid="stSidebar"]{
-        background: #ffffffE6;
-        border-right: 1px solid var(--rd-border);
-        backdrop-filter: blur(2px);
-      }
-      [data-testid="stSidebar"] h1, [data-testid="stSidebar"] h2, [data-testid="stSidebar"] h3{
-        color: var(--rd-accent);
-        font-weight: 800;
-      }
-
-      /* Títulos */
-      h1, h2, h3{
-        font-family: ui-serif, Georgia, "Times New Roman", serif !important;
-        color: var(--rd-accent);
-        letter-spacing:.2px;
-      }
-      h1{
-        position: relative;
-        display: inline-block;
-        padding-bottom: .25rem;
-      }
-      h1:after{
-        content:"";
-        position:absolute; left:0; bottom:0;
-        width: 56%;
-        height: 8px;
-        background: linear-gradient(90deg,var(--rd-accent-2),transparent);
-        border-radius: 999px;
-        opacity:.6;
-      }
-
-      /* Texto y enlaces */
-      p, li, label, span, div{ color: var(--rd-text); }
-      a{ color: var(--rd-accent); text-decoration: none; }
-      a:hover{ text-decoration: underline; }
-
-      /* Botones con estilo pastilla (texto siempre visible) */
-      .stButton>button{
-        background: var(--rd-accent) !important;
-        color: #fff !important;
-        padding: .75rem 1.1rem !important;
-        border-radius: 999px !important;
-        border: 1px solid var(--rd-accent) !important;
-        box-shadow: var(--rd-shadow) !important;
-        font-weight: 700 !important;
-        transition: transform .03s ease, background .2s ease;
-        opacity: 1 !important;
-      }
-      .stButton>button *, .stButton>button svg{ color:#fff !important; fill:#fff !important; opacity:1 !important; }
-      .stButton>button:hover{ background:#2F5A53 !important; transform: translateY(-1px); }
-      .stButton>button:focus{ outline: 3px solid var(--rd-accent-2) !important; }
-
-      /* === NUEVO: mismo look para st.form_submit_button === */
-      [data-testid="stFormSubmitter"] > div > button,
-      [data-testid="baseButton-primaryFormSubmit"],
-      [data-testid="baseButton-secondaryFormSubmit"]{
-        background: var(--rd-accent) !important;
-        color: #fff !important;
-        padding: .75rem 1.1rem !important;
-        border-radius: 999px !important;
-        border: 1px solid var(--rd-accent) !important;
-        box-shadow: var(--rd-shadow) !important;
-        font-weight: 700 !important;
-        transition: transform .03s ease, background .2s ease;
-        opacity: 1 !important;
-      }
-      [data-testid="stFormSubmitter"] > div > button:hover,
-      [data-testid="baseButton-primaryFormSubmit"]:hover,
-      [data-testid="baseButton-secondaryFormSubmit"]:hover{
-        background:#2F5A53 !important; transform: translateY(-1px);
-      }
-      [data-testid="stFormSubmitter"] > div > button:focus,
-      [data-testid="baseButton-primaryFormSubmit"]:focus,
-      [data-testid="baseButton-secondaryFormSubmit"]:focus{
-        outline: 3px solid var(--rd-accent-2) !important;
-      }
-
-      /* Inputs redondeados */
-      input, textarea{ border-radius: 14px !important; }
-      .stSelectbox [data-baseweb="select"]{ border-radius: 14px !important; }
-
-      /* === Campos de entrada más claros (verde oliva suave) === */
-      [data-testid="stTextInput"] input,
-      [data-testid="stTextArea"] textarea,
-      [data-testid="stNumberInput"] input,
-      [data-testid="stDateInput"] input,
-      .stSelectbox [data-baseweb="select"] > div{
-        background: var(--rd-input-bg) !important;
-        border: 1px solid var(--rd-input-border) !important;
-        color: var(--rd-text) !important;
-        box-shadow: none !important;
-      }
-      [data-testid="stTextInput"] input::placeholder,
-      [data-testid="stTextArea"] textarea::placeholder{
-        color: rgba(31,42,46,.55) !important;
-      }
-      [data-testid="stTextInput"] input:focus,
-      [data-testid="stTextArea"] textarea:focus,
-      [data-testid="stNumberInput"] input:focus,
-      [data-testid="stDateInput"] input:focus,
-      .stSelectbox [data-baseweb="select"] > div:focus-within{
-        border-color: var(--rd-accent) !important;
-        outline: 2px solid var(--rd-accent-2) !important;
-      }
-      [data-testid="stTextInput"] input,
-      [data-testid="stTextArea"] textarea{ caret-color: var(--rd-accent) !important; }
-
-      /* === LISTA DESPLEGABLE MÁS CLARA (selectbox abierto) === */
-      /* Fondo del menú (en el popover de BaseWeb) */
-      .stSelectbox [data-baseweb="select"] [role="listbox"],
-      [data-baseweb="popover"] [role="listbox"]{
-        background: var(--rd-input-bg) !important;   /* verde claro */
-        border: 1px solid var(--rd-input-border) !important;
-        color: var(--rd-text) !important;
-      }
-      /* Opción normal */
-      .stSelectbox [data-baseweb="select"] [role="option"],
-      [data-baseweb="popover"] [role="option"]{
-        color: var(--rd-text) !important;
-        background: transparent !important;
-      }
-      /* Hover/selección: verde menta suave para contraste */
-      .stSelectbox [data-baseweb="select"] [role="option"]:hover,
-      [data-baseweb="popover"] [role="option"]:hover,
-      .stSelectbox [data-baseweb="select"] [role="option"][aria-selected="true"],
-      [data-baseweb="popover"] [role="option"][aria-selected="true"]{
-        background: var(--rd-pill-bg) !important;    /* #EAF6F3 */
-        color: var(--rd-accent) !important;
-      }
-      /* Borde del control cuando está abierto/enfocado */
-      .stSelectbox [data-baseweb="select"] > div:focus-within{
-        border-color: var(--rd-accent) !important;
-        box-shadow: 0 0 0 2px var(--rd-accent-2) inset !important;
-      }
-
-      /* Tarjetas reutilizables */
-      .rd-card{
-        background: var(--rd-card);
-        border: 1px solid var(--rd-border);
-        border-radius: var(--rd-radius);
-        box-shadow: var(--rd-shadow);
-        padding: 16px 18px;
-      }
-
-      /* Chips / etiquetas de descuento */
-      .rd-pill{ background: var(--rd-pill-bg); color: var(--rd-accent); padding:2px 10px; border-radius:999px; font-size:12px; font-weight:700; }
-
-      /* Tablas y contenedores */
-      .stTable { border-radius: var(--rd-radius); overflow:hidden; box-shadow: var(--rd-shadow); }
-
-      /* Divisor sutil */
-      hr, .stDivider { opacity:.6; border-color: var(--rd-border) !important; }
-
-      /* Countdown destacado */
-      .rd-countdown{ background:#ffffffcc; backdrop-filter:saturate(1.2) blur(3px); padding:.6rem .9rem; display:inline-block; border:1px solid var(--rd-border); border-radius:999px; box-shadow: var(--rd-shadow); }
-    </style>
-    """, unsafe_allow_html=True)
 
 # -------------------------------------------------------------
 # Helpers / Estado
@@ -1041,6 +847,198 @@ def _render_personaliza_programa():
 # ========= FIN CORRECCIÓN =========
 
 # -------------------------------------------------------------
+# THEME (paleta inspirada en la plantilla Wix del enlace)
+# -------------------------------------------------------------
+def inject_theme():
+    st.markdown("""
+    <style>
+      :root{
+        /* Paleta: tonos cálidos crema + acentos verde salvia */
+        --rd-bg-start:#FFF9F4;      /* crema muy claro */
+        --rd-bg-end:#F7F3EE;        /* beige suave */
+        --rd-card:#FFFFFF;
+        --rd-border:#EAE6E1;
+        --rd-accent:#3A6B64;        /* verde salvia principal */
+        --rd-accent-2:#8BBFB5;      /* verde menta suave */
+        --rd-text:#1F2A2E;          /* gris petróleo */
+        --rd-muted:#6C7A7E;
+        --rd-pill-bg:#EAF6F3;
+        --rd-shadow:0 10px 24px rgba(20,40,40,.08);
+        --rd-radius:18px;
+        --rd-input-bg:#EEF4F2;      /* verde oliva muy claro */
+        --rd-input-border:#D5E2DE;  /* borde suave */
+      }
+
+      /* Fondo general y tipografía */
+      [data-testid="stAppViewContainer"]{
+        background: linear-gradient(180deg,var(--rd-bg-start),var(--rd-bg-end)) fixed;
+        color: var(--rd-text);
+        font-family: "Inter",-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;
+      }
+
+      /* Contenedor central más ancho */
+      .block-container{ max-width: 1200px; }
+
+      /* Sidebar */
+      [data-testid="stSidebar"]{
+        background: #ffffffE6;
+        border-right: 1px solid var(--rd-border);
+        backdrop-filter: blur(2px);
+      }
+      [data-testid="stSidebar"] h1, [data-testid="stSidebar"] h2, [data-testid="stSidebar"] h3{
+        color: var(--rd-accent);
+        font-weight: 800;
+      }
+
+      /* Títulos */
+      h1, h2, h3{
+        font-family: ui-serif, Georgia, "Times New Roman", serif !important;
+        color: var(--rd-accent);
+        letter-spacing:.2px;
+      }
+      h1{
+        position: relative;
+        display: inline-block;
+        padding-bottom: .25rem;
+      }
+      h1:after{
+        content:"";
+        position:absolute; left:0; bottom:0;
+        width: 56%;
+        height: 8px;
+        background: linear-gradient(90deg,var(--rd-accent-2),transparent);
+        border-radius: 999px;
+        opacity:.6;
+      }
+
+      /* Texto y enlaces */
+      p, li, label, span, div{ color: var(--rd-text); }
+      a{ color: var(--rd-accent); text-decoration: none; }
+      a:hover{ text-decoration: underline; }
+
+      /* Botones con estilo pastilla (texto siempre visible) */
+      .stButton>button{
+        background: var(--rd-accent) !important;
+        color: #fff !important;
+        padding: .75rem 1.1rem !important;
+        border-radius: 999px !important;
+        border: 1px solid var(--rd-accent) !important;
+        box-shadow: var(--rd-shadow) !important;
+        font-weight: 700 !important;
+        transition: transform .03s ease, background .2s ease;
+        opacity: 1 !important;
+      }
+      .stButton>button *, .stButton>button svg{ color:#fff !important; fill:#fff !important; opacity:1 !important; }
+      .stButton>button:hover{ background:#2F5A53 !important; transform: translateY(-1px); }
+      .stButton>button:focus{ outline: 3px solid var(--rd-accent-2) !important; }
+
+      /* === NUEVO: mismo look para st.form_submit_button === */
+      [data-testid="stFormSubmitter"] > div > button,
+      [data-testid="baseButton-primaryFormSubmit"],
+      [data-testid="baseButton-secondaryFormSubmit"]{
+        background: var(--rd-accent) !important;
+        color: #fff !important;
+        padding: .75rem 1.1rem !important;
+        border-radius: 999px !important;
+        border: 1px solid var(--rd-accent) !important;
+        box-shadow: var(--rd-shadow) !important;
+        font-weight: 700 !important;
+        transition: transform .03s ease, background .2s ease;
+        opacity: 1 !important;
+      }
+      [data-testid="stFormSubmitter"] > div > button:hover,
+      [data-testid="baseButton-primaryFormSubmit"]:hover,
+      [data-testid="baseButton-secondaryFormSubmit"]:hover{
+        background:#2F5A53 !important; transform: translateY(-1px);
+      }
+      [data-testid="stFormSubmitter"] > div > button:focus,
+      [data-testid="baseButton-primaryFormSubmit"]:focus,
+      [data-testid="baseButton-secondaryFormSubmit"]:focus{
+        outline: 3px solid var(--rd-accent-2) !important;
+      }
+
+      /* Inputs redondeados */
+      input, textarea{ border-radius: 14px !important; }
+      .stSelectbox [data-baseweb="select"]{ border-radius: 14px !important; }
+
+      /* === Campos de entrada más claros (verde oliva suave) === */
+      [data-testid="stTextInput"] input,
+      [data-testid="stTextArea"] textarea,
+      [data-testid="stNumberInput"] input,
+      [data-testid="stDateInput"] input,
+      .stSelectbox [data-baseweb="select"] > div{
+        background: var(--rd-input-bg) !important;
+        border: 1px solid var(--rd-input-border) !important;
+        color: var(--rd-text) !important;
+        box-shadow: none !important;
+      }
+      [data-testid="stTextInput"] input::placeholder,
+      [data-testid="stTextArea"] textarea::placeholder{
+        color: rgba(31,42,46,.55) !important;
+      }
+      [data-testid="stTextInput"] input:focus,
+      [data-testid="stTextArea"] textarea:focus,
+      [data-testid="stNumberInput"] input:focus,
+      [data-testid="stDateInput"] input:focus,
+      .stSelectbox [data-baseweb="select"] > div:focus-within{
+        border-color: var(--rd-accent) !important;
+        outline: 2px solid var(--rd-accent-2) !important;
+      }
+      [data-testid="stTextInput"] input,
+      [data-testid="stTextArea"] textarea{ caret-color: var(--rd-accent) !important; }
+
+      /* === LISTA DESPLEGABLE MÁS CLARA (selectbox abierto) === */
+      /* Fondo del menú (en el popover de BaseWeb) */
+      .stSelectbox [data-baseweb="select"] [role="listbox"],
+      [data-baseweb="popover"] [role="listbox"]{
+        background: var(--rd-input-bg) !important;   /* verde claro */
+        border: 1px solid var(--rd-input-border) !important;
+        color: var(--rd-text) !important;
+      }
+      /* Opción normal */
+      .stSelectbox [data-baseweb="select"] [role="option"],
+      [data-baseweb="popover"] [role="option"]{
+        color: var(--rd-text) !important;
+        background: transparent !important;
+      }
+      /* Hover/selección: verde menta suave para contraste */
+      .stSelectbox [data-baseweb="select"] [role="option"]:hover,
+      [data-baseweb="popover"] [role="option"]:hover,
+      .stSelectbox [data-baseweb="select"] [role="option"][aria-selected="true"],
+      [data-baseweb="popover"] [role="option"][aria-selected="true"]{
+        background: var(--rd-pill-bg) !important;    /* #EAF6F3 */
+        color: var(--rd-accent) !important;
+      }
+      /* Borde del control cuando está abierto/enfocado */
+      .stSelectbox [data-baseweb="select"] > div:focus-within{
+        border-color: var(--rd-accent) !important;
+        box-shadow: 0 0 0 2px var(--rd-accent-2) inset !important;
+      }
+
+      /* Tarjetas reutilizables */
+      .rd-card{
+        background: var(--rd-card);
+        border: 1px solid var(--rd-border);
+        border-radius: var(--rd-radius);
+        box-shadow: var(--rd-shadow);
+        padding: 16px 18px;
+      }
+
+      /* Chips / etiquetas de descuento */
+      .rd-pill{ background: var(--rd-pill-bg); color: var(--rd-accent); padding:2px 10px; border-radius:999px; font-size:12px; font-weight:700; }
+
+      /* Tablas y contenedores */
+      .stTable { border-radius: var(--rd-radius); overflow:hidden; box-shadow: var(--rd-shadow); }
+
+      /* Divisor sutil */
+      hr, .stDivider { opacity:.6; border-color: var(--rd-border) !important; }
+
+      /* Countdown destacado */
+      .rd-countdown{ background:#ffffffcc; backdrop-filter:saturate(1.2) blur(3px); padding:.6rem .9rem; display:inline-block; border:1px solid var(--rd-border); border-radius:999px; box-shadow: var(--rd-shadow); }
+    </style>
+    """, unsafe_allow_html=True)
+
+# -------------------------------------------------------------
 # STEP 1 - Perfil de Bienestar
 # -------------------------------------------------------------
 def pantalla1():
@@ -1364,6 +1362,7 @@ def pantalla3():
     })
 
     bton_nav()
+
 # -------------------------------------------------------------
 # STEP 4 - Valoración de Servicio
 # -------------------------------------------------------------
@@ -1379,7 +1378,8 @@ def pantalla4():
     st.header("4) Valoración de Servicio")
     st.write(
         "La empresa valora la calidad de mi servicio según la cantidad de personas a las cuales **les quieres regalar la misma evaluación**."
-        "Mencionar 1 persona significa que no te gusto y 5 personas significa que te encantó. Entonces...")
+        "Mencionar 1 persona significa que no te gusto y 5 personas significa que te encantó. Entonces..."
+    )
 
     if "valoracion_contactos" not in st.session_state:
         st.session_state.valoracion_contactos = []
@@ -1587,436 +1587,6 @@ def _excel_bytes():
     buf.seek(0)
     return buf.getvalue()
 
-# ------------------------------
-# Cuenta regresiva (48 horas)
-# ------------------------------
-def _init_promo_deadline():
-    if not st.session_state.promo_deadline:
-        st.session_state.promo_deadline = (datetime.now() + timedelta(hours=48)).isoformat()
-
-def _render_countdown():
-    if HAVE_AUTOREFRESH:
-        st_autorefresh(interval=1000, key="promo_timer_tick")
-    deadline = datetime.fromisoformat(st.session_state.promo_deadline)
-    restante = max(deadline - datetime.now(), timedelta(0))
-    total_seg = int(restante.total_seconds())
-    h, rem = divmod(total_seg, 3600)
-    m, s = divmod(rem, 60)
-    if total_seg > 0:
-        st.markdown(
-            "<div class='rd-countdown'>⏳ Promoción válida por "
-            f"<strong>{h:02d}:{m:02d}:{s:02d}</strong></div>",
-            unsafe_allow_html=True
-        )
-    else:
-        st.markdown("<div class='rd-countdown'><strong>⏳ Promoción finalizada</strong></div>", unsafe_allow_html=True)
-
-# ========= NUEVO: util para cargar imágenes locales (APP_DIR o /mnt/data) =========
-def _carga_img_local(nombre: str):
-    # 1) mismo folder de la app
-    p1 = APP_DIR / nombre
-    if p1.exists():
-        try:
-            return Image.open(p1)
-        except Exception:
-            pass
-    # 2) fallback: carpeta /mnt/data (usada en ChatGPT)
-    p2 = Path("/mnt/data") / nombre
-    if p2.exists():
-        try:
-            return Image.open(p2)
-        except Exception:
-            pass
-    return None  # si no hay imagen, el card mostrará un aviso
-
-# ========= NUEVO: calcula precios manteniendo la misma lógica que las tarjetas actuales =========
-def _precio_programa_html_y_payload(titulo: str, items: List[str], descuento_pct: int):
-    total, faltantes = _precio_sumado(items)
-    cc = st.session_state.get("country_code")
-
-    # Canadá (recargo +15 y presentación especial salvo Chupapanza)
-    if cc == "CA" and titulo.strip() != "Batido + Chupapanza":
-        base_con_recargo = int(round(total + 15))
-        if descuento_pct:
-            precio_promocional = base_con_recargo
-            inflado = int(round(precio_promocional / (1 - descuento_pct/100)))
-            tachado = f"<span style='text-decoration:line-through; opacity:.6; margin-right:8px'>{_mon(inflado)}</span>"
-            precio_html = f"{tachado}<strong style='font-size:20px'>{_mon(precio_promocional)}</strong> {_chip_desc(descuento_pct)}"
-        else:
-            precio_promocional = base_con_recargo
-            precio_html = f"<strong style='font-size:20px'>{_mon(precio_promocional)}</strong>"
-        precio_final = precio_promocional
-        precio_regular = int(round(precio_final / (1 - descuento_pct/100))) if descuento_pct else precio_final
-
-    # Resto de países
-    else:
-        precio_promocional = int(round(total))
-        if descuento_pct:
-            inflado = int(round(precio_promocional / (1 - descuento_pct/100)))
-            tachado = f"<span style='text-decoration:line-through; opacity:.6; margin-right:8px'>{_mon(inflado)}</span>"
-            precio_html = f"{tachado}<strong style='font-size:20px'>{_mon(precio_promocional)}</strong> {_chip_desc(descuento_pct)}"
-            # nota informativa diaria sólo para Batido 5%
-            if titulo.strip().lower() in ("batido nutricional", "batido") and descuento_pct == 5:
-                if cc == "PE":
-                    precio_html += " <span style='font-size:13px; opacity:.8'>(S/7.9 al dia)</span>"
-                elif cc == "CL":
-                    precio_html += " <span style='font-size:13px; opacity:.8'>($1.744 al dia)</span>"
-                elif cc == "CO":
-                    precio_html += " <span style='font-size:13px; opacity:.8'>($6.693 al dia)</span>"
-                elif cc in ("ES-PEN", "ES-CAN", "IT"):
-                    diario = round(precio_promocional / 22.0, 2)
-                    precio_html += f" <span style='font-size:13px; opacity:.8'>(€{diario:.2f} al dia)</span>"
-                elif cc == "US":
-                    diario = round(precio_promocional / 30.0, 2)
-                    precio_html += f" <span style='font-size:13px; opacity:.8'>(${diario:.2f} al dia)</span>"
-        else:
-            precio_html = f"<strong style='font-size:20px'>{_mon(precio_promocional)}</strong>"
-        precio_final = precio_promocional
-        precio_regular = int(round(precio_final / (1 - descuento_pct/100))) if descuento_pct else precio_final
-
-    payload = {
-        "titulo": titulo,
-        "items": items,
-        "precio_regular": precio_regular,
-        "descuento_pct": descuento_pct,
-        "precio_final": precio_final,
-    }
-    return precio_html, payload, faltantes
-
-# ========= NUEVO: Cards con imagen (formato tipo “tarjeta de curso”) =========
-def mostrar_opciones_pantalla6():
-    st.markdown("""
-    <style>
-      .rd-grid {
-        display: grid;
-        gap: 18px;
-        grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
-      }
-      .rd-program-card{
-        background: var(--rd-card);
-        border: 1px solid var(--rd-border);
-        border-radius: 20px;
-        box-shadow: var(--rd-shadow);
-        overflow: hidden;
-        display: flex;
-        flex-direction: column;
-      }
-      .rd-program-card img{
-        width: 100%; height: 220px; object-fit: cover; display: block;
-        background:#fafafa;
-      }
-      .rd-program-body{ padding: 14px 16px 16px 16px; }
-      .rd-program-title{ font-weight: 800; color: var(--rd-accent); font-size: 18px; margin: 0 0 6px 0; }
-      .rd-program-sub{ font-size: 13px; color: var(--rd-muted); margin-bottom: 8px; }
-      .rd-program-price{ margin: 6px 0 12px 0; }
-      .rd-program-btn .stButton>button{ width: 100%; }
-      .rd-miss{ color:#b00020; font-size:12px; margin-top:6px; }
-    </style>
-    """, unsafe_allow_html=True)
-
-    # Definición de los 3 programas con sus imágenes
-    programas = [
-        {
-            "titulo": "Batido",
-            "items": ["Batido"],
-            "desc_pct": 5,
-            "img_name": "Batido.jpg"
-        },
-        {
-            "titulo": "Batido + Te",
-            "items": ["Batido", "Té de Hierbas"],
-            "desc_pct": 10,
-            "img_name": "Batidoyte.jpg"
-        },
-        {
-            "titulo": "Batido + Chupapanza",
-            "items": ["Batido", "Té de Hierbas", "Fibra Activa", "Aloe Concentrado"],
-            "desc_pct": 10,
-            "img_name": "Batidoychupapanza.jpg"
-        },
-    ]
-
-    st.markdown("### Opciones recomendadas")
-    st.markdown("<div class='rd-grid'>", unsafe_allow_html=True)
-
-    for idx, prog in enumerate(programas):
-        # Validación de disponibilidad de productos
-        if not all(_producto_disponible(i) for i in prog["items"]):
-            # Si algún item no está disponible en el país, saltamos la tarjeta
-            continue
-
-        precio_html, payload, faltantes = _precio_programa_html_y_payload(
-            prog["titulo"], prog["items"], prog["desc_pct"]
-        )
-
-        # Cargar imagen
-        img = _carga_img_local(prog["img_name"])
-        if img is None:
-            # Renderiza un contenedor vacío si no hubiera imagen
-            st.markdown(
-                "<div class='rd-program-card'><div style='height:220px;background:#eee"
-                ";display:flex;align-items:center;justify-content:center;color:#888'>"
-                "Imagen no disponible</div>",
-                unsafe_allow_html=True
-            )
-        else:
-            st.image(img, use_container_width=True)
-
-        # Cuerpo de la tarjeta (titulo, items, precio, botón)
-        items_txt = " + ".join(_display_name(i) for i in prog["items"])
-        st.markdown(
-            f"""
-            <div class='rd-program-card' style='margin-top:-8px'>
-              <div class='rd-program-body'>
-                <div class='rd-program-title'>{prog["titulo"]}</div>
-                <div class='rd-program-sub'>{items_txt}</div>
-                <div class='rd-program-price'>{precio_html}</div>
-                {'<div class=\"rd-miss\">Falta configurar precio: ' + ', '.join(faltantes) + '</div>' if faltantes else ''}
-              </div>
-            </div>
-            """,
-            unsafe_allow_html=True
-        )
-
-        # Botón “Elegir este” (con la misma semántica que antes)
-        if st.button("Elegir este", key=f"elegir_prog_{idx}", use_container_width=True):
-            st.session_state.combo_elegido = payload
-            st.success(f"Elegiste: {payload['titulo']} — Total {_mon(payload['precio_final'])}")
-
-    st.markdown("</div>", unsafe_allow_html=True)
-
-    # Mensaje de confirmación si ya hay selección
-    if st.session_state.combo_elegido:
-        e = st.session_state.combo_elegido
-        st.success(f"Seleccionado: **{e['titulo']}** — {_mon(e['precio_final'])} ({e['descuento_pct']}% dscto)")
-
-# ------------------------------
-# Cuenta regresiva (48 horas)
-# ------------------------------
-def _init_promo_deadline():
-    if not st.session_state.promo_deadline:
-        st.session_state.promo_deadline = (datetime.now() + timedelta(hours=48)).isoformat()
-
-def _render_countdown():
-    if HAVE_AUTOREFRESH:
-        st_autorefresh(interval=1000, key="promo_timer_tick")
-    deadline = datetime.fromisoformat(st.session_state.promo_deadline)
-    restante = max(deadline - datetime.now(), timedelta(0))
-    total_seg = int(restante.total_seconds())
-    h, rem = divmod(total_seg, 3600)
-    m, s = divmod(rem, 60)
-    if total_seg > 0:
-        st.markdown(
-            "<div class='rd-countdown'>⏳ Promoción válida por "
-            f"<strong>{h:02d}:{m:02d}:{s:02d}</strong></div>",
-            unsafe_allow_html=True
-        )
-    else:
-        st.markdown("<div class='rd-countdown'><strong>⏳ Promoción finalizada</strong></div>", unsafe_allow_html=True)
-
-# ========= NUEVO: util para cargar imágenes locales (APP_DIR o /mnt/data) =========
-def _carga_img_local(nombre: str):
-    # 1) mismo folder de la app
-    p1 = APP_DIR / nombre
-    if p1.exists():
-        try:
-            return Image.open(p1)
-        except Exception:
-            pass
-    # 2) fallback: carpeta /mnt/data (usada en ChatGPT)
-    p2 = Path("/mnt/data") / nombre
-    if p2.exists():
-        try:
-            return Image.open(p2)
-        except Exception:
-            pass
-    return None  # si no hay imagen, el card mostrará un aviso
-
-# ========= NUEVO: calcula precios manteniendo la misma lógica que las tarjetas actuales =========
-def _precio_programa_html_y_payload(titulo: str, items: List[str], descuento_pct: int):
-    total, faltantes = _precio_sumado(items)
-    cc = st.session_state.get("country_code")
-
-    # Canadá (recargo +15 y presentación especial salvo Chupapanza)
-    if cc == "CA" and titulo.strip() != "Batido + Chupapanza":
-        base_con_recargo = int(round(total + 15))
-        if descuento_pct:
-            precio_promocional = base_con_recargo
-            inflado = int(round(precio_promocional / (1 - descuento_pct/100)))
-            tachado = f"<span style='text-decoration:line-through; opacity:.6; margin-right:8px'>{_mon(inflado)}</span>"
-            precio_html = f"{tachado}<strong style='font-size:20px'>{_mon(precio_promocional)}</strong> {_chip_desc(descuento_pct)}"
-        else:
-            precio_promocional = base_con_recargo
-            precio_html = f"<strong style='font-size:20px'>{_mon(precio_promocional)}</strong>"
-        precio_final = precio_promocional
-        precio_regular = int(round(precio_final / (1 - descuento_pct/100))) if descuento_pct else precio_final
-
-    # Resto de países
-    else:
-        precio_promocional = int(round(total))
-        if descuento_pct:
-            inflado = int(round(precio_promocional / (1 - descuento_pct/100)))
-            tachado = f"<span style='text-decoration:line-through; opacity:.6; margin-right:8px'>{_mon(inflado)}</span>"
-            precio_html = f"{tachado}<strong style='font-size:20px'>{_mon(precio_promocional)}</strong> {_chip_desc(descuento_pct)}"
-            # nota informativa diaria sólo para Batido 5%
-            if titulo.strip().lower() in ("batido nutricional", "batido") and descuento_pct == 5:
-                if cc == "PE":
-                    precio_html += " <span style='font-size:13px; opacity:.8'>(S/7.9 al dia)</span>"
-                elif cc == "CL":
-                    precio_html += " <span style='font-size:13px; opacity:.8'>($1.744 al dia)</span>"
-                elif cc == "CO":
-                    precio_html += " <span style='font-size:13px; opacity:.8'>($6.693 al dia)</span>"
-                elif cc in ("ES-PEN", "ES-CAN", "IT"):
-                    diario = round(precio_promocional / 22.0, 2)
-                    precio_html += f" <span style='font-size:13px; opacity:.8'>(€{diario:.2f} al dia)</span>"
-                elif cc == "US":
-                    diario = round(precio_promocional / 30.0, 2)
-                    precio_html += f" <span style='font-size:13px; opacity:.8'>(${diario:.2f} al dia)</span>"
-        else:
-            precio_html = f"<strong style='font-size:20px'>{_mon(precio_promocional)}</strong>"
-        precio_final = precio_promocional
-        precio_regular = int(round(precio_final / (1 - descuento_pct/100))) if descuento_pct else precio_final
-
-    payload = {
-        "titulo": titulo,
-        "items": items,
-        "precio_regular": precio_regular,
-        "descuento_pct": descuento_pct,
-        "precio_final": precio_final,
-    }
-    return precio_html, payload, faltantes
-
-# ========= NUEVO: Cards con imagen (formato tipo “tarjeta de curso”) =========
-def mostrar_opciones_pantalla6():
-    st.markdown("""
-    <style>
-      .rd-grid {
-        display: grid;
-        gap: 18px;
-        grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
-      }
-      .rd-program-card{
-        background: var(--rd-card);
-        border: 1px solid var(--rd-border);
-        border-radius: 20px;
-        box-shadow: var(--rd-shadow);
-        overflow: hidden;
-        display: flex;
-        flex-direction: column;
-      }
-      .rd-program-card img{
-        width: 100%; height: 220px; object-fit: cover; display: block;
-        background:#fafafa;
-      }
-      .rd-program-body{ padding: 14px 16px 16px 16px; }
-      .rd-program-title{ font-weight: 800; color: var(--rd-accent); font-size: 18px; margin: 0 0 6px 0; }
-      .rd-program-sub{ font-size: 13px; color: var(--rd-muted); margin-bottom: 8px; }
-      .rd-program-price{ margin: 6px 0 12px 0; }
-      .rd-program-btn .stButton>button{ width: 100%; }
-      .rd-miss{ color:#b00020; font-size:12px; margin-top:6px; }
-    </style>
-    """, unsafe_allow_html=True)
-
-    # Definición de los 3 programas con sus imágenes
-    programas = [
-        {
-            "titulo": "Batido",
-            "items": ["Batido"],
-            "desc_pct": 5,
-            "img_name": "Batido.jpg"
-        },
-        {
-            "titulo": "Batido + Te",
-            "items": ["Batido", "Té de Hierbas"],
-            "desc_pct": 10,
-            "img_name": "Batidoyte.jpg"
-        },
-        {
-            "titulo": "Batido + Chupapanza",
-            "items": ["Batido", "Té de Hierbas", "Fibra Activa", "Aloe Concentrado"],
-            "desc_pct": 10,
-            "img_name": "Batidoychupapanza.jpg"
-        },
-    ]
-
-    st.markdown("### Opciones recomendadas")
-    st.markdown("<div class='rd-grid'>", unsafe_allow_html=True)
-
-    for idx, prog in enumerate(programas):
-        # Validación de disponibilidad de productos
-        if not all(_producto_disponible(i) for i in prog["items"]):
-            # Si algún item no está disponible en el país, saltamos la tarjeta
-            continue
-
-        precio_html, payload, faltantes = _precio_programa_html_y_payload(
-            prog["titulo"], prog["items"], prog["desc_pct"]
-        )
-
-        # Cargar imagen
-        img = _carga_img_local(prog["img_name"])
-        if img is None:
-            # Renderiza un contenedor vacío si no hubiera imagen
-            st.markdown(
-                "<div class='rd-program-card'><div style='height:220px;background:#eee"
-                ";display:flex;align-items:center;justify-content:center;color:#888'>"
-                "Imagen no disponible</div>",
-                unsafe_allow_html=True
-            )
-        else:
-            st.image(img, use_container_width=True)
-
-        # Cuerpo de la tarjeta (titulo, items, precio, botón)
-        items_txt = " + ".join(_display_name(i) for i in prog["items"])
-        st.markdown(
-            f"""
-            <div class='rd-program-card' style='margin-top:-8px'>
-              <div class='rd-program-body'>
-                <div class='rd-program-title'>{prog["titulo"]}</div>
-                <div class='rd-program-sub'>{items_txt}</div>
-                <div class='rd-program-price'>{precio_html}</div>
-                {'<div class=\"rd-miss\">Falta configurar precio: ' + ', '.join(faltantes) + '</div>' if faltantes else ''}
-              </div>
-            </div>
-            """,
-            unsafe_allow_html=True
-        )
-
-        # Botón “Elegir este” (con la misma semántica que antes)
-        if st.button("Elegir este", key=f"elegir_prog_{idx}", use_container_width=True):
-            st.session_state.combo_elegido = payload
-            st.success(f"Elegiste: {payload['titulo']} — Total {_mon(payload['precio_final'])}")
-
-    st.markdown("</div>", unsafe_allow_html=True)
-
-    # Mensaje de confirmación si ya hay selección
-    if st.session_state.combo_elegido:
-        e = st.session_state.combo_elegido
-        st.success(f"Seleccionado: **{e['titulo']}** — {_mon(e['precio_final'])} ({e['descuento_pct']}% dscto)")
-
-# ------------------------------
-# Cuenta regresiva (48 horas)
-# ------------------------------
-def _init_promo_deadline():
-    if not st.session_state.promo_deadline:
-        st.session_state.promo_deadline = (datetime.now() + timedelta(hours=48)).isoformat()
-
-def _render_countdown():
-    if HAVE_AUTOREFRESH:
-        st_autorefresh(interval=1000, key="promo_timer_tick")
-    deadline = datetime.fromisoformat(st.session_state.promo_deadline)
-    restante = max(deadline - datetime.now(), timedelta(0))
-    total_seg = int(restante.total_seconds())
-    h, rem = divmod(total_seg, 3600)
-    m, s = divmod(rem, 60)
-    if total_seg > 0:
-        st.markdown(
-            "<div class='rd-countdown'>⏳ Promoción válida por "
-            f"<strong>{h:02d}:{m:02d}:{s:02d}</strong></div>",
-            unsafe_allow_html=True
-        )
-    else:
-        st.markdown("<div class='rd-countdown'><strong>⏳ Promoción finalizada</strong></div>", unsafe_allow_html=True)
-
 # ========= util para cargar imágenes locales (APP_DIR o /mnt/data) =========
 def _carga_img_local(nombre: str):
     p1 = APP_DIR / nombre
@@ -2157,7 +1727,7 @@ def pantalla6():
 
     st.markdown("## ¿Qué incluye el plan personalizado?")
 
-    # === Beneficios en cuadrícula de 3 columnas ===
+    # === Beneficios en cuadrícula 3 columnas ===
     beneficios = [
         ("diariodecomidas.png", "Guía y acceso exclusivo a nuestro app de Diario de Comidas"),
         ("coachingcontinuo.png", "Coaching continuo y seguimiento personalizado"),
@@ -2170,7 +1740,6 @@ def pantalla6():
 
     icons_dir = APP_DIR / "icons"
 
-    # === CSS corregido (ICONOS Y TEXTO DENTRO DE LA TARJETA) ===
     st.markdown(
         """
         <style>
@@ -2212,13 +1781,10 @@ def pantalla6():
         unsafe_allow_html=True
     )
 
-    # === Render corregido: icono + texto dentro de la tarjeta ===
     st.markdown("<div class='benef-grid'>", unsafe_allow_html=True)
 
     for fname, texto in beneficios:
         ruta = icons_dir / fname
-        img_html = ""
-
         if ruta.exists():
             with open(ruta, "rb") as f:
                 b64 = base64.b64encode(f.read()).decode()
@@ -2254,80 +1820,92 @@ def pantalla6():
 
     _, c1, c2, c3, _ = st.columns([0.3, 1, 1, 1, 0.3])
 
+    # =============================================================
+    # TARJETAS CON PRECIO HTML COMPLETO (SIN MARKDOWN)
+    # =============================================================
     def _render_programa(col, titulo, items, desc_pct, img_name, key_suffix):
+
         if not all(_producto_disponible(i) for i in items):
             return
 
         with col:
+
             img = _carga_img_local(img_name)
-            if img is not None:
+            if img:
                 st.image(img, use_container_width=True)
             else:
                 st.write(f"(Falta imagen: {img_name})")
 
             items_txt = " + ".join(_display_name(i) for i in items)
-            precio_html, payload, faltantes = _precio_programa_html_y_payload(titulo, items, desc_pct)
 
-            st.markdown(f"**{titulo}**")
-            st.caption(items_txt)
-            st.markdown(precio_html, unsafe_allow_html=True)
+            # ⭐ Usamos tu función correcta – devuelve HTML en precio_html
+            precio_html, payload, faltantes = _precio_programa_html_y_payload(
+                titulo, items, desc_pct
+            )
 
-            if faltantes:
-                st.markdown(
-                    f"<span style='color:#b00020;font-size:12px'>Falta configurar precio: {', '.join(faltantes)}</span>",
-                    unsafe_allow_html=True,
-                )
+            # ⭐ MOSTRAR PRECIO EN HTML PURO (NO MARKDOWN)
+            st.markdown(
+                f"""
+                <div style="text-align:center; margin-top:10px;">
+                    <div style="font-weight:800; font-size:18px; margin-bottom:2px;">
+                        {titulo}
+                    </div>
+                    <div style="font-size:13px; opacity:.8; margin-bottom:8px;">
+                        {items_txt}
+                    </div>
+                    <div style="margin-bottom:6px;">
+                        {precio_html}
+                    </div>
+                    {f"<div style='color:#b00020;font-size:12px;'>Falta configurar precio: {', '.join(faltantes)}</div>" if faltantes else ""}
+                </div>
+                """,
+                unsafe_allow_html=True
+            )
 
             if st.button("Elegir este", key=f"elegir_prog_{key_suffix}", use_container_width=True):
                 st.session_state.combo_elegido = payload
-                st.success(f"Elegiste: {payload['titulo']} — Total {_mon(payload['precio_final'])}")
+                st.success(
+                    f"Elegiste: {payload['titulo']} — "
+                    f"Total {_mon(payload['precio_final'])}"
+                )
 
     _render_programa(c1, "Batido", ["Batido"], 5, "Batido.jpg", "batido")
     _render_programa(c2, "Batido + Te", ["Batido", "Té de Hierbas"], 10, "Batidoyte.jpg", "batido_te")
-    _render_programa(c3, "Batido + Chupapanza",
+    _render_programa(
+        c3,
+        "Batido + Chupapanza",
         ["Batido", "Té de Hierbas", "Fibra Activa", "Aloe Concentrado"],
         10,
         "Batidoychupapanza.jpg",
         "chupapanza"
     )
 
+    # ==== Selección actual ====
     if st.session_state.get("combo_elegido"):
         e = st.session_state.combo_elegido
         st.success(
             f"Seleccionado: **{e['titulo']}** — {_mon(e['precio_final'])} "
             f"({e['descuento_pct']}% dscto)"
         )
-        
 
+    # ==== Recomendaciones por flags ====
     hay = any(st.session_state.get(k, False) for k in P3_FLAGS)
     if hay:
-        st.write(
-            "Adicionalmente, según lo que conversamos te voy a recomendar algunos productos específicos…"
-        )
+        st.write("Adicionalmente, según lo que conversamos te voy a recomendar algunos productos específicos…")
 
-        if st.session_state.get("p3_estrenimiento"):
-            st.write("• Para ayudarte con el estreñimiento está la **Fibra Activa**.")
-        if st.session_state.get("p3_colesterol_alto"):
-            st.write("• Para el colesterol está **Herbalifeline**.")
-        if st.session_state.get("p3_baja_energia"):
-            st.write("• Para energía rápida: **Té Concentrado de Hierbas** y **NRG**.")
-        if st.session_state.get("p3_dolor_muscular"):
-            st.write("• Para dolor muscular: **PDM**.")
-        if st.session_state.get("p3_gastritis"):
-            st.write("• Para gastritis: **Aloe Concentrado**.")
-        if st.session_state.get("p3_hemorroides"):
-            st.write("• Para hemorroides: **Aloe Concentrado**.")
-        if st.session_state.get("p3_hipertension"):
-            st.write("• Para hipertensión: **Fibra Activa**.")
-        if st.session_state.get("p3_dolor_articular"):
-            st.write("• Para dolor articular: **Collagen / Golden Beverage**.")
-        if st.session_state.get("p3_ansiedad_por_comer"):
-            st.write("• Para ansiedad: **PDM** + Beverage**.")
-        if st.session_state.get("p3_jaquecas_migranas"):
-            st.write("• Para jaquecas/migrañas: **NRG**.")
-        if st.session_state.get("p3_diabetes_antecedentes_familiares"):
-            st.write("• Para control glucosa: **Fibra Activa**.")
+        if st.session_state.get("p3_estrenimiento"): st.write("• **Fibra Activa**.")
+        if st.session_state.get("p3_colesterol_alto"): st.write("• **Herbalifeline**.")
+        if st.session_state.get("p3_baja_energia"): st.write("• **Té Concentrado** y **NRG**.")
+        if st.session_state.get("p3_dolor_muscular"): st.write("• **PDM**.")
+        if st.session_state.get("p3_gastritis"): st.write("• **Aloe Concentrado**.")
+        if st.session_state.get("p3_hemorroides"): st.write("• **Aloe Concentrado**.")
+        if st.session_state.get("p3_hipertension"): st.write("• **Fibra Activa**.")
+        if st.session_state.get("p3_dolor_articular"): st.write("• **Collagen / Golden Beverage**.")
+        if st.session_state.get("p3_ansiedad_por_comer"): st.write("• **PDM + Beverage**.")
+        if st.session_state.get("p3_jaquecas_migranas"): st.write("• **NRG**.")
+        if st.session_state.get("p3_diabetes_antecedentes_familiares"): st.write("• **Fibra Activa**.")
 
+    # ==== Personalización + Descarga ====
     st.divider()
     _render_personaliza_programa()
 
@@ -2344,6 +1922,7 @@ def pantalla6():
     )
 
     bton_nav()
+
 # -------------------------------------------------------------
 # Side Nav
 # -------------------------------------------------------------
@@ -2371,7 +1950,7 @@ def sidebar_nav():
 # -------------------------------------------------------------
 def main():
     init_state()
-    inject_theme()  # <<< aplica la nueva paleta/estilos inspirada en la plantilla Wix
+    inject_theme()
     sidebar_nav()
     s = st.session_state.step
     if s == 1: pantalla1()
