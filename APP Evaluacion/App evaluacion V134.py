@@ -1035,6 +1035,142 @@ def inject_theme():
 
       /* Countdown destacado */
       .rd-countdown{ background:#ffffffcc; backdrop-filter:saturate(1.2) blur(3px); padding:.6rem .9rem; display:inline-block; border:1px solid var(--rd-border); border-radius:999px; box-shadow: var(--rd-shadow); }
+      [data-baseweb="popover"] {
+    background: var(--rd-input-bg) !important;
+    border: 1px solid var(--rd-input-border) !important;
+}
+
+/* Fondo interno del calendario */
+[data-baseweb="calendar"] {
+    background: var(--rd-input-bg) !important;
+    color: var(--rd-text) !important;
+}
+
+/* Cada celda del calendario (días) */
+[data-baseweb="calendar"] [role="gridcell"] {
+    background: var(--rd-input-bg) !important;
+    color: var(--rd-text) !important;
+}
+
+/* Hover en días */
+[data-baseweb="calendar"] [role="gridcell"]:hover {
+    background: var(--rd-pill-bg) !important;
+    color: var(--rd-accent) !important;
+}
+
+/* Día seleccionado */
+[data-baseweb="calendar"] [aria-selected="true"] {
+    background: var(--rd-accent-2) !important;
+    color: #000 !important;
+}
+
+/* Header (mes/año) */
+[data-baseweb="calendar"] button,
+[data-baseweb="calendar"] [role="heading"] {
+    background: var(--rd-input-bg) !important;
+    color: var(--rd-text) !important;
+}
+/* ============================================================
+   FIX DEFINITIVO REAL – ELIMINAR BACKGROUND NEGRO DE FOCUS
+   ============================================================ */
+
+/* Eliminar focus ring negro global de BaseWeb */
+*[data-baseweb]::before,
+*[data-baseweb]::after {
+    background: transparent !important;
+    box-shadow: none !important;
+    border: none !important;
+    outline: none !important;
+}
+
+/* Eliminar focus ring especificamente en botones del calendario */
+[data-baseweb="calendar"] *::before,
+[data-baseweb="calendar"] *::after {
+    background: transparent !important;
+    box-shadow: none !important;
+    border: none !important;
+    outline: none !important;
+}
+
+/* Eliminar focus ring en popover del datepicker */
+[data-baseweb="popover"] *::before,
+[data-baseweb="popover"] *::after {
+    background: transparent !important;
+    box-shadow: none !important;
+    border: none !important;
+    outline: none !important;
+}
+/* ============================================================
+   FIX GLOBAL DEFINITIVO – Estilos oscuros residuales del UI
+   ============================================================ */
+
+/* 1) Header oscuro del calendario */
+[data-baseweb="calendar"] [data-baseweb="calendar-header"],
+[data-baseweb="calendar-header"] {
+    background: var(--rd-input-bg) !important;
+    color: var(--rd-text) !important;
+    border: none !important;
+}
+
+/* 2) Botones dentro del header del calendario */
+[data-baseweb="calendar-header"] [data-baseweb="button"] {
+    background: var(--rd-input-bg) !important;
+    color: var(--rd-text) !important;
+    border: none !important;
+}
+[data-baseweb="calendar-header"] [data-baseweb="button"] svg {
+    fill: var(--rd-text) !important;
+}
+
+/* 3) Forzar fondo claro al contenedor del POPUP del selectbox */
+[data-baseweb="popover"] {
+    background: var(--rd-input-bg) !important;
+    border: 1px solid var(--rd-input-border) !important;
+    box-shadow: var(--rd-shadow) !important;
+}
+
+/* 4) Los wrappers oscuros internos del selectbox (clases dinámicas) */
+[data-baseweb="popover"] > div,
+[data-baseweb="popover"] > div > div,
+[data-baseweb="popover"] .buiqZc,
+[data-baseweb="popover"] .buiqXa,
+[data-baseweb="popover"] .buiqBd,
+[data-baseweb="popover"] .buiqYe {
+    background: var(--rd-input-bg) !important;
+    color: var(--rd-text) !important;
+}
+
+/* 5) Fondo y texto de cada opción */
+[data-baseweb="popover"] [role="option"] {
+    background: var(--rd-input-bg) !important;
+    color: var(--rd-text) !important;
+}
+
+/* 6) Hover y opción seleccionada */
+[data-baseweb="popover"] [role="option"]:hover,
+[data-baseweb="popover"] [role="option"][aria-selected="true"] {
+    background: var(--rd-pill-bg) !important;
+    color: var(--rd-accent) !important;
+}
+
+/* 7) Evitar que se superponga un fondo oscuro por focus */
+[data-baseweb="popover"] *::before,
+[data-baseweb="popover"] *::after {
+    background: transparent !important;
+    box-shadow: none !important;
+}
+/* ============================================================
+   🔥 FIX FINAL – CONTENEDOR SUPERIOR DEL CALENDARIO
+   ============================================================ */
+
+/* El contenedor superior que envuelve el header */
+[data-baseweb="calendar"] [data-baseweb="header"],
+[data-baseweb="header"] {
+    background: var(--rd-input-bg) !important;
+    color: var(--rd-text) !important;
+    border: none !important;
+    box-shadow: none !important;
+}
     </style>
     """, unsafe_allow_html=True)
 
