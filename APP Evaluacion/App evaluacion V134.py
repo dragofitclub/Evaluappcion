@@ -1983,7 +1983,7 @@ def pantalla6():
     st.write("Cuéntame, **¿Con qué programa te permites empezar?**")
 
     # 👉 ESPACIADOR NUEVO
-    st.markdown("<div style='height:25px'></div>", unsafe_allow_html=True)
+    st.markdown("<div style='height:50px'></div>", unsafe_allow_html=True)
 
     # =============================================================
     # TARJETAS CON PRECIO HTML COMPLETO (SIN MARKDOWN)
