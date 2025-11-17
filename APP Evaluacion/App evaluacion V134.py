@@ -721,11 +721,6 @@ def _render_card(titulo:str, items:List[str], descuento_pct:int=0, seleccionable
         "precio_final": precio_desc,
     }
 
-    if seleccionable:
-        btn_key = f"elegir_{key_sufijo or titulo.replace(' ', '_')}"
-        if st.button("Elegir este", key=btn_key, use_container_width=True):
-            st.session_state.combo_elegido = payload
-            st.success(f"Elegiste: {titulo} — Total {_mon(precio_desc)}")
     return precio_desc
 
 def _combos_por_flags() -> List[Dict]:
@@ -2037,16 +2032,22 @@ def pantalla6():
             # ============================================================
             # 🚀 FIX DEFINITIVO – BOTÓN “ELEGIR ESTE” FUNCIONANDO EN CLOUD
             # ============================================================
-            if st.button("Elegir este", key=f"elegir_prog_{key_suffix}", use_container_width=True):
-
+            if st.button("Elegir este", key=f"program_{key_suffix}", use_container_width=True):
+                
                 # Guardar el combo elegido
                 st.session_state.combo_elegido = payload
 
-                # Mantener auto_added_items incluso después de refrescos / cambios de país
+                # Mantenerse en pantalla 6 tras el refresh de Cloud
+                st.session_state.step = 6
+
+                # Preparar contenedor persistente para auto-agregados
                 if "auto_added_items" not in st.session_state:
                     st.session_state.auto_added_items = {}
 
+                # Mantener referencia estable (no recrear dict)
                 st.session_state.auto_added_items.clear()
+
+                # Insertar los items del programa
                 for item in payload["items"]:
                     st.session_state.auto_added_items[item] = 1
 
