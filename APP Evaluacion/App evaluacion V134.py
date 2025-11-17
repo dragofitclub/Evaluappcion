@@ -456,6 +456,7 @@ def init_state():
     st.session_state.setdefault("precios_recomendados", {"batido_5": None, "combo": None})
     st.session_state.setdefault("combo_elegido", None)
     st.session_state.setdefault("promo_deadline", None)
+    st.session_state.setdefault("auto_added_items", {})   # <-- NUEVO
     if "country_name" not in st.session_state:
         _apply_country_config("Perú")
 
@@ -597,7 +598,8 @@ def _producto_disponible(nombre: str) -> bool:
 # ——— NOMBRE MOSTRADO (sin afectar precios) ———
 def _display_name(product: str) -> str:
     cc = st.session_state.get("country_code")
-    # Canada: mapeos solicitados para pantalla 6
+
+    # Canadá
     if cc == "CA":
         if product == "Golden Beverage":
             return "Collagen Beauty Drink"
@@ -605,25 +607,30 @@ def _display_name(product: str) -> str:
             return "LiftOff"
         if product == "Beta Heart":
             return "Fibra Activa"
-    # España e Italia: mapeos solicitados
+        return product
+
+    # España / Italia
     if cc in ("ES-PEN", "ES-CAN", "IT"):
-        if product == "NRG":
-            return "High Protein Iced Coffee"
-        if product in ("Beverage", "Beverage Mix"):
-            return "PPP"
+        # Solo Golden Beverage cambia
         if product == "Golden Beverage":
-            # España -> Collagen Booster; Italia -> Herbalifeline
             return "Collagen Booster" if cc in ("ES-PEN", "ES-CAN") else "Herbalifeline"
-    # Chile y Estados Unidos: caso especial para dolor articular
+        # NO CAMBIAR Beverage Mix
+        # NO CAMBIAR NRG
+        return product
+
+    # Chile y Estados Unidos — caso especial solo cuando hay dolor articular
     if (
         cc in ("CL", "US")
         and st.session_state.get("p3_dolor_articular")
         and product == "Golden Beverage"
     ):
         return "Collagen Drink"
-    # === NUEVO: Mexico muestra Collagen Beauty Drink en lugar de Golden Beverage (última página/listados) ===
+
+    # México — Golden Beverage cambia siempre
     if cc == "MX" and product == "Golden Beverage":
         return "Collagen Beauty Drink"
+
+    # Otros países (Perú, Colombia, Argentina, RD, etc.)
     return product
 
 def _render_card(titulo:str, items:List[str], descuento_pct:int=0, seleccionable:bool=False, key_sufijo:str=""):
@@ -815,13 +822,17 @@ def _render_personaliza_programa():
         with c[1]:
             st.write(_mon(precios.get(prod, 0)))
         with c[2]:
+
+            # 🔥 PASO 3: aplicar cantidades automáticas
+            default_qty = st.session_state.auto_added_items.get(prod, 0)
+
             cantidades[prod] = st.selectbox(
                 " ",
                 options=list(range(0, 11)),
-                index=0,
+                index=default_qty,
                 key=f"custom_qty_{prod}",
                 label_visibility="collapsed"
-            )
+        )
 
     # Cálculo de totales
     total_items = sum(int(q) for q in cantidades.values())
@@ -2029,6 +2040,9 @@ def pantalla6():
 
             if st.button("Elegir este", key=f"elegir_prog_{key_suffix}", use_container_width=True):
                 st.session_state.combo_elegido = payload
+
+                st.session_state.auto_added_items = {item: 1 for item in payload["items"]}
+                
                 st.success(
                     f"Elegiste: {payload['titulo']} — "
                     f"Total {_mon(payload['precio_final'])}"
