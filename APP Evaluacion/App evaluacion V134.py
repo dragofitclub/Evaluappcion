@@ -1883,7 +1883,7 @@ def pantalla6():
         "y en compañía de otras personas caminando en la misma dirección."
     )
 
-    st.write (¡Tú también puedes construir una nueva y mejor versión de ti!)
+    st.write ("¡Tú también puedes construir una nueva y mejor versión de ti!")
 
     st.markdown("## ¿Qué incluye el plan personalizado?")
 
