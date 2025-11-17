@@ -1882,7 +1882,7 @@ def _tarjeta_programa(col, titulo: str, items: List[str], desc_pct: int, img_nam
             st.success(f"Elegiste: {payload['titulo']} — Total {_mon(payload['precio_final'])}")
 
 # -------------------------------------------------------------
-# STEP 6 - Plan Personalizado
+# STEP 6 - Plan Personalizado  (VERSIÓN CORREGIDA)
 # -------------------------------------------------------------
 def pantalla6():
 
@@ -1997,7 +1997,7 @@ def pantalla6():
     st.markdown("<div style='height:150px'></div>", unsafe_allow_html=True)
 
     # =============================================================
-    # TARJETAS CON PRECIO HTML COMPLETO (SIN MARKDOWN)
+    # TARJETAS DE PROGRAMAS - FUNCIÓN CORREGIDA
     # =============================================================
     def _render_programa(col, titulo, items, desc_pct, img_name, key_suffix):
 
@@ -2014,12 +2014,8 @@ def pantalla6():
 
             items_txt = " + ".join(_display_name(i) for i in items)
 
-            # ⭐ Usamos tu función correcta – devuelve HTML en precio_html
-            precio_html, payload, faltantes = _precio_programa_html_y_payload(
-                titulo, items, desc_pct
-            )
+            precio_html, payload, faltantes = _precio_programa_html_y_payload(titulo, items, desc_pct)
 
-            # ⭐ MOSTRAR PRECIO EN HTML PURO (NO MARKDOWN)
             st.markdown(
                 f"""
                 <div style="text-align:center; margin-top:10px;">
@@ -2038,16 +2034,28 @@ def pantalla6():
                 unsafe_allow_html=True
             )
 
+            # ============================================================
+            # 🚀 FIX DEFINITIVO – BOTÓN “ELEGIR ESTE” FUNCIONANDO EN CLOUD
+            # ============================================================
             if st.button("Elegir este", key=f"elegir_prog_{key_suffix}", use_container_width=True):
+
+                # Guardar el combo elegido
                 st.session_state.combo_elegido = payload
 
-                st.session_state.auto_added_items = {item: 1 for item in payload["items"]}
-                
+                # Mantener auto_added_items incluso después de refrescos / cambios de país
+                if "auto_added_items" not in st.session_state:
+                    st.session_state.auto_added_items = {}
+
+                st.session_state.auto_added_items.clear()
+                for item in payload["items"]:
+                    st.session_state.auto_added_items[item] = 1
+
                 st.success(
                     f"Elegiste: {payload['titulo']} — "
                     f"Total {_mon(payload['precio_final'])}"
                 )
 
+    # === TARJETAS ===
     _render_programa(c1, "Batido", ["Batido"], 5, "Batido.jpg", "batido")
     _render_programa(c2, "Batido + Te", ["Batido", "Té de Hierbas"], 10, "Batidoyte.jpg", "batido_te")
     _render_programa(
