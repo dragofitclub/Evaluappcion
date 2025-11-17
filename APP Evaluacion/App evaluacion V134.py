@@ -2075,13 +2075,13 @@ def pantalla6():
 
         if st.session_state.get("p3_estrenimiento"): st.write("• Para ayudarte a aliviar el estreñimiento y tener una salud digestiva adecuada esta la **Fibra Activa**.")
         if st.session_state.get("p3_colesterol_alto"): st.write("• Para reducir el colesterol alto facilitando arrastrar la grasa esta el **Herbalifeline**.")
-        if st.session_state.get("p3_baja_energia"): st.write("• Para que no vueltas a tener baja energía esta el **Té Concentrado** y **NRG**.")
+        if st.session_state.get("p3_baja_energia"): st.write("• Para que no vuelvas a tener baja energía esta el **Té Concentrado** y **NRG**.")
         if st.session_state.get("p3_dolor_muscular"): st.write("• El dolor muscular es producto de un deficit en la ingesta de proteína. El **PDM** suma de 9 a 18g de proteína por toma de manera rápida, rica y práctica.") 
         if st.session_state.get("p3_gastritis"): st.write("• El **Aloe Concentrado** aydua a desinflamar el sistema digestivo y aliviar la gastritis.")
         if st.session_state.get("p3_hemorroides"): st.write("• **Aloe Concentrado**.")
         if st.session_state.get("p3_hipertension"): st.write("• La **Fibra Activa**. ayuda a reducir el indice glucémico ideal para reducir la presión arterial")
         if st.session_state.get("p3_dolor_articular"): st.write("• Para desinflamar el dolor articular puedes usar **Collagen o Golden Beverage**.")
-        if st.session_state.get("p3_ansiedad_por_comer"): st.write("• **PDM + Beverage**.")
+        if st.session_state.get("p3_ansiedad_por_comer"): st.write("• La ansiedad por comer es la respuesta del cuerpo a la falta de proteína. El **PDM + Beverage**. agregan de 15 a 18g para que siempre te sientas saciado")
         if st.session_state.get("p3_jaquecas_migranas"): st.write("• El **NRG** tiene la dosis ideal de cafeína para ayudar a aliviar los dolores de cabeza.")
         if st.session_state.get("p3_diabetes_antecedentes_familiares"): st.write("• La **Fibra Activa** ayuda a reducir los picos de insulina por su bajo indice glucémico.")
 
