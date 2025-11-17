@@ -1981,6 +1981,10 @@ def pantalla6():
     _, c1, c2, c3, _ = st.columns([0.3, 1, 1, 1, 0.3])
 
     st.write("Cuéntame, **¿Con qué programa te permites empezar?**")
+
+    # 👉 ESPACIADOR NUEVO
+    st.markdown("<div style='height:25px'></div>", unsafe_allow_html=True)
+
     # =============================================================
     # TARJETAS CON PRECIO HTML COMPLETO (SIN MARKDOWN)
     # =============================================================
