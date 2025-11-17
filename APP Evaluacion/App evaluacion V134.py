@@ -2073,17 +2073,17 @@ def pantalla6():
     if hay:
         st.write("Adicionalmente, según lo que conversamos te voy a recomendar algunos productos específicos…")
 
-        if st.session_state.get("p3_estrenimiento"): st.write("• **Fibra Activa**.")
-        if st.session_state.get("p3_colesterol_alto"): st.write("• **Herbalifeline**.")
-        if st.session_state.get("p3_baja_energia"): st.write("• **Té Concentrado** y **NRG**.")
-        if st.session_state.get("p3_dolor_muscular"): st.write("• **PDM**.")
-        if st.session_state.get("p3_gastritis"): st.write("• **Aloe Concentrado**.")
+        if st.session_state.get("p3_estrenimiento"): st.write("• Para ayudarte a aliviar el estreñimiento y tener una salud digestiva adecuada esta la **Fibra Activa**.")
+        if st.session_state.get("p3_colesterol_alto"): st.write("• Para reducir el colesterol alto facilitando arrastrar la grasa esta el **Herbalifeline**.")
+        if st.session_state.get("p3_baja_energia"): st.write("• Para que no vueltas a tener baja energía esta el **Té Concentrado** y **NRG**.")
+        if st.session_state.get("p3_dolor_muscular"): st.write("• El dolor muscular es producto de un deficit en la ingesta de proteína. El **PDM** suma de 9 a 18g de proteína por toma de manera rápida, rica y práctica.") 
+        if st.session_state.get("p3_gastritis"): st.write("• El **Aloe Concentrado** aydua a desinflamar el sistema digestivo y aliviar la gastritis.")
         if st.session_state.get("p3_hemorroides"): st.write("• **Aloe Concentrado**.")
-        if st.session_state.get("p3_hipertension"): st.write("• **Fibra Activa**.")
-        if st.session_state.get("p3_dolor_articular"): st.write("• **Collagen / Golden Beverage**.")
+        if st.session_state.get("p3_hipertension"): st.write("• La **Fibra Activa**. ayuda a reducir el indice glucémico ideal para reducir la presión arterial")
+        if st.session_state.get("p3_dolor_articular"): st.write("• Para desinflamar el dolor articular puedes usar **Collagen o Golden Beverage**.")
         if st.session_state.get("p3_ansiedad_por_comer"): st.write("• **PDM + Beverage**.")
-        if st.session_state.get("p3_jaquecas_migranas"): st.write("• **NRG**.")
-        if st.session_state.get("p3_diabetes_antecedentes_familiares"): st.write("• **Fibra Activa**.")
+        if st.session_state.get("p3_jaquecas_migranas"): st.write("• El **NRG** tiene la dosis ideal de cafeína para ayudar a aliviar los dolores de cabeza.")
+        if st.session_state.get("p3_diabetes_antecedentes_familiares"): st.write("• La **Fibra Activa** ayuda a reducir los picos de insulina por su bajo indice glucémico.")
 
     # ==== Personalización + Descarga ====
     st.divider()
