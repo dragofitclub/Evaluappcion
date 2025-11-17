@@ -1491,7 +1491,7 @@ def pantalla3():
     st.markdown("---")
 
     st.text_input(
-        "¿Consideras valioso optimizar tu presupuesto y darle prioridad a comidas y bebidas que aporten a tu bienestar y objetivos?",
+        "¿Consideras valioso optimizar tu presupuesto para alcanzar tus objetivos?",
         key="ev_valora_optimizar"
     )
 
