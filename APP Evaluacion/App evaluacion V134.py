@@ -1980,7 +1980,7 @@ def pantalla6():
 
     _, c1, c2, c3, _ = st.columns([0.3, 1, 1, 1, 0.3])
 
-    st.write("Cuentame, **¿Con qué programa te permites empezar?**")
+    st.write("Cuéntame, **¿Con qué programa te permites empezar?**")
     # =============================================================
     # TARJETAS CON PRECIO HTML COMPLETO (SIN MARKDOWN)
     # =============================================================
