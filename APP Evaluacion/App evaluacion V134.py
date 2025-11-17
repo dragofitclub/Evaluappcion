@@ -792,7 +792,7 @@ def mostrar_opciones_pantalla6():
 # ========= CORREGIDO: Sección de Personalización =========
 def _render_personaliza_programa():
     st.divider()
-    st.subheader("🧩 Personaliza tu programa")
+    st.subheader("¿Requieres cubrir alguna necesidad específica adicional?")
 
     precios = _get_precios()
     disponibles = st.session_state.get("available_products") or set(precios.keys())
