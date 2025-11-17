@@ -457,6 +457,9 @@ def init_state():
     st.session_state.setdefault("combo_elegido", None)
     st.session_state.setdefault("promo_deadline", None)
     st.session_state.setdefault("auto_added_items", {})   # <-- NUEVO
+
+    st.session_state.setdefault("custom_qty_version", 0)
+    
     if "country_name" not in st.session_state:
         _apply_country_config("Perú")
 
@@ -825,7 +828,7 @@ def _render_personaliza_programa():
                 " ",
                 options=list(range(0, 11)),
                 index=default_qty,
-                key=f"custom_qty_{prod}",
+                key=f"custom_qty_{prod}_{st.session_state.custom_qty_version}",
                 label_visibility="collapsed"
         )
 
@@ -2033,28 +2036,17 @@ def pantalla6():
             # 🚀 FIX DEFINITIVO – BOTÓN “ELEGIR ESTE” FUNCIONANDO EN CLOUD
             # ============================================================
             if st.button("Elegir este", key=f"program_{key_suffix}", use_container_width=True):
-                
-                # Guardar el combo elegido
-                st.session_state.combo_elegido = payload
 
-                # Mantenerse en pantalla 6 tras el refresh de Cloud
+                st.session_state.combo_elegido = payload
                 st.session_state.step = 6
 
-                # Preparar contenedor persistente para auto-agregados
-                if "auto_added_items" not in st.session_state:
-                    st.session_state.auto_added_items = {}
+                # Guardar selección
+                st.session_state.auto_added_items = {item: 1 for item in payload["items"]}
 
-                # Mantener referencia estable (no recrear dict)
-                st.session_state.auto_added_items.clear()
+                # 🔥 Forzar recreación de los selectbox
+                st.session_state.custom_qty_version += 1
 
-                # Insertar los items del programa
-                for item in payload["items"]:
-                    st.session_state.auto_added_items[item] = 1
-
-                st.success(
-                    f"Elegiste: {payload['titulo']} — "
-                    f"Total {_mon(payload['precio_final'])}"
-                )
+                st.success(f"Elegiste: {payload['titulo']} — Total {_mon(payload['precio_final'])}")
 
     # === TARJETAS ===
     _render_programa(c1, "Batido", ["Batido"], 5, "Batido.jpg", "batido")
