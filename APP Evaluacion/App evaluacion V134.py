@@ -1968,7 +1968,7 @@ def pantalla6():
     st.markdown(
         """
         Por las próximas 48 horas tienes un beneficio exclusivo del 5% a 10% de descuento según la opción que elijas.  
-        Te muestro las opciones y me cuentas: **¿Con qué programa te permites empezar?**
+        Te muestro las opciones 
         """
     )
 
@@ -1980,6 +1980,7 @@ def pantalla6():
 
     _, c1, c2, c3, _ = st.columns([0.3, 1, 1, 1, 0.3])
 
+    st.write("Cuentame, **¿Con qué programa te permites empezar?**")
     # =============================================================
     # TARJETAS CON PRECIO HTML COMPLETO (SIN MARKDOWN)
     # =============================================================
