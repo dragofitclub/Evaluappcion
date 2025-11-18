@@ -774,25 +774,6 @@ def _render_countdown():
     else:
         st.markdown("<div class='rd-countdown'><strong>⏳ Promoción finalizada</strong></div>", unsafe_allow_html=True)
 
-def mostrar_opciones_pantalla6():
-    st.markdown("### Opciones recomendadas")
-    _render_card("Batido", ["Batido"], 5, seleccionable=True, key_sufijo="batido")
-    _render_card("Batido + Te", ["Batido", "Té de Hierbas"], 10, seleccionable=True, key_sufijo="batido_te")
-    _render_card(
-        "Batido + Chupapanza",
-        ["Batido", "Té de Hierbas", "Fibra Activa", "Aloe Concentrado"],
-        10,
-        seleccionable=True,
-        key_sufijo="chupapanza"
-    )
-
-    if st.session_state.combo_elegido:
-        e = st.session_state.combo_elegido
-        st.success(
-            f"Seleccionado: **{e['titulo']}** — "
-            f"{_mon(e['precio_final'])} "
-            f"({e['descuento_pct']}% dscto)"
-        )
 
 # ========= CORREGIDO: Sección de Personalización =========
 def _render_personaliza_programa():
@@ -1880,7 +1861,7 @@ def _tarjeta_programa(col, titulo: str, items: List[str], desc_pct: int, img_nam
             st.success(f"Elegiste: {payload['titulo']} — Total {_mon(payload['precio_final'])}")
 
 # -------------------------------------------------------------
-# STEP 6 - Plan Personalizado  (VERSIÓN CORREGIDA)
+# STEP 6 - Plan Personalizado
 # -------------------------------------------------------------
 def pantalla6():
 
@@ -1892,7 +1873,7 @@ def pantalla6():
         "y en compañía de otras personas caminando en la misma dirección."
     )
 
-    st.write ("¡Tú también puedes construir una nueva y mejor versión de ti!")
+    st.write("¡Tú también puedes construir una nueva y mejor versión de ti!")
 
     st.markdown("## ¿Qué incluye el plan personalizado?")
 
@@ -1991,11 +1972,11 @@ def pantalla6():
 
     st.write("Cuéntame, **¿Con qué programa te permites empezar?**")
 
-    # 👉 ESPACIADOR NUEVO
+    # 👉 Espaciador entre la pregunta y las tarjetas
     st.markdown("<div style='height:150px'></div>", unsafe_allow_html=True)
 
     # =============================================================
-    # TARJETAS DE PROGRAMAS - FUNCIÓN CORREGIDA
+    # TARJETAS DE PROGRAMAS
     # =============================================================
     def _render_programa(col, titulo, items, desc_pct, img_name, key_suffix):
 
@@ -2003,15 +1984,17 @@ def pantalla6():
             return
 
         with col:
-
+            # Imagen del programa
             img = _carga_img_local(img_name)
             if img:
                 st.image(img, use_container_width=True)
             else:
                 st.write(f"(Falta imagen: {img_name})")
 
+            # Texto de items
             items_txt = " + ".join(_display_name(i) for i in items)
 
+            # Precio y payload para guardar selección
             precio_html, payload, faltantes = _precio_programa_html_y_payload(titulo, items, desc_pct)
 
             st.markdown(
@@ -2032,23 +2015,57 @@ def pantalla6():
                 unsafe_allow_html=True
             )
 
-            # ============================================================
-            # 🚀 FIX DEFINITIVO – BOTÓN “ELEGIR ESTE” FUNCIONANDO EN CLOUD
-            # ============================================================
+            # === TEXTO ESPECIAL SOLO PARA BATIDO ===
+            if titulo.strip().lower() == "batido":
+                st.markdown(
+                    """
+                    <div style='text-align:center; font-size:13px; color:#29453A;
+                        margin-top:-10px; margin-bottom:14px;'>
+                        Te ayuda a controlar la ansiedad y reducir la cantidad de calorías al día.
+                    </div>
+                    """,
+                    unsafe_allow_html=True
+                )
+            # === TEXTO ESPECIAL SOLO PARA BATIDO + TÉ ===
+            if titulo.strip().lower() == "batido + te":
+                st.markdown(
+                    """
+                    <div style='text-align:center; font-size:13px; color:#29453A;
+                        margin-top:-10px; margin-bottom:14px;'>
+                        Te permite acelerar el metabolismo y aumentar la quema de grasa.
+                    </div>
+                    """,
+                    unsafe_allow_html=True
+                )
+            # === TEXTO ESPECIAL SOLO PARA BATIDO + CHUPAPANZA ===
+            if titulo.strip().lower() == "batido + chupapanza":
+                st.markdown(
+                    """
+                    <div style='text-align:center; font-size:13px; color:#29453A;
+                        margin-top:-10px; margin-bottom:14px;'>
+                        Te ayuda a desinflamar y reducir medidas.
+                    </div>
+                    """,
+                    unsafe_allow_html=True
+                )
+            
+                
+            # Botón para elegir programa
             if st.button("Elegir este", key=f"program_{key_suffix}", use_container_width=True):
 
+                # Guardar selección del combo
                 st.session_state.combo_elegido = payload
                 st.session_state.step = 6
 
-                # Guardar selección
+                # Pre-cargar cantidades de personalización con 1 unidad de cada ítem
                 st.session_state.auto_added_items = {item: 1 for item in payload["items"]}
 
-                # 🔥 Forzar recreación de los selectbox
+                # Forzar recreación de los selectbox en la sección de personalización
                 st.session_state.custom_qty_version += 1
 
                 st.success(f"Elegiste: {payload['titulo']} — Total {_mon(payload['precio_final'])}")
 
-    # === TARJETAS ===
+    # === Tarjetas visibles lado a lado ===
     _render_programa(c1, "Batido", ["Batido"], 5, "Batido.jpg", "batido")
     _render_programa(c2, "Batido + Te", ["Batido", "Té de Hierbas"], 10, "Batidoyte.jpg", "batido_te")
     _render_programa(
@@ -2071,19 +2088,33 @@ def pantalla6():
     # ==== Recomendaciones por flags ====
     hay = any(st.session_state.get(k, False) for k in P3_FLAGS)
     if hay:
+        # Espacio extra antes de "Adicionalmente..."
+        st.markdown("<div style='height:60px'></div>", unsafe_allow_html=True)
+
         st.write("Adicionalmente, según lo que conversamos te voy a recomendar algunos productos específicos…")
 
-        if st.session_state.get("p3_estrenimiento"): st.write("• Para ayudarte a aliviar el estreñimiento y tener una salud digestiva adecuada esta la **Fibra Activa**.")
-        if st.session_state.get("p3_colesterol_alto"): st.write("• Para reducir el colesterol alto facilitando arrastrar la grasa esta el **Herbalifeline**.")
-        if st.session_state.get("p3_baja_energia"): st.write("• Para que no vuelvas a tener baja energía esta el **Té Concentrado** y **NRG**.")
-        if st.session_state.get("p3_dolor_muscular"): st.write("• El dolor muscular es producto de un deficit en la ingesta de proteína. El **PDM** suma de 9 a 18g de proteína por toma de manera rápida, rica y práctica.") 
-        if st.session_state.get("p3_gastritis"): st.write("• El **Aloe Concentrado** aydua a desinflamar el sistema digestivo y aliviar la gastritis.")
-        if st.session_state.get("p3_hemorroides"): st.write("• **Aloe Concentrado**.")
-        if st.session_state.get("p3_hipertension"): st.write("• La **Fibra Activa**. ayuda a reducir el indice glucémico ideal para reducir la presión arterial")
-        if st.session_state.get("p3_dolor_articular"): st.write("• Para desinflamar el dolor articular puedes usar **Collagen o Golden Beverage**.")
-        if st.session_state.get("p3_ansiedad_por_comer"): st.write("• La ansiedad por comer es la respuesta del cuerpo a la falta de proteína. El **PDM + Beverage**. agregan de 15 a 18g para que siempre te sientas saciado")
-        if st.session_state.get("p3_jaquecas_migranas"): st.write("• El **NRG** tiene la dosis ideal de cafeína para ayudar a aliviar los dolores de cabeza.")
-        if st.session_state.get("p3_diabetes_antecedentes_familiares"): st.write("• La **Fibra Activa** ayuda a reducir los picos de insulina por su bajo indice glucémico.")
+        if st.session_state.get("p3_estrenimiento"):
+            st.write("• Para ayudarte a aliviar el estreñimiento y tener una salud digestiva adecuada esta la **Fibra Activa**.")
+        if st.session_state.get("p3_colesterol_alto"):
+            st.write("• Para reducir el colesterol alto facilitando arrastrar la grasa esta el **Herbalifeline**.")
+        if st.session_state.get("p3_baja_energia"):
+            st.write("• Para que no vuelvas a tener baja energía esta el **Té Concentrado** y **NRG**.")
+        if st.session_state.get("p3_dolor_muscular"):
+            st.write("• El dolor muscular es producto de un deficit en la ingesta de proteína. El **PDM** suma de 9 a 18g de proteína por toma de manera rápida, rica y práctica.")
+        if st.session_state.get("p3_gastritis"):
+            st.write("• El **Aloe Concentrado** aydua a desinflamar el sistema digestivo y aliviar la gastritis.")
+        if st.session_state.get("p3_hemorroides"):
+            st.write("• **Aloe Concentrado**.")
+        if st.session_state.get("p3_hipertension"):
+            st.write("• La **Fibra Activa**. ayuda a reducir el indice glucémico ideal para reducir la presión arterial")
+        if st.session_state.get("p3_dolor_articular"):
+            st.write("• Para desinflamar el dolor articular puedes usar **Collagen o Golden Beverage**.")
+        if st.session_state.get("p3_ansiedad_por_comer"):
+            st.write("• La ansiedad por comer es la respuesta del cuerpo a la falta de proteína. El **PDM + Beverage**. agregan de 15 a 18g para que siempre te sientas saciado")
+        if st.session_state.get("p3_jaquecas_migranas"):
+            st.write("• El **NRG** tiene la dosis ideal de cafeína para ayudar a aliviar los dolores de cabeza.")
+        if st.session_state.get("p3_diabetes_antecedentes_familiares"):
+            st.write("• La **Fibra Activa** ayuda a reducir los picos de insulina por su bajo indice glucémico.")
 
     # ==== Personalización + Descarga ====
     st.divider()
