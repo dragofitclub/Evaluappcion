@@ -2133,7 +2133,6 @@ def pantalla6():
         use_container_width=True,
     )
 
-    bton_nav()
 
 # -------------------------------------------------------------
 # STEP 7 - Personaliza tu Programa (personalización completa)
