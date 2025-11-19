@@ -1521,7 +1521,7 @@ def pantalla3():
 def emoji_y_texto(n):
     if n <= 0: return "😡", "PÉSIMO (Ayúdame a mejorar mi calificación)"
     if n == 1: return "😠", "NO ME GUSTÓ (Ayúdame a mejorar mi calificación)" 
-    if n == 2: return "😐", "ME GUSTÓ POCO (Sólo faltan 3 mas)"
+    if n == 2: return "😐", "ME GUSTÓ POCO (Sólo faltan 3 más)"
     if n == 3: return "🙂", "ME GUSTÓ (¡Sólo 2 más!)"
     if n == 4: return "😁", "ME GUSTÓ MUCHO (¡El último y terminamos!)"
     return "🤩", "ME ENCANTÓ"
