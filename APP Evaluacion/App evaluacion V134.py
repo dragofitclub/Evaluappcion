@@ -467,7 +467,8 @@ def go(prev=False, next=False, to=None):
     if to is not None:
         st.session_state.step = to
     elif next:
-        st.session_state.step = min(st.session_state.step + 1, 6)
+        # AHORA HASTA LA PÁGINA 7
+        st.session_state.step = min(st.session_state.step + 1, 7)
     elif prev:
         st.session_state.step = max(st.session_state.step - 1, 1)
 
@@ -811,7 +812,7 @@ def _render_personaliza_programa():
                 index=default_qty,
                 key=f"custom_qty_{prod}_{st.session_state.custom_qty_version}",
                 label_visibility="collapsed"
-        )
+            )
 
     # Cálculo de totales
     total_items = sum(int(q) for q in cantidades.values())
@@ -1411,12 +1412,15 @@ def pantalla3():
             dolor_musc  = st.checkbox("¿Dolor Muscular?")
             gastritis   = st.checkbox("¿Gastritis?")
             hemorroides = st.checkbox("¿Hemorroides?")
+            hiper       = st.checkbox("¿Hiper/Hipotiroidismo?")
         with cols[1]:
             hta         = st.checkbox("¿Hipertensión?")
             dolor_art   = st.checkbox("¿Dolor Articular?")
             ansiedad    = st.checkbox("¿Ansiedad por comer?")
             jaquecas    = st.checkbox("¿Jaquecas / Migrañas?")
-            diabetes_fam= st.checkbox("Diabetes (antecedentes familiares)")
+            diabetes_fam= st.checkbox("¿Resistencia a la Insulina")
+            higado      = st.checkbox("¿Higado Graso?")
+            trigli      = st.checkbox("¿Trigliceridos Altos?")
 
     st.session_state.p3_estrenimiento                      = bool(estre)
     st.session_state.p3_colesterol_alto                    = bool(colesterol)
@@ -1860,9 +1864,6 @@ def _tarjeta_programa(col, titulo: str, items: List[str], desc_pct: int, img_nam
             st.session_state.combo_elegido = payload
             st.success(f"Elegiste: {payload['titulo']} — Total {_mon(payload['precio_final'])}")
 
-# -------------------------------------------------------------
-# STEP 6 - Plan Personalizado
-# -------------------------------------------------------------
 def pantalla6():
 
     st.header("6) Únete a LA TRIBU PRO con nuestro programa personalizado")
@@ -1965,15 +1966,57 @@ def pantalla6():
     _init_promo_deadline()
     _render_countdown()
 
-    # ======== Tarjetas de Programas (3 columnas centradas) ========
     st.markdown("### Opciones recomendadas")
 
     _, c1, c2, c3, _ = st.columns([0.3, 1, 1, 1, 0.3])
 
     st.write("Cuéntame, **¿Con qué programa te permites empezar?**")
 
-    # 👉 Espaciador entre la pregunta y las tarjetas
-    st.markdown("<div style='height:150px'></div>", unsafe_allow_html=True)
+    # =============================================================
+    # CHECKBOX PDM
+    # =============================================================
+    st.markdown("<div style='height:20px'></div>", unsafe_allow_html=True)
+
+    cur = st.session_state.get("currency_symbol", "S/")
+    precio_pdm = st.session_state.get("precios", {}).get("PDM", 0)
+
+    st.markdown(
+        """
+        <div style="font-size:16px; margin-bottom:10px;">
+        Te gustaría sumar un PDM a tu pedido para complementar tu Batido, acelerar tu progreso
+        y alcanzar fácilmente tu requerimiento de proteína diario?
+        </div>
+        """,
+        unsafe_allow_html=True
+    )
+
+    st.session_state["checkbox_pdm"] = st.checkbox(
+        f"Sí deseo ({cur}{precio_pdm})",
+        key="checkbox_pdm_key"
+    )
+
+    # =============================================================
+    # ⚡ NUEVO TEXTO QUE PEDISTE (debajo del checkbox)
+    # =============================================================
+    combo = st.session_state.get("combo_elegido")
+    precio_combo = combo["precio_final"] if combo else 0
+    precio_total = precio_combo + (precio_pdm if st.session_state["checkbox_pdm"] else 0)
+
+    st.markdown("<div style='height:15px'></div>", unsafe_allow_html=True)
+
+    st.markdown(
+        f"""
+        <div style="background:#FFFFFF; border:1px solid #E2E2E2;
+        padding:14px; border-radius:14px; font-size:16px; font-weight:600;
+        text-align:center; box-shadow:0 2px 6px rgba(0,0,0,0.06);">
+        El total de tu programa sería <strong>{cur}{precio_total}</strong>  
+        <br><br>¿Cómo te gustaría pagarlo?
+        </div>
+        """,
+        unsafe_allow_html=True
+    )
+
+    st.markdown("<div style='height:25px'></div>", unsafe_allow_html=True)
 
     # =============================================================
     # TARJETAS DE PROGRAMAS
@@ -1984,17 +2027,14 @@ def pantalla6():
             return
 
         with col:
-            # Imagen del programa
             img = _carga_img_local(img_name)
             if img:
                 st.image(img, use_container_width=True)
             else:
                 st.write(f"(Falta imagen: {img_name})")
 
-            # Texto de items
             items_txt = " + ".join(_display_name(i) for i in items)
 
-            # Precio y payload para guardar selección
             precio_html, payload, faltantes = _precio_programa_html_y_payload(titulo, items, desc_pct)
 
             st.markdown(
@@ -2015,7 +2055,7 @@ def pantalla6():
                 unsafe_allow_html=True
             )
 
-            # === TEXTO ESPECIAL SOLO PARA BATIDO ===
+            # Textos especiales
             if titulo.strip().lower() == "batido":
                 st.markdown(
                     """
@@ -2026,7 +2066,7 @@ def pantalla6():
                     """,
                     unsafe_allow_html=True
                 )
-            # === TEXTO ESPECIAL SOLO PARA BATIDO + TÉ ===
+
             if titulo.strip().lower() == "batido + te":
                 st.markdown(
                     """
@@ -2037,7 +2077,7 @@ def pantalla6():
                     """,
                     unsafe_allow_html=True
                 )
-            # === TEXTO ESPECIAL SOLO PARA BATIDO + CHUPAPANZA ===
+
             if titulo.strip().lower() == "batido + chupapanza":
                 st.markdown(
                     """
@@ -2048,24 +2088,18 @@ def pantalla6():
                     """,
                     unsafe_allow_html=True
                 )
-            
-                
-            # Botón para elegir programa
+
             if st.button("Elegir este", key=f"program_{key_suffix}", use_container_width=True):
 
-                # Guardar selección del combo
                 st.session_state.combo_elegido = payload
                 st.session_state.step = 6
 
-                # Pre-cargar cantidades de personalización con 1 unidad de cada ítem
                 st.session_state.auto_added_items = {item: 1 for item in payload["items"]}
-
-                # Forzar recreación de los selectbox en la sección de personalización
                 st.session_state.custom_qty_version += 1
 
                 st.success(f"Elegiste: {payload['titulo']} — Total {_mon(payload['precio_final'])}")
 
-    # === Tarjetas visibles lado a lado ===
+    # Tarjetas
     _render_programa(c1, "Batido", ["Batido"], 5, "Batido.jpg", "batido")
     _render_programa(c2, "Batido + Te", ["Batido", "Té de Hierbas"], 10, "Batidoyte.jpg", "batido_te")
     _render_programa(
@@ -2085,41 +2119,8 @@ def pantalla6():
             f"({e['descuento_pct']}% dscto)"
         )
 
-    # ==== Recomendaciones por flags ====
-    hay = any(st.session_state.get(k, False) for k in P3_FLAGS)
-    if hay:
-        # Espacio extra antes de "Adicionalmente..."
-        st.markdown("<div style='height:60px'></div>", unsafe_allow_html=True)
-
-        st.write("Adicionalmente, según lo que conversamos te voy a recomendar algunos productos específicos…")
-
-        if st.session_state.get("p3_estrenimiento"):
-            st.write("• Para ayudarte a aliviar el estreñimiento y tener una salud digestiva adecuada esta la **Fibra Activa**.")
-        if st.session_state.get("p3_colesterol_alto"):
-            st.write("• Para reducir el colesterol alto facilitando arrastrar la grasa esta el **Herbalifeline**.")
-        if st.session_state.get("p3_baja_energia"):
-            st.write("• Para que no vuelvas a tener baja energía esta el **Té Concentrado** y **NRG**.")
-        if st.session_state.get("p3_dolor_muscular"):
-            st.write("• El dolor muscular es producto de un deficit en la ingesta de proteína. El **PDM** suma de 9 a 18g de proteína por toma de manera rápida, rica y práctica.")
-        if st.session_state.get("p3_gastritis"):
-            st.write("• El **Aloe Concentrado** aydua a desinflamar el sistema digestivo y aliviar la gastritis.")
-        if st.session_state.get("p3_hemorroides"):
-            st.write("• **Aloe Concentrado**.")
-        if st.session_state.get("p3_hipertension"):
-            st.write("• La **Fibra Activa**. ayuda a reducir el indice glucémico ideal para reducir la presión arterial")
-        if st.session_state.get("p3_dolor_articular"):
-            st.write("• Para desinflamar el dolor articular puedes usar **Collagen o Golden Beverage**.")
-        if st.session_state.get("p3_ansiedad_por_comer"):
-            st.write("• La ansiedad por comer es la respuesta del cuerpo a la falta de proteína. El **PDM + Beverage**. agregan de 15 a 18g para que siempre te sientas saciado")
-        if st.session_state.get("p3_jaquecas_migranas"):
-            st.write("• El **NRG** tiene la dosis ideal de cafeína para ayudar a aliviar los dolores de cabeza.")
-        if st.session_state.get("p3_diabetes_antecedentes_familiares"):
-            st.write("• La **Fibra Activa** ayuda a reducir los picos de insulina por su bajo indice glucémico.")
-
-    # ==== Personalización + Descarga ====
+    # ==== SOLO DESCARGA ====
     st.divider()
-    _render_personaliza_programa()
-
     st.markdown("### 📥 Descargar Evaluación")
     excel_bytes = _excel_bytes()
     file_country = st.session_state.get("country_code", "PE")
@@ -2131,6 +2132,21 @@ def pantalla6():
         mime="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
         use_container_width=True,
     )
+
+    bton_nav()
+
+# -------------------------------------------------------------
+# STEP 7 - Personaliza tu Programa (personalización completa)
+# -------------------------------------------------------------
+def pantalla7():
+    st.header("7) Personaliza tu programa")
+
+    st.write(
+        "Aquí puedes ajustar las cantidades de productos para adaptar aún más tu programa a tus necesidades "
+        "y ver el total con los descuentos correspondientes."
+    )
+
+    _render_personaliza_programa()
 
     bton_nav()
 
@@ -2148,6 +2164,7 @@ def sidebar_nav():
             (4, "Valoración"),
             (5, "Quiénes somos"),
             (6, "Plan Personalizado"),
+            (7, "Nutrición Específica"),
         ]:
             if st.button(f"{i}. {titulo}", use_container_width=True):
                 go(to=i)
@@ -2170,6 +2187,7 @@ def main():
     elif s == 4: pantalla4()
     elif s == 5: pantalla5()
     elif s == 6: pantalla6()
+    elif s == 7: pantalla7()
 
 if __name__ == "__main__":
     main()
