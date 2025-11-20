@@ -1603,7 +1603,7 @@ def pantalla5():
         ("nicolasyscarlett.jpg","Nicolás y Scarlett jovenes de 18 años",
          ["Ambos aumentaron peso en masa muscular. El 20 kilos y ella 14."]),
         ("wagnerysonia.jpg","Wagner y Sonia — Tercera edad",
-         ["Ambos empezaron el programa con más de 60 años, con dolores de rodillas y probelmas de salud. Los médicos solo argumentaban que eran problemas propios de la edad.",
+         ["Ambos empezaron el programa con más de 60 años, con dolores de rodillas y problemas de salud. Los médicos solo argumentaban que eran problemas propios de la edad.",
           "Controlaron peso, mejoraron su salud y se llenaron de energía."]),
         ("mayraymariaantonieta.jpg","Mayra y María Antonieta — Hipotiroidismo",
          ["Ambas pensaban que debido a su condición no podían tener resultados. Mayra controló 20 kg y María Antonieta 15."]),
