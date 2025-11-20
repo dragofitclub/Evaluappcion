@@ -798,7 +798,20 @@ def _render_personaliza_programa():
     for prod in productos_ordenados:
         c = st.columns([3, 2, 2])
         with c[0]:
-            st.write(_display_name(prod))
+            desc = {
+                "Batido": "Reemplazo de comida alto en proteína",
+                "Té de Hierbas": "Aumenta energía y metabolismo",
+                "Aloe Concentrado": "Mejora digestión y reduce inflamación",
+                "Beverage Mix": "Proteína ligera para recuperación",
+                "Beta Heart": "Fibra para colesterol y corazón",
+                "Fibra Activa": "Mejora digestión y saciedad",
+                "Golden Beverage": "Alivia articulaciones y piel",
+                "NRG": "Energía natural y enfoque",
+                "Herbalifeline": "Omega 3 para salud cardiovascular",
+                "PDM": "Proteína extra para controlar hambre",
+            }.get(prod, "")
+
+            st.write(f"**{_display_name(prod)}** — {desc}")
         with c[1]:
             st.write(_mon(precios.get(prod, 0)))
         with c[2]:
@@ -1419,8 +1432,8 @@ def pantalla3():
             ansiedad    = st.checkbox("¿Ansiedad por comer?")
             jaquecas    = st.checkbox("¿Jaquecas / Migrañas?")
             diabetes_fam= st.checkbox("¿Resistencia a la Insulina")
-            higado      = st.checkbox("¿Higado Graso?")
-            trigli      = st.checkbox("¿Trigliceridos Altos?")
+            higado      = st.checkbox("¿Hígado Graso?")
+            trigli      = st.checkbox("¿Triglicéridos Altos?")
 
     st.session_state.p3_estrenimiento                      = bool(estre)
     st.session_state.p3_colesterol_alto                    = bool(colesterol)
