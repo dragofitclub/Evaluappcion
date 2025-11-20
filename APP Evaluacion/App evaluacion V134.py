@@ -1403,7 +1403,7 @@ def pantalla3():
         st.text_input("¿Qué es lo que más se te complica? (Constancia, Alimentación, Motivación, Otros)", key="ev_complica")
         st.text_input("¿Consideras que cuidar de ti es una prioridad?", key="ev_prioridad_personal")
     with c2:
-        st.write("Presentas alguna de las siguientes condiciones?")
+        st.write("¿Presentas alguna de las siguientes condiciones?")
         cols = st.columns(2)
         with cols[0]:
             estre       = st.checkbox("¿Estreñimiento?")
@@ -1530,7 +1530,7 @@ def pantalla4():
     st.header("4) Valoración de Servicio")
     st.write(
         "La empresa valora la calidad de mi servicio según la cantidad de personas a las cuales **les quieres regalar la misma evaluación**."
-        "Mencionar 1 persona significa que no te gusto y 5 personas significa que te encantó. Entonces..."
+        "Mencionar 1 persona significa que no te gustó y 5 personas significa que te encantó. Entonces..."
     )
 
     if "valoracion_contactos" not in st.session_state:
