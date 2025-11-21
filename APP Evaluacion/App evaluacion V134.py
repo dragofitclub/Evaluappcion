@@ -1327,7 +1327,7 @@ def pantalla2():
         st.caption("Coloca 'imagen_grasa_corporal.png' o 'grasa_ref.png' en esta misma carpeta para mostrar una guía visual.")
 
     st.divider()
-    st.subheader("Resultados")
+    st.subheader("Resultados Personalizados")
     st.session_state.datos["altura_cm"] = altura_cm
     st.session_state.datos["peso_kg"]   = peso_kg
     st.session_state.datos["grasa_pct"] = grasa_pct
@@ -1350,16 +1350,17 @@ def pantalla2():
     meta_masa = st.session_state.metas.get("masa_muscular", False)
     objetivo_kcal = bmr + 250 if meta_masa else bmr - 250
 
-    st.write("En base a los datos introducidos, la aplicación arroja los siguientes resultados:")
+    st.write("Lo que estás a punto de escuchar no es “un dato más”. Es tu mapa personal de bienestar."
+             " Son números que explican cómo está respondiendo tu cuerpo hoy… y hacia dónde puede ir si tomas buenas decisiones. ")
 
     if 18.6 <= imc_val <= 24.9:
         st.write(
-            f"Tu Índice de Masa Corporal (IMC) es de {imc_val:.1f}, eso indica que tienes PESO NORMAL lo que significa que deberías tener buena condición física, "
-            f"vitalidad y buen nivel de energía, ¿Te sientes así? . Como referencia, el IMC ideal es de 18.6 a 24.9."
-        )
+            f"📌 Tu Índice de Masa Corporal (IMC) es de {imc_val:.1f}, eso indica que tienes PESO NORMAL lo que significa que deberías tener buena condición física, "
+            f"vitalidad y buen nivel de energía, ¿Te sientes así? . Si la respuesta es “no”, entonces el IMC solo te está diciendo que estás “dentro del rango”, pero tu cuerpo ya te está pidiendo ajustes."
+)
     else:
         st.write(
-            f"Tu Índice de Masa Corporal (IMC) es de **{imc_val:.1f}**, eso indica que tienes **{_imc_categoria_y_sintomas(imc_val)[0]}** "
+            f"📌 Tu Índice de Masa Corporal (IMC) es de **{imc_val:.1f}**, eso indica que tienes **{_imc_categoria_y_sintomas(imc_val)[0]}** "
             f"y eres propenso a **{_imc_categoria_y_sintomas(imc_val)[1] or '—'}**. "
             f"Como referencia, el IMC ideal es de 18.6 a 24.9."
         )
@@ -1367,37 +1368,48 @@ def pantalla2():
     genero_pal = "mujer" if str(genero).strip().upper().startswith("M") else "hombre"
     articulo = "Una" if genero_pal == "mujer" else "Un"
     st.write(
-        f"{articulo} {genero_pal} de {edad_ref} años como tú tiene "
+        f"📌 {articulo} {genero_pal} de {edad_ref} años como tú tiene "
         f"**{rmin:.1f} % de grasa en el mejor de los casos y {rmax:.1f} % en el peor de los casos. "
-        f"Tú tienes {grasa_pct}%**"
+        f" Tú tienes {grasa_pct}%**. La grasa corporal es un indicador clave: cuando está en equilibrio, tu energía, tu sueño, tu digestión y tu estado emocional mejoran."
     )
 
-    st.write(f"Tu requerimiento diario y mínimo de hidratación es de **{agua_ml:,} ml/día.** "
-                f"Es indispensable para facilitar el tránsito intestinal, mejorar la función cerebral, transportar nutrientes, entre muchas mas funciones." 
+    st.write(f"📌 Tu requerimiento diario y mínimo de hidratación es de **{agua_ml:,} ml/día.** "
+                f"Tu cuerpo lo necesita para limpiar toxinas, optimizar la funció cerebral, transportar nutrientes y estabilizar el apetito"
+                f"Cuando no llegas a este nivel, tu cuerpo funciona a “media máquina”. Hidratarte correctamente es uno de los cambios más simples y poderosos que puedes hacer."
+                 
     )
 
     if objetivo_kcal < 1200:
         st.write(
-            f"Tu metabolismo en reposo es de {bmr:,} y para alcanzar tu objetivo "
+            f"📌 Tu metabolismo en reposo es de {bmr:,} y para alcanzar tu objetivo "
             f"se recomienda una ingesta diaria de 1,200 calorías. "
-            f"(No exceder tu requerimiento de calorías diarias te permite mantener un peso saludable.)"
+            f"Aquí está la clave: si comes por encima de eso, acumulas; si comes por debajo, te estancas o pierdes músculo."
+            f"Cuidar este número es cuidar tu futuro cuerpo: tu energía, tu forma física y tu salud hormonal."
+
         )
     else:
         st.write(
-            f"Tu metabolismo en resposo es de {bmr:,} y para alcanzar tu objetivo "
+            f"📌 Tu metabolismo en resposo es de {bmr:,} y para alcanzar tu objetivo "
             f"**se recomienda una ingesta diaria de {objetivo_kcal:,} calorías.** "
-            f"(No exceder tu requerimiento de calorías diarias te permite mantener un peso saludable.)"
+            f"Aquí está la clave: si comes por encima de eso, acumulas; si comes por debajo, te estancas o pierdes músculo."
+            f"Cuidar este número es cuidar tu futuro cuerpo: tu energía, tu forma física y tu salud hormonal."
         )
 
     pollo_g = int(round((prote_g / 22.5) * 100))
     huevos_n = int(round(prote_g / 5.5))
     st.write(
-        f"Finalmente tu **requerimiento de proteína** según el objetivo que te has propuesto es de **{prote_g} gramos al día.** "
+        f"📌 Tu **requerimiento de proteína** según el objetivo que te has propuesto es de **{prote_g} gramos al día.** "
+        f"Esto es lo que realmente define tu composición corporal."
         f"Como referencia, esto equivale a {pollo_g} g de pechuga de pollo o {huevos_n} huevos. "
-        f"(Alcanzar tu requerimiento de proteína diario te permite preservar músculo durante la perdida de peso, evitando la flacidez.)"
+        f"Alcanzar tu requerimiento de proteína diario te permite preservar y aumentar músculo, evitar la flacidez en la perdida de peso, controlar el apetito, mejorar tu metabolismo y mantener tu energia estable. "
+        f"La proteína no es un suplemento exclusivo para deportistas, es un pilar de la nutrición diaria."
     )
 
-    st.write("Tómale foto a esta información, puede cambiar de manera significativa el rumbo de tu bienestar.")
+    st.write("📸 Tómale foto a esta información")
+
+    st.write("Porque estos números pueden cambiar el rumbo de tu bienestar si los tomas en serio. Aquí tienes la guía para tomar decisiones inteligentes, construir hábitos sólidos y conseguir resultados reales.")
+
+    st.write("Tu cuerpo te está hablando. Hoy puedes decidir escucharlo.")
 
     bton_nav()
 
