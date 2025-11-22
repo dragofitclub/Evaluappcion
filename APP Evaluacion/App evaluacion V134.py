@@ -1443,7 +1443,7 @@ def pantalla3():
             dolor_art   = st.checkbox("¿Dolor Articular?")
             ansiedad    = st.checkbox("¿Ansiedad por comer?")
             jaquecas    = st.checkbox("¿Jaquecas / Migrañas?")
-            diabetes_fam= st.checkbox("¿Resistencia a la Insulina")
+            diabetes_fam= st.checkbox("¿Resistencia a la Insulina?")
             higado      = st.checkbox("¿Hígado Graso?")
             trigli      = st.checkbox("¿Triglicéridos Altos?")
 
