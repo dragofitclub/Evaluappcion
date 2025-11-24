@@ -1891,7 +1891,9 @@ def _tarjeta_programa(col, titulo: str, items: List[str], desc_pct: int, img_nam
 
 def pantalla6():
 
-    st.header("6) Únete a LA TRIBU PRO con nuestro programa personalizado")
+    st.header("¡Tú también puedes construir una nueva y mejor versión de ti!")
+
+    st.write("Únete a LA TRIBU PRO con nuestro programa personalizado ")
 
     st.write(
         "Para asegurar alcanzar tus resultados los 10 primeros días son clave. "
@@ -1899,8 +1901,7 @@ def pantalla6():
         "y en compañía de otras personas caminando en la misma dirección."
     )
 
-    st.write("¡Tú también puedes construir una nueva y mejor versión de ti!")
-
+    
     st.markdown("## ¿Qué incluye el plan personalizado?")
 
     # === Beneficios en cuadrícula 3 columnas ===
