@@ -1641,6 +1641,24 @@ def pantalla5():
             st.markdown(f"- {txt}")
         st.write("")
 
+    # ======= BLOQUE QUE AGREGASTE =======
+    st.divider()
+    st.markdown("## Y yo también tengo un resultado que compartirte")
+
+    foto_usuario = st.file_uploader(
+        "Sube tu foto aquí",
+        type=["jpg", "jpeg", "png"],
+        key="foto_resultado_usuario"
+    )
+
+    if foto_usuario:
+        try:
+            img_user = Image.open(foto_usuario)
+            st.image(img_user, use_container_width=True)
+        except Exception as e:
+            st.error(f"No se pudo mostrar la imagen: {e}")
+    # ====================================
+
     bton_nav()
 
 # =========================
