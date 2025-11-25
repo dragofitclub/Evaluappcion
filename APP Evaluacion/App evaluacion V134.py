@@ -1351,7 +1351,7 @@ def pantalla2():
     objetivo_kcal = bmr + 250 if meta_masa else bmr - 250
 
     st.write("Lo que estás a punto de escuchar no es “un dato más”. Es tu mapa personal de bienestar."
-             " Son números que explican cómo está respondiendo tu cuerpo hoy… y hacia dónde puede ir si tomas buenas decisiones. ")
+             " Son números que explican cómo está respondiendo tu cuerpo hoy… y hacia dónde puede ir, tomando buenas decisiones. ")
 
     if 18.6 <= imc_val <= 24.9:
         st.write(
@@ -1374,7 +1374,7 @@ def pantalla2():
     )
 
     st.write(f"📌 Tu requerimiento diario y mínimo de hidratación es de **{agua_ml:,} ml/día.** "
-                f"Tu cuerpo lo necesita para limpiar toxinas, optimizar la funció cerebral, transportar nutrientes y estabilizar el apetito"
+                f"Tu cuerpo lo necesita para limpiar toxinas, optimizar la funció cerebral, transportar nutrientes y estabilizar el apetito. "
                 f"Cuando no llegas a este nivel, tu cuerpo funciona a “media máquina”. Hidratarte correctamente es uno de los cambios más simples y poderosos que puedes hacer."
                  
     )
@@ -1383,7 +1383,6 @@ def pantalla2():
         st.write(
             f"📌 Tu metabolismo en reposo es de {bmr:,} y para alcanzar tu objetivo "
             f"se recomienda una ingesta diaria de 1,200 calorías. "
-            f"Aquí está la clave: si comes por encima de eso, acumulas; si comes por debajo, te estancas o pierdes músculo."
             f"Cuidar este número es cuidar tu futuro cuerpo: tu energía, tu forma física y tu salud hormonal."
 
         )
@@ -1391,7 +1390,6 @@ def pantalla2():
         st.write(
             f"📌 Tu metabolismo en resposo es de {bmr:,} y para alcanzar tu objetivo "
             f"**se recomienda una ingesta diaria de {objetivo_kcal:,} calorías.** "
-            f"Aquí está la clave: si comes por encima de eso, acumulas; si comes por debajo, te estancas o pierdes músculo."
             f"Cuidar este número es cuidar tu futuro cuerpo: tu energía, tu forma física y tu salud hormonal."
         )
 
@@ -1399,17 +1397,14 @@ def pantalla2():
     huevos_n = int(round(prote_g / 5.5))
     st.write(
         f"📌 Tu **requerimiento de proteína** según el objetivo que te has propuesto es de **{prote_g} gramos al día.** "
-        f"Esto es lo que realmente define tu composición corporal."
+        f"Esto es lo que realmente define tu composición corporal. "
         f"Como referencia, esto equivale a {pollo_g} g de pechuga de pollo o {huevos_n} huevos. "
         f"Alcanzar tu requerimiento de proteína diario te permite preservar y aumentar músculo, evitar la flacidez en la perdida de peso, controlar el apetito, mejorar tu metabolismo y mantener tu energia estable. "
         f"La proteína no es un suplemento exclusivo para deportistas, es un pilar de la nutrición diaria."
     )
 
-    st.write("📸 Tómale foto a esta información")
+    st.write("📸 Te invito a tomarle foto a esta información porque estos números pueden cambiar el rumbo de tu bienestar.")
 
-    st.write("Porque estos números pueden cambiar el rumbo de tu bienestar si los tomas en serio. Aquí tienes la guía para tomar decisiones inteligentes, construir hábitos sólidos y conseguir resultados reales.")
-
-    st.write("Tu cuerpo te está hablando. Hoy puedes decidir escucharlo.")
 
     bton_nav()
 
