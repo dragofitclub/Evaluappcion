@@ -1370,7 +1370,7 @@ def pantalla2():
     st.write(
         f"📌 {articulo} {genero_pal} de {edad_ref} años como tú tiene "
         f"**{rmin:.1f} % de grasa en el mejor de los casos y {rmax:.1f} % en el peor de los casos. "
-        f" Tú tienes {grasa_pct}%**. La grasa corporal es un indicador clave: cuando está en equilibrio, tu energía, tu sueño, tu digestión y tu estado emocional mejoran."
+        f" Tú tienes {grasa_pct}%**. La grasa corporal es un indicador clave: cuanto más cerca estes al mejor de los casos, tu energía, tu sueño, tu digestión y tu estado emocional mejoran."
     )
 
     st.write(f"📌 Tu requerimiento diario y mínimo de hidratación es de **{agua_ml:,} ml/día.** "
