@@ -1375,7 +1375,7 @@ def pantalla2():
 
     st.write(f"📌 Tu requerimiento diario y mínimo de hidratación es de **{agua_ml:,} ml/día.** "
                 f"Tu cuerpo lo necesita para limpiar toxinas, optimizar la funció cerebral, transportar nutrientes y estabilizar el apetito. "
-                f"Cuando no llegas a este nivel, tu cuerpo funciona a “media máquina”. Hidratarte correctamente es uno de los cambios más simples y poderosos que puedes hacer."
+                f"Cuando no llegas a este nivel, tu cuerpo funciona a “media máquina”. Hidratarte correctamente es uno de los cambios más poderosos que puedes hacer."
                  
     )
 
