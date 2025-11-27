@@ -1399,7 +1399,7 @@ def pantalla2():
         f"📌 Tu **requerimiento de proteína** según el objetivo que te has propuesto es de **{prote_g} gramos al día.** "
         f"Esto es lo que realmente define tu composición corporal. "
         f"Como referencia, si solo comieras pollo o huevo durante el dia, esto equivale a {pollo_g} g de pechuga de pollo o {huevos_n} huevos. "
-        f"Alcanzar tu requerimiento de proteína diario te permite preservar y aumentar músculo, evitar la flacidez en la perdida de peso, controlar el apetito, mejorar tu metabolismo y mantener tu energia estable. "
+        f"Alcanzar tu requerimiento de proteína diario te permite preservar y aumentar músculo, evitar la flacidez en la pérdida de peso, controlar el apetito, mejorar tu metabolismo y mantener tu energía estable. "
         f"La proteína no es un suplemento exclusivo para deportistas, es un pilar de la nutrición diaria."
     )
 
