@@ -2215,7 +2215,7 @@ def pantalla7():
 # -------------------------------------------------------------
 def sidebar_nav():
     with st.sidebar:
-        st.title("Evalución de Bienestar")
+        st.title("Evaluación de Bienestar")
         st.caption(f"País: {st.session_state.get('country_name','Perú')}  ·  Moneda: {st.session_state.get('currency_symbol','S/')}")
         for i, titulo in [
             (1, "Perfil de Bienestar"),
