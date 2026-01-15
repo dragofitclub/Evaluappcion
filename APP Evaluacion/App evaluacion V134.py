@@ -1636,9 +1636,7 @@ def pantalla5():
     """, unsafe_allow_html=True)
 
     testimonios = [
-        ("jessiyroi.jpg","Jessi y Roi son papás de 3 niños",
-         ["El aumentó 8kg de masa muscular y ella controló 14kg post parto en 3 meses",
-          "Lo que más valoran es la energía que tienen a diario para jugar y disfrutar de sus hijos."]),
+        ("jessiyroi.jpg","Jessi y Roi son papás de 3 niños",),
         ("alexisylyn.jpg","Alexis y Lyn — Recomposición corporal",
          ["Ambos pesan lo mismo en ambas fotos. El 74 y ella 60kg.",
           "Ambos lograron una mejora notable en el tono muscular y pérdida de grasa."]),
