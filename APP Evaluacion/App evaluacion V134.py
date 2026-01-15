@@ -1636,7 +1636,8 @@ def pantalla5():
     """, unsafe_allow_html=True)
 
     testimonios = [
-        ("jessiyroi.jpg","Jessi y Roi son papás de 3 niños",),
+        ("jessiyroi.jpg","Jessi y Roi son papás de 3 niños",
+        ),
         ("alexisylyn.jpg","Alexis y Lyn — Recomposición corporal",
          ["Ambos pesan lo mismo en ambas fotos. El 74 y ella 60kg.",
           "Ambos lograron una mejora notable en el tono muscular y pérdida de grasa."]),
