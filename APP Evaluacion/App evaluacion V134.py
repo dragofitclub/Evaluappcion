@@ -1628,6 +1628,7 @@ def pantalla5():
     )
     st.subheader("Testimonios")
 
+    # (Estilo se puede dejar aunque ya no haya texto; no rompe nada)
     st.markdown("""
         <style>
         .testi-title{ font-weight: 800; font-size: 1.2rem; margin: 8px 0 2px 0; }
@@ -1655,13 +1656,11 @@ def pantalla5():
          ["Aldo, arquitecto, se amanecía trabajando en la oficina. Cristina, médico, con turnos de 24 a 48 horas.  Ambos con una alimentación muy desordenada. Él controló 25 kg y ella 12 kg."]),
     ]
 
+    # ✅ Solo fotos (sin texto entre foto y foto)
     for fname, titulo, bullets in testimonios:
         st.divider()
         show_img(fname)
-        st.markdown(f"<div class='testi-box'><div class='testi-title'>{titulo}</div></div>", unsafe_allow_html=True)
-        for txt in bullets:
-            st.markdown(f"- {txt}")
-        st.write("")
+        st.write("")  # espacio suave entre imágenes
 
     # ======= BLOQUE QUE AGREGASTE =======
     st.divider()
