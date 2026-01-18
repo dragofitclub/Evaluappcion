@@ -366,6 +366,29 @@ COUNTRY_CONFIG: Dict[str, Dict] = {
             "Fibra Activa","Golden Beverage","NRG","Herbalifeline","PDM"
         ],
     },
+
+    # ==== NUEVO: Ecuador ====
+    "Ecuador": {
+        "code": "EC",
+        "currency_symbol": "$",
+        "thousands_sep": ",",
+        "prices": {
+            "Batido": 57.02,
+            "Té de Hierbas": 38.09,
+            "Aloe Concentrado": 54.18,
+            "Beverage Mix": 49.35,
+            "Beta Heart": 62.21,
+            "Fibra Activa": 52.70,
+            "Golden Beverage": 34.98,
+            "NRG": 28.00,
+            "Herbalifeline": 53.00,
+            "PDM": 72.98,
+        },
+        "available_products": [
+            "Batido","Té de Hierbas","Aloe Concentrado","Beverage Mix","Beta Heart",
+            "Fibra Activa","Golden Beverage","NRG","Herbalifeline","PDM"
+        ],
+    },
 }
 
 # =========================
@@ -1243,7 +1266,7 @@ def pantalla1():
         st.subheader("País")
         pais = st.selectbox(
             "Selecciona tu país",
-            ["Perú", "Chile", "Colombia", "España (Península)", "España (Canarias)", "Italia", "Francia", "Argentina", "Estados Unidos", "Canada", "Mexico", "República Dominicana"],
+            sorted(COUNTRY_CONFIG.keys()),
             index=0,
             help="Esto ajustará los precios y la moneda en las recomendaciones."
         )
