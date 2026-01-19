@@ -435,6 +435,29 @@ COUNTRY_CONFIG: Dict[str, Dict] = {
             "Fibra Activa","Golden Beverage","NRG","Herbalifeline","PDM"
         ],
     },
+
+    # ==== NUEVO: Portugal ====
+    "Portugal": {
+        "code": "PT",
+        "currency_symbol": "€",
+        "thousands_sep": ".",
+        "prices": {
+            "Batido": 49.70,
+            "Té de Hierbas": 35.21,
+            "Aloe Concentrado": 43.07,
+            "Beverage Mix": 58.93,
+            "Beta Heart": 43.34,
+            "Fibra Activa": 32.06,
+            "Golden Beverage": 63.75,
+            "NRG": 33.91,
+            "Herbalifeline": 32.32,
+            "PDM": 56.11,
+        },
+        "available_products": [
+            "Batido","Té de Hierbas","Aloe Concentrado","Beverage Mix","Beta Heart",
+            "Fibra Activa","Golden Beverage","NRG","Herbalifeline","PDM"
+        ],
+    },
 }
 
 # =========================
