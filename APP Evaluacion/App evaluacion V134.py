@@ -389,6 +389,52 @@ COUNTRY_CONFIG: Dict[str, Dict] = {
             "Fibra Activa","Golden Beverage","NRG","Herbalifeline","PDM"
         ],
     },
+
+    # ==== NUEVO: Holanda ====
+    "Holanda": {
+        "code": "NL",
+        "currency_symbol": "€",
+        "thousands_sep": ".",
+        "prices": {
+            "Batido": 65.35,
+            "Té de Hierbas": 40.60,
+            "Aloe Concentrado": 57.60,
+            "Beverage Mix": 72.60,
+            "Beta Heart": 57.35,
+            "Fibra Activa": 43.45,
+            "Golden Beverage": 82.35,
+            "NRG": 36.45,
+            "Herbalifeline": 40.80,
+            "PDM": 72.90,
+        },
+        "available_products": [
+            "Batido","Té de Hierbas","Aloe Concentrado","Beverage Mix","Beta Heart",
+            "Fibra Activa","Golden Beverage","NRG","Herbalifeline","PDM"
+        ],
+    },
+
+    # ==== NUEVO: Francia ====
+    "Francia": {
+        "code": "FR",
+        "currency_symbol": "€",
+        "thousands_sep": ".",
+        "prices": {
+            "Batido": 55.78,
+            "Té de Hierbas": 32.26,
+            "Aloe Concentrado": 42.79,
+            "Beverage Mix": 65.85,
+            "Beta Heart": 50.34,
+            "Fibra Activa": 38.16,
+            "Golden Beverage": 74.05,
+            "NRG": 32.60,
+            "Herbalifeline": 35.82,
+            "PDM": 62.73,
+        },
+        "available_products": [
+            "Batido","Té de Hierbas","Aloe Concentrado","Beverage Mix","Beta Heart",
+            "Fibra Activa","Golden Beverage","NRG","Herbalifeline","PDM"
+        ],
+    },
 }
 
 # =========================
