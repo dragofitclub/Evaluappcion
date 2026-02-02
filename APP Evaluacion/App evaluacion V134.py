@@ -1648,57 +1648,8 @@ def pantalla3():
     })
 
     bton_nav()
-
 # -------------------------------------------------------------
-# STEP 4 - Valoración de Servicio
-# -------------------------------------------------------------
-def emoji_y_texto(n):
-    if n <= 0: return "😡", "PÉSIMO (Ayúdame a mejorar mi calificación)"
-    if n == 1: return "😠", "NO ME GUSTÓ (Ayúdame a mejorar mi calificación)" 
-    if n == 2: return "😐", "ME GUSTÓ POCO (Sólo faltan 3 más)"
-    if n == 3: return "🙂", "ME GUSTÓ (¡Sólo 2 más!)"
-    if n == 4: return "😁", "ME GUSTÓ MUCHO (¡El último y terminamos!)"
-    return "🤩", "ME ENCANTÓ"
-
-def pantalla4():
-    st.header("4) Valoración de Servicio")
-    st.write(
-        "La empresa valora la calidad de mi servicio según la cantidad de personas a las cuales **les quieres regalar la misma evaluación**."
-        "Mencionar 1 persona significa que no te gustó y 5 personas significa que te encantó. Entonces..."
-    )
-
-    if "valoracion_contactos" not in st.session_state:
-        st.session_state.valoracion_contactos = []
-
-    with st.form("add_ref"):
-        cols = st.columns([2,1,1,1])
-        with cols[0]:
-            nombre   = st.text_input("¿A quién te gustaría regalarle esta evaluación?")
-        with cols[1]:
-            telefono = st.text_input("¿Cuál es su número de teléfono?")
-        with cols[2]:
-            distrito = st.text_input("¿Distrito?")
-        with cols[3]:
-            relacion = st.text_input("¿Qué relación tienen?")
-        if st.form_submit_button("Agregar") and nombre:
-            st.session_state.valoracion_contactos.append({
-                "nombre": nombre, "telefono": telefono, "distrito": distrito, "relacion": relacion
-            })
-
-    if st.session_state.valoracion_contactos:
-        st.table(st.session_state.valoracion_contactos)
-
-    n = min(len(st.session_state.valoracion_contactos), 5)
-    cara, texto = emoji_y_texto(n)
-    st.markdown(f"### {cara}  {texto}")
-
-    st.divider()
-    st.write("Muchas gracias por ayudarme con la evaluación. Antes de despedirnos, **¿Te gustaría que te explique cómo, a través de nuestra TRIBU, podemos ayudarte a alcanzar tus objetivos ?**")
-
-    bton_nav()
-
-# -------------------------------------------------------------
-# STEP 5 - Quiénes somos
+# STEP 4 - Quiénes somos
 # -------------------------------------------------------------
 def show_img(filename: str, caption: str = ""):
     p = (APP_DIR / filename)
@@ -1711,8 +1662,8 @@ def show_img(filename: str, caption: str = ""):
     else:
         st.warning(f"(Falta imagen: {filename})")
 
-def pantalla5():
-    st.header("5) Quiénes somos")
+def pantalla4():
+    st.header("4) Quiénes somos")
     st.write(
         "Somos **LA TRIBU PRO**, una comunidad que educa a las personas en hábitos saludables de vida para que puedan alcanzar resultados "
         "de bienestar y puesta en forma, y sostenerlos en el tiempo.\n\n"
@@ -1771,6 +1722,55 @@ def pantalla5():
         except Exception as e:
             st.error(f"No se pudo mostrar la imagen: {e}")
     # ====================================
+
+    bton_nav()
+
+
+# -------------------------------------------------------------
+# STEP 5 - Valoración de Servicio
+# -------------------------------------------------------------
+def emoji_y_texto(n):
+    if n <= 0: return "😡", "PÉSIMO (Ayúdame a mejorar mi calificación)"
+    if n == 1: return "😠", "NO ME GUSTÓ (Ayúdame a mejorar mi calificación)" 
+    if n == 2: return "😐", "ME GUSTÓ POCO (Sólo faltan 3 más)"
+    if n == 3: return "🙂", "ME GUSTÓ (¡Sólo 2 más!)"
+    if n == 4: return "😁", "ME GUSTÓ MUCHO (¡El último y terminamos!)"
+    return "🤩", "ME ENCANTÓ"
+
+def pantalla5():
+    st.header("5) Valoración de Servicio")
+    st.write(
+        "La empresa valora la calidad de mi servicio según la cantidad de personas a las cuales **les quieres regalar la misma evaluación**."
+        "Mencionar 1 persona significa que no te gustó y 5 personas significa que te encantó. Entonces..."
+    )
+
+    if "valoracion_contactos" not in st.session_state:
+        st.session_state.valoracion_contactos = []
+
+    with st.form("add_ref"):
+        cols = st.columns([2,1,1,1])
+        with cols[0]:
+            nombre   = st.text_input("¿A quién te gustaría regalarle esta evaluación?")
+        with cols[1]:
+            telefono = st.text_input("¿Cuál es su número de teléfono?")
+        with cols[2]:
+            distrito = st.text_input("¿Distrito?")
+        with cols[3]:
+            relacion = st.text_input("¿Qué relación tienen?")
+        if st.form_submit_button("Agregar") and nombre:
+            st.session_state.valoracion_contactos.append({
+                "nombre": nombre, "telefono": telefono, "distrito": distrito, "relacion": relacion
+            })
+
+    if st.session_state.valoracion_contactos:
+        st.table(st.session_state.valoracion_contactos)
+
+    n = min(len(st.session_state.valoracion_contactos), 5)
+    cara, texto = emoji_y_texto(n)
+    st.markdown(f"### {cara}  {texto}")
+
+    st.divider()
+    st.write("Muchas gracias por ayudarme con la evaluación. Antes de despedirnos, **¿Te gustaría que te explique cómo, a través de nuestra TRIBU, podemos ayudarte a alcanzar tus objetivos ?**")
 
     bton_nav()
 
@@ -2312,8 +2312,8 @@ def sidebar_nav():
             (1, "Perfil de Bienestar"),
             (2, "Composición Corporal"),
             (3, "Estilo de Vida"),
-            (4, "Valoración"),
-            (5, "Quiénes somos"),
+            (4, "Quiénes somos"),
+            (5, "Valoración"),
             (6, "Plan Personalizado"),
             (7, "Nutrición Específica"),
         ]:
