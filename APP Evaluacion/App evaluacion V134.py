@@ -1552,7 +1552,7 @@ def pantalla3():
 
     
     
-    st.header("2) Evaluación de Composición Corporal")
+    st.header("Evaluación de Composición Corporal")
 
     col = st.columns([2,1,1])
     with col[1]:
