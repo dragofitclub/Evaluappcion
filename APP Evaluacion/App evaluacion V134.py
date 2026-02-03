@@ -581,10 +581,12 @@ def go(prev=False, next=False, to=None):
     if to is not None:
         st.session_state.step = to
     elif next:
-        # AHORA HASTA LA PÁGINA 7
         st.session_state.step = min(st.session_state.step + 1, 7)
     elif prev:
         st.session_state.step = max(st.session_state.step - 1, 1)
+
+    # marcar que hay que subir arriba en el próximo render
+    st.session_state._scroll_top = True
 
 def ir_prev(): go(prev=True)
 def ir_next(): go(next=True)
@@ -1318,6 +1320,21 @@ def inject_theme():
 # STEP 1 - Perfil de Bienestar
 # -------------------------------------------------------------
 def pantalla1():
+    scroll_to_top()
+
+    st.header("Bienvenid@")
+
+    st.markdown("""
+    Esta evaluación existe para ayudarte a entender con mayor claridad tu punto de partida en bienestar y qué ajustes pueden acercarte a los resultados que estás buscando.
+
+    Formamos parte de **La Tribu Pro**, una comunidad de personas que practican un estilo de vida activo y saludable y que crece a nivel local y global a través del ejemplo de sus miembros.
+
+    Nuestro enfoque es simple: acompañar a personas en su proceso, ofreciéndoles guía, estructura y comunidad para sostener el cambio en el tiempo.
+
+    Si esta evaluación te aporta claridad y valor, ya está cumpliendo su propósito.  
+    Y apreciaríamos mucho que pudieras compartirla con más personas para que la Tribu pueda sumar valor en más vidas.
+    """)
+    
     st.header("1) Perfil de Bienestar")
     with st.form("perfil"):
         st.subheader("Información Personal")
@@ -1391,9 +1408,70 @@ def pantalla1():
                 "alcohol_mes": alcohol
             })
             go(next=True)
+            
+# -------------------------------------------------------------
+# STEP 2 - Estilo de Vida y Objetivos
+# -------------------------------------------------------------
+def pantalla2():
+    scroll_to_top()
+
+    st.header("2) Evaluación de Estilo de Vida")
+
+    st.subheader("Hábitos y energía")
+    c1, c2 = st.columns(2)
+    with c1:
+        st.text_input("¿En qué momento del día sientes menos energía?", key="ev_menos_energia")
+        st.text_input("¿Practicas actividad física al menos 3 veces/semana?", key="ev_actividad")
+        st.text_input("¿Has intentado algo antes para verte/estar mejor? (Gym, Dieta, App, Otros)", key="ev_intentos")
+        st.text_input("¿Qué es lo que más se te complica? (Constancia, Alimentación, Motivación, Otros)", key="ev_complica")
+        st.text_input("¿Consideras que cuidar de ti es una prioridad?", key="ev_prioridad_personal")
+    with c2:
+        st.write("¿Presentas alguna de las siguientes condiciones?")
+        cols = st.columns(2)
+        with cols[0]:
+            estre       = st.checkbox("¿Estreñimiento?")
+            colesterol  = st.checkbox("¿Colesterol Alto?")
+            baja_ene    = st.checkbox("¿Baja Energía?")
+            dolor_musc  = st.checkbox("¿Dolor Muscular?")
+            gastritis   = st.checkbox("¿Gastritis?")
+            hemorroides = st.checkbox("¿Hemorroides?")
+            hiper       = st.checkbox("¿Hiper/Hipotiroidismo?")
+        with cols[1]:
+            hta         = st.checkbox("¿Hipertensión?")
+            dolor_art   = st.checkbox("¿Dolor Articular?")
+            ansiedad    = st.checkbox("¿Ansiedad por comer?")
+            jaquecas    = st.checkbox("¿Jaquecas / Migrañas?")
+            diabetes_fam= st.checkbox("¿Resistencia a la Insulina?")
+            higado      = st.checkbox("¿Hígado Graso?")
+            trigli      = st.checkbox("¿Triglicéridos Altos?")
+
+    st.session_state.p3_estrenimiento                      = bool(estre)
+    st.session_state.p3_colesterol_alto                    = bool(colesterol)
+    st.session_state.p3_baja_energia                       = bool(baja_ene)
+    st.session_state.p3_dolor_muscular                     = bool(dolor_musc)
+    st.session_state.p3_gastritis                          = bool(gastritis)
+    st.session_state.p3_hemorroides                        = bool(hemorroides)
+    st.session_state.p3_hipertension                       = bool(hta)
+    st.session_state.p3_dolor_articular                    = bool(dolor_art)
+    st.session_state.p3_ansiedad_por_comer                 = bool(ansiedad)
+    st.session_state.p3_jaquecas_migranas                  = bool(jaquecas)
+    st.session_state.p3_diabetes_antecedentes_familiares   = bool(diabetes_fam)
+
+    st.subheader("Objetivos")
+    c1, c2 = st.columns(2)
+    with c1:
+        st.text_input("¿Qué talla de ropa te gustaría ser o mantener?", key="obj_talla")
+        st.text_input("¿Qué prenda tienes en tu ropero que podamos usar como meta?", key="obj_ropero")
+        st.text_input("¿Qué partes de tu cuerpo te gustaría mejorar?", key="obj_partes")
+    with c2:
+        st.text_input("¿Cómo mejoraría tu vida al alcanzar tus objetivos de bienestar?", key="obj_beneficio")
+        st.text_input("¿Qué eventos tienes en los próximos 3 o 6 meses que te inspiren a lograr tus objetivos?", key="obj_eventos")
+        st.text_input("Del 1 al 10, ¿cuál es tu nivel de compromiso en alcanzar una mejor versión de ti?", key="obj_compromiso")
+
+    bton_nav()
 
 # -------------------------------------------------------------
-# STEP 2 - Evaluación de Composición Corporal
+# STEP 3 - Evaluación de Composición Corporal
 # -------------------------------------------------------------
 def _calcular_edad(fecha_iso: str) -> int:
     try:
@@ -1402,7 +1480,78 @@ def _calcular_edad(fecha_iso: str) -> int:
         return 30
     return max(16, min(79, date.today().year - anio))
 
-def pantalla2():
+def pantalla3():
+    scroll_to_top()
+
+
+    st.header ("3) Análisis de presupuesto")
+
+    col = st.columns(4)
+    cur = st.session_state.get("currency_symbol", "S/")
+
+    with col[0]:
+        st.number_input(f"¿Cuánto gastas a la semana en tu comida? ({cur})", min_value=0.0, step=0.1, key="presu_comida")
+    with col[1]:
+        st.number_input(f"¿Cuánto de este monto corresponde a dulces, golosinas y/o snacks salados? ({cur})", min_value=0.0, step=0.1, key="presu_snacks")
+    with col[2]:
+        st.number_input(f"¿Cuánto de este monto corresponde a bebidas/gaseosas/agua/refrescos/alcohol? ({cur})", min_value=0.0, step=0.1, key="presu_bebidas")
+    with col[3]:
+        st.number_input(f"¿Cuánto de este monto corresponde a deliveries/salidas a comer? ({cur})", min_value=0.0, step=0.1, key="presu_deliveries")
+
+    # ================================
+    # Cálculos de presupuestos diarios
+    # ================================
+    presu_comida_diario = round(float(st.session_state.get("presu_comida", 0.0)) / 7, 2)
+    presu_snacks_diario = round(float(st.session_state.get("presu_snacks", 0.0)) / 7, 2)
+    presu_bebidas_diario = round(float(st.session_state.get("presu_bebidas", 0.0)) / 7, 2)
+    presu_deliveries_diario = round(float(st.session_state.get("presu_deliveries", 0.0)) / 7, 2)
+
+    prom_diario_total = round(
+        presu_comida_diario +
+        presu_snacks_diario +
+        presu_bebidas_diario +
+        presu_deliveries_diario, 2
+    )
+
+    # ================================
+    # Resultados
+    # ================================
+    st.markdown("### Presupuesto diario estimado:")
+    st.write(f"- **Comida:** {cur} {presu_comida_diario:.2f}")
+    st.write(f"- **Golosinas/snacks:** {cur} {presu_snacks_diario:.2f}")
+    st.write(f"- **Bebidas:** {cur} {presu_bebidas_diario:.2f}")
+    st.write(f"- **Restaurantes/deliveries:** {cur} {presu_deliveries_diario:.2f}")
+    st.markdown("---")
+
+    st.text_input(
+        "¿Consideras valioso optimizar tu presupuesto para alcanzar tus objetivos?",
+        key="ev_valora_optimizar"
+    )
+
+    st.session_state.estilo_vida.update({
+        "ev_menos_energia":      st.session_state.get("ev_menos_energia", ""),
+        "ev_actividad":          st.session_state.get("ev_actividad", ""),
+        "ev_intentos":           st.session_state.get("ev_intentos", ""),
+        "ev_complica":           st.session_state.get("ev_complica", ""),
+        "ev_prioridad_personal": st.session_state.get("ev_prioridad_personal",""),
+        "ev_valora_optimizar":   st.session_state.get("ev_valora_optimizar",""),
+        "presu_comida":          st.session_state.get("presu_comida", 0.0),
+        "presu_snacks":          st.session_state.get("presu_snacks", 0.0),
+        "presu_bebidas":         st.session_state.get("presu_bebidas", 0.0),
+        "presu_deliveries":      st.session_state.get("presu_deliveries", 0.0),
+    })
+
+    st.session_state.metas.update({
+        "obj_talla":      st.session_state.get("obj_talla",""),
+        "obj_partes":     st.session_state.get("obj_partes",""),
+        "obj_ropero":     st.session_state.get("obj_ropero",""),
+        "obj_beneficio":  st.session_state.get("obj_beneficio",""),
+        "obj_eventos":    st.session_state.get("obj_eventos",""),
+        "obj_compromiso": st.session_state.get("obj_compromiso",""),
+    })
+
+    
+    
     st.header("2) Evaluación de Composición Corporal")
 
     col = st.columns([2,1,1])
@@ -1517,137 +1666,13 @@ def pantalla2():
         f"La proteína no es un suplemento exclusivo para deportistas, es un pilar de la nutrición diaria."
     )
 
-    st.write("📸 Te invito a tomarle foto a esta información porque estos números pueden cambiar el rumbo de tu bienestar.")
-
-
-    bton_nav()
-
-# -------------------------------------------------------------
-# STEP 3 - Estilo de Vida y Objetivos
-# -------------------------------------------------------------
-def pantalla3():
-    st.header("3) Evaluación de Estilo de Vida")
-
-    st.subheader("Hábitos y energía")
-    c1, c2 = st.columns(2)
-    with c1:
-        st.text_input("¿En qué momento del día sientes menos energía?", key="ev_menos_energia")
-        st.text_input("¿Practicas actividad física al menos 3 veces/semana?", key="ev_actividad")
-        st.text_input("¿Has intentado algo antes para verte/estar mejor? (Gym, Dieta, App, Otros)", key="ev_intentos")
-        st.text_input("¿Qué es lo que más se te complica? (Constancia, Alimentación, Motivación, Otros)", key="ev_complica")
-        st.text_input("¿Consideras que cuidar de ti es una prioridad?", key="ev_prioridad_personal")
-    with c2:
-        st.write("¿Presentas alguna de las siguientes condiciones?")
-        cols = st.columns(2)
-        with cols[0]:
-            estre       = st.checkbox("¿Estreñimiento?")
-            colesterol  = st.checkbox("¿Colesterol Alto?")
-            baja_ene    = st.checkbox("¿Baja Energía?")
-            dolor_musc  = st.checkbox("¿Dolor Muscular?")
-            gastritis   = st.checkbox("¿Gastritis?")
-            hemorroides = st.checkbox("¿Hemorroides?")
-            hiper       = st.checkbox("¿Hiper/Hipotiroidismo?")
-        with cols[1]:
-            hta         = st.checkbox("¿Hipertensión?")
-            dolor_art   = st.checkbox("¿Dolor Articular?")
-            ansiedad    = st.checkbox("¿Ansiedad por comer?")
-            jaquecas    = st.checkbox("¿Jaquecas / Migrañas?")
-            diabetes_fam= st.checkbox("¿Resistencia a la Insulina?")
-            higado      = st.checkbox("¿Hígado Graso?")
-            trigli      = st.checkbox("¿Triglicéridos Altos?")
-
-    st.session_state.p3_estrenimiento                      = bool(estre)
-    st.session_state.p3_colesterol_alto                    = bool(colesterol)
-    st.session_state.p3_baja_energia                       = bool(baja_ene)
-    st.session_state.p3_dolor_muscular                     = bool(dolor_musc)
-    st.session_state.p3_gastritis                          = bool(gastritis)
-    st.session_state.p3_hemorroides                        = bool(hemorroides)
-    st.session_state.p3_hipertension                       = bool(hta)
-    st.session_state.p3_dolor_articular                    = bool(dolor_art)
-    st.session_state.p3_ansiedad_por_comer                 = bool(ansiedad)
-    st.session_state.p3_jaquecas_migranas                  = bool(jaquecas)
-    st.session_state.p3_diabetes_antecedentes_familiares   = bool(diabetes_fam)
-
-    st.subheader("Objetivos")
-    c1, c2 = st.columns(2)
-    with c1:
-        st.text_input("¿Qué talla de ropa te gustaría ser o mantener?", key="obj_talla")
-        st.text_input("¿Qué prenda tienes en tu ropero que podamos usar como meta?", key="obj_ropero")
-        st.text_input("¿Qué partes de tu cuerpo te gustaría mejorar?", key="obj_partes")
-    with c2:
-        st.text_input("¿Cómo mejoraría tu vida al alcanzar tus objetivos de bienestar?", key="obj_beneficio")
-        st.text_input("¿Qué eventos tienes en los próximos 3 o 6 meses que te inspiren a lograr tus objetivos?", key="obj_eventos")
-        st.text_input("Del 1 al 10, ¿cuál es tu nivel de compromiso en alcanzar una mejor versión de ti?", key="obj_compromiso")
-
-    st.subheader("Análisis de presupuesto")
-
-    col = st.columns(4)
-    cur = st.session_state.get("currency_symbol", "S/")
-
-    with col[0]:
-        st.number_input(f"¿Cuánto gastas a la semana en tu comida? ({cur})", min_value=0.0, step=0.1, key="presu_comida")
-    with col[1]:
-        st.number_input(f"¿Cuánto de este monto corresponde a dulces, golosinas y/o snacks salados? ({cur})", min_value=0.0, step=0.1, key="presu_snacks")
-    with col[2]:
-        st.number_input(f"¿Cuánto de este monto corresponde a bebidas/gaseosas/agua/refrescos/alcohol? ({cur})", min_value=0.0, step=0.1, key="presu_bebidas")
-    with col[3]:
-        st.number_input(f"¿Cuánto de este monto corresponde a deliveries/salidas a comer? ({cur})", min_value=0.0, step=0.1, key="presu_deliveries")
-
-    # ================================
-    # Cálculos de presupuestos diarios
-    # ================================
-    presu_comida_diario = round(float(st.session_state.get("presu_comida", 0.0)) / 7, 2)
-    presu_snacks_diario = round(float(st.session_state.get("presu_snacks", 0.0)) / 7, 2)
-    presu_bebidas_diario = round(float(st.session_state.get("presu_bebidas", 0.0)) / 7, 2)
-    presu_deliveries_diario = round(float(st.session_state.get("presu_deliveries", 0.0)) / 7, 2)
-
-    prom_diario_total = round(
-        presu_comida_diario +
-        presu_snacks_diario +
-        presu_bebidas_diario +
-        presu_deliveries_diario, 2
-    )
-
-    # ================================
-    # Resultados
-    # ================================
-    st.markdown("### Presupuesto diario estimado:")
-    st.write(f"- **Comida:** {cur} {presu_comida_diario:.2f}")
-    st.write(f"- **Golosinas/snacks:** {cur} {presu_snacks_diario:.2f}")
-    st.write(f"- **Bebidas:** {cur} {presu_bebidas_diario:.2f}")
-    st.write(f"- **Restaurantes/deliveries:** {cur} {presu_deliveries_diario:.2f}")
-    st.markdown("---")
-
-    st.text_input(
-        "¿Consideras valioso optimizar tu presupuesto para alcanzar tus objetivos?",
-        key="ev_valora_optimizar"
-    )
-
     st.write("Hasta aqui, ¿Qué te parece la información que has recibido en esta evaluación?")
 
-    st.session_state.estilo_vida.update({
-        "ev_menos_energia":      st.session_state.get("ev_menos_energia", ""),
-        "ev_actividad":          st.session_state.get("ev_actividad", ""),
-        "ev_intentos":           st.session_state.get("ev_intentos", ""),
-        "ev_complica":           st.session_state.get("ev_complica", ""),
-        "ev_prioridad_personal": st.session_state.get("ev_prioridad_personal",""),
-        "ev_valora_optimizar":   st.session_state.get("ev_valora_optimizar",""),
-        "presu_comida":          st.session_state.get("presu_comida", 0.0),
-        "presu_snacks":          st.session_state.get("presu_snacks", 0.0),
-        "presu_bebidas":         st.session_state.get("presu_bebidas", 0.0),
-        "presu_deliveries":      st.session_state.get("presu_deliveries", 0.0),
-    })
-
-    st.session_state.metas.update({
-        "obj_talla":      st.session_state.get("obj_talla",""),
-        "obj_partes":     st.session_state.get("obj_partes",""),
-        "obj_ropero":     st.session_state.get("obj_ropero",""),
-        "obj_beneficio":  st.session_state.get("obj_beneficio",""),
-        "obj_eventos":    st.session_state.get("obj_eventos",""),
-        "obj_compromiso": st.session_state.get("obj_compromiso",""),
-    })
 
     bton_nav()
+
+
+    
 # -------------------------------------------------------------
 # STEP 4 - Quiénes somos
 # -------------------------------------------------------------
@@ -2310,8 +2335,8 @@ def sidebar_nav():
         st.caption(f"País: {st.session_state.get('country_name','Perú')}  ·  Moneda: {st.session_state.get('currency_symbol','S/')}")
         for i, titulo in [
             (1, "Perfil de Bienestar"),
-            (2, "Composición Corporal"),
-            (3, "Estilo de Vida"),
+            (2, "Estilo de Vida"),
+            (3, "Composición Corporal"),
             (4, "Quiénes somos"),
             (5, "Valoración"),
             (6, "Plan Personalizado"),
@@ -2327,18 +2352,44 @@ def sidebar_nav():
 # -------------------------------------------------------------
 # Main
 # -------------------------------------------------------------
+def scroll_to_top():
+    st.markdown(
+        """
+        <script>
+            window.scrollTo({ top: 0, behavior: 'instant' });
+        </script>
+        """,
+        unsafe_allow_html=True
+    )
+
 def main():
     init_state()
     inject_theme()
+
+    # Sidebar
     sidebar_nav()
+
+    if st.session_state.get("_scroll_top"):
+        scroll_to_top()
+        st.session_state._scroll_top = False
+
+
+    # Router de pantallas
     s = st.session_state.step
-    if s == 1: pantalla1()
-    elif s == 2: pantalla2()
-    elif s == 3: pantalla3()
-    elif s == 4: pantalla4()
-    elif s == 5: pantalla5()
-    elif s == 6: pantalla6()
-    elif s == 7: pantalla7()
+    if s == 1:
+        pantalla1()
+    elif s == 2:
+        pantalla2()
+    elif s == 3:
+        pantalla3()
+    elif s == 4:
+        pantalla4()
+    elif s == 5:
+        pantalla5()
+    elif s == 6:
+        pantalla6()
+    elif s == 7:
+        pantalla7()
 
 if __name__ == "__main__":
     main()
