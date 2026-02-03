@@ -1688,13 +1688,7 @@ def show_img(filename: str, caption: str = ""):
         st.warning(f"(Falta imagen: {filename})")
 
 def pantalla4():
-    st.header("4) Quiénes somos")
-    st.write(
-        "Somos **LA TRIBU PRO**, una comunidad que educa a las personas en hábitos saludables de vida para que puedan alcanzar resultados "
-        "de bienestar y puesta en forma, y sostenerlos en el tiempo.\n\n"
-        "A continuación te voy a mostrar algunos testimonios de nuestra comunidad."
-    )
-    st.subheader("Testimonios")
+    st.header("4) Resultados")
 
     # (Estilo se puede dejar aunque ya no haya texto; no rompe nada)
     st.markdown("""
@@ -2337,7 +2331,7 @@ def sidebar_nav():
             (1, "Perfil de Bienestar"),
             (2, "Estilo de Vida"),
             (3, "Composición Corporal"),
-            (4, "Quiénes somos"),
+            (4, "Resultados"),
             (5, "Valoración"),
             (6, "Plan Personalizado"),
             (7, "Nutrición Específica"),
