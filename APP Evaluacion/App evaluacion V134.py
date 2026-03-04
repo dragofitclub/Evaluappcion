@@ -2035,8 +2035,7 @@ def pantalla6():
     st.write("te presento la asesoría detallada de nuestro programa")
 
     st.write(
-        "Para asegurar alcanzar tus resultados los 10 primeros días son clave. "
-        "Y no hay mejor manera que empezar tu proceso de puesta en forma que en tribu "
+        "No hay mejor manera que empezar tu proceso de puesta en forma que en tribu "
         "y en compañía de otras personas caminando en la misma dirección."
     )
 
