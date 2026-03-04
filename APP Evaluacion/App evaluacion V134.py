@@ -2040,85 +2040,58 @@ def pantalla6():
         "y en compañía de otras personas caminando en la misma dirección."
     )
 
-    
     st.markdown("## ¿Qué incluye el plan personalizado?")
 
-    # === Beneficios en cuadrícula 3 columnas ===
+    # === TABLA (invisible) 3 columnas: icono | título en negrita | explicación 1 línea ===
     beneficios = [
-        ("diariodecomidas.png", "Guía y acceso exclusivo a nuestro app de Diario de Comidas"),
-        ("coachingcontinuo.png", "Coaching continuo y seguimiento personalizado"),
-        ("entrenamiento.png", "Entrenamiento online por niveles"),
-        ("llamadaclientes.png", "Llamada semanal en directo con la TRIBU"),
-        ("whatsapp.png", "Grupo privado de Whatsapp"),
-        ("eventostribu.png", "Eventos exclusivos de la TRIBU"),
-        ("suplementacion.png", "Guía de suplementación personalizada"),
+        ("entrenamiento.png", "Plataforma de entrenamiento",
+         "Rutinas desde 15 minutos cardio hit, pilates y entrenamiento de fuerza"),
+        ("coachingcontinuo.png", "Asesoría Personalizada",
+         "Acompañamiento 1 a 1 en tiempo real y seguimiento de tu progreso"),
+        ("whatsapp.png", "Chat de Asesoria Grupal por Whatsapp",
+         "Información valiosa, soporte y guía en TRIBU"),
+        ("diariodecomidas.png", "Diario de Comidas",
+         "App para calcular diariamente tus proteinas, calorias e hidratacion"),
+        ("suplementacion.png", "Suplementos Nutricionales",
+         "Complementa tus comidas con vitaminas, minerales, fibra, proteína y más a diario"),
+        ("llamadaclientes.png", "Llamada Semanal en Tribu",
+         "Desarrollamos el tema de la semana y compartimos el proceso"),
     ]
 
     icons_dir = APP_DIR / "icons"
 
+    # Estilo ligero (sin bordes, sin tarjetas)
     st.markdown(
         """
         <style>
-        .benef-grid{
-            display: grid;
-            grid-template-columns: repeat(3, 1fr);
-            gap: 28px;
-            width: 100%;
-            margin-top: 1.2rem;
-            margin-bottom: 2rem;
-        }
-        .benef-card{
-            background-color: #F7F3EE;
-            border-radius: 20px;
-            padding: 25px 20px;
-            box-shadow: 0 4px 12px rgba(0,0,0,0.07);
-            text-align:center;
-            display:flex;
-            flex-direction:column;
-            justify-content:flex-start;
-            align-items:center;
-            min-height:260px;
-        }
-        .benef-icon{
-            width:120px;
-            height:120px;
-            object-fit:contain;
-            margin-bottom:12px;
-        }
-        .benef-title{
-            font-weight:700;
-            color:#29453A;
-            font-size:18px;
-            line-height:1.3;
-            margin-top:8px;
-        }
+          .svc-title{ font-weight:800; color:#29453A; font-size:16px; line-height:1.2; margin:0; }
+          .svc-desc{ color:#29453A; font-size:14px; opacity:.9; line-height:1.25; margin:0; }
         </style>
         """,
         unsafe_allow_html=True
     )
 
-    st.markdown("<div class='benef-grid'>", unsafe_allow_html=True)
+    for fname, titulo, desc in beneficios:
+        c_icon, c_title, c_desc = st.columns([1, 3, 7], vertical_alignment="center")
 
-    for fname, texto in beneficios:
+        # Col 1: icono
         ruta = icons_dir / fname
-        if ruta.exists():
-            with open(ruta, "rb") as f:
-                b64 = base64.b64encode(f.read()).decode()
-                img_html = f"<img class='benef-icon' src='data:image/png;base64,{b64}' />"
-        else:
-            img_html = f"<div style='color:#b00;font-size:12px'>(Falta icono: {fname})</div>"
+        with c_icon:
+            if ruta.exists():
+                try:
+                    st.image(Image.open(ruta), width=56)
+                except Exception:
+                    st.write(f"(Icono inválido: {fname})")
+            else:
+                st.write(f"(Falta: {fname})")
 
-        st.markdown(
-            f"""
-            <div class='benef-card'>
-                {img_html}
-                <div class='benef-title'>{texto}</div>
-            </div>
-            """,
-            unsafe_allow_html=True
-        )
+        # Col 2: título en negrita
+        with c_title:
+            st.markdown(f"<div class='svc-title'>{titulo}</div>", unsafe_allow_html=True)
 
-    st.markdown("</div>", unsafe_allow_html=True)
+        # Col 3: descripción 1 línea
+        with c_desc:
+            st.markdown(f"<div class='svc-desc'>{desc}</div>", unsafe_allow_html=True)
 
     # ==== Cuenta regresiva ====
     st.markdown(
@@ -2297,7 +2270,6 @@ def pantalla6():
         mime="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
         use_container_width=True,
     )
-
 
 # -------------------------------------------------------------
 # STEP 7 - Personaliza tu Programa (personalización completa)
