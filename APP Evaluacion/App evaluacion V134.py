@@ -2058,7 +2058,12 @@ def pantalla6():
          "Desarrollamos el tema de la semana y compartimos el proceso"),
     ]
 
+    # Ruta robusta (Linux es case-sensitive)
     icons_dir = APP_DIR / "icons"
+    if not icons_dir.exists():
+        alt = APP_DIR / "Icons"
+        if alt.exists():
+            icons_dir = alt
 
     # Estilo ligero (sin bordes, sin tarjetas)
     st.markdown(
@@ -2071,27 +2076,33 @@ def pantalla6():
         unsafe_allow_html=True
     )
 
-    for fname, titulo, desc in beneficios:
-        c_icon, c_title, c_desc = st.columns([1, 3, 7], vertical_alignment="center")
+    # ✅ FIX: si algo falla aquí, NO debe cortar el resto de la página
+    try:
+        for fname, titulo, desc in beneficios:
+            # ✅ FIX compatibilidad: quitar vertical_alignment (puede romper en Cloud si tu versión es distinta)
+            c_icon, c_title, c_desc = st.columns([1, 3, 7])
 
-        # Col 1: icono
-        ruta = icons_dir / fname
-        with c_icon:
-            if ruta.exists():
-                try:
-                    st.image(Image.open(ruta), width=56)
-                except Exception:
-                    st.write(f"(Icono inválido: {fname})")
-            else:
-                st.write(f"(Falta: {fname})")
+            # Col 1: icono
+            ruta = icons_dir / fname
+            with c_icon:
+                if ruta.exists():
+                    try:
+                        st.image(Image.open(ruta), width=56)
+                    except Exception:
+                        st.write(f"(Icono inválido: {fname})")
+                else:
+                    st.write(f"(Falta: {fname})")
 
-        # Col 2: título en negrita
-        with c_title:
-            st.markdown(f"<div class='svc-title'>{titulo}</div>", unsafe_allow_html=True)
+            # Col 2: título en negrita
+            with c_title:
+                st.markdown(f"<div class='svc-title'>{titulo}</div>", unsafe_allow_html=True)
 
-        # Col 3: descripción 1 línea
-        with c_desc:
-            st.markdown(f"<div class='svc-desc'>{desc}</div>", unsafe_allow_html=True)
+            # Col 3: descripción 1 línea
+            with c_desc:
+                st.markdown(f"<div class='svc-desc'>{desc}</div>", unsafe_allow_html=True)
+
+    except Exception as e:
+        st.error(f"Error renderizando la tabla de beneficios: {e}")
 
     # ==== Cuenta regresiva ====
     st.markdown(
@@ -2134,7 +2145,7 @@ def pantalla6():
     )
 
     # =============================================================
-    # ⚡ NUEVO TEXTO QUE PEDISTE (debajo del checkbox)
+    # ⚡ NUEVO TEXTO (debajo del checkbox)
     # =============================================================
     combo = st.session_state.get("combo_elegido")
     precio_combo = combo["precio_final"] if combo else 0
