@@ -2042,7 +2042,6 @@ def pantalla6():
 
     st.markdown("## ¿Qué incluye el plan personalizado?")
 
-    # === TABLA (invisible) 3 columnas: icono | título en negrita | explicación 1 línea ===
     beneficios = [
         ("entrenamiento.png", "Plataforma de entrenamiento",
          "Rutinas desde 15 minutos cardio hit, pilates y entrenamiento de fuerza"),
@@ -2058,14 +2057,13 @@ def pantalla6():
          "Desarrollamos el tema de la semana y compartimos el proceso"),
     ]
 
-    # Ruta robusta (Linux es case-sensitive)
+    # Ruta robusta (Linux en Streamlit Cloud es case-sensitive)
     icons_dir = APP_DIR / "icons"
     if not icons_dir.exists():
         alt = APP_DIR / "Icons"
         if alt.exists():
             icons_dir = alt
 
-    # Estilo ligero (sin bordes, sin tarjetas)
     st.markdown(
         """
         <style>
@@ -2076,33 +2074,29 @@ def pantalla6():
         unsafe_allow_html=True
     )
 
-    # ✅ FIX: si algo falla aquí, NO debe cortar el resto de la página
-    try:
+    # ✅ FIX: render “a prueba de fallos” (si un ícono falla, NO corta la página)
+    with st.container():
         for fname, titulo, desc in beneficios:
-            # ✅ FIX compatibilidad: quitar vertical_alignment (puede romper en Cloud si tu versión es distinta)
-            c_icon, c_title, c_desc = st.columns([1, 3, 7])
+            try:
+                c_icon, c_title, c_desc = st.columns([1, 3, 7])
 
-            # Col 1: icono
-            ruta = icons_dir / fname
-            with c_icon:
-                if ruta.exists():
-                    try:
-                        st.image(Image.open(ruta), width=56)
-                    except Exception:
-                        st.write(f"(Icono inválido: {fname})")
-                else:
-                    st.write(f"(Falta: {fname})")
+                ruta = icons_dir / fname
 
-            # Col 2: título en negrita
-            with c_title:
-                st.markdown(f"<div class='svc-title'>{titulo}</div>", unsafe_allow_html=True)
+                with c_icon:
+                    if ruta.exists():
+                        # ✅ FIX: evita PIL/Image.open (a veces revienta en Cloud con algunos PNG)
+                        st.image(str(ruta), width=56)
+                    else:
+                        st.write(f"(Falta: {fname})")
 
-            # Col 3: descripción 1 línea
-            with c_desc:
-                st.markdown(f"<div class='svc-desc'>{desc}</div>", unsafe_allow_html=True)
+                with c_title:
+                    st.markdown(f"<div class='svc-title'>{titulo}</div>", unsafe_allow_html=True)
 
-    except Exception as e:
-        st.error(f"Error renderizando la tabla de beneficios: {e}")
+                with c_desc:
+                    st.markdown(f"<div class='svc-desc'>{desc}</div>", unsafe_allow_html=True)
+
+            except Exception as e:
+                st.warning(f"No se pudo renderizar '{fname}': {e}")
 
     # ==== Cuenta regresiva ====
     st.markdown(
@@ -2145,7 +2139,7 @@ def pantalla6():
     )
 
     # =============================================================
-    # ⚡ NUEVO TEXTO (debajo del checkbox)
+    # TEXTO debajo del checkbox
     # =============================================================
     combo = st.session_state.get("combo_elegido")
     precio_combo = combo["precio_final"] if combo else 0
@@ -2204,7 +2198,6 @@ def pantalla6():
                 unsafe_allow_html=True
             )
 
-            # Textos especiales
             if titulo.strip().lower() == "batido":
                 st.markdown(
                     """
@@ -2248,7 +2241,6 @@ def pantalla6():
 
                 st.success(f"Elegiste: {payload['titulo']} — Total {_mon(payload['precio_final'])}")
 
-    # Tarjetas
     _render_programa(c1, "Batido", ["Batido"], 5, "Batido.jpg", "batido")
     _render_programa(c2, "Batido + Te", ["Batido", "Té de Hierbas"], 10, "Batidoyte.jpg", "batido_te")
     _render_programa(
@@ -2260,7 +2252,6 @@ def pantalla6():
         "chupapanza"
     )
 
-    # ==== Selección actual ====
     if st.session_state.get("combo_elegido"):
         e = st.session_state.combo_elegido
         st.success(
@@ -2268,7 +2259,6 @@ def pantalla6():
             f"({e['descuento_pct']}% dscto)"
         )
 
-    # ==== SOLO DESCARGA ====
     st.divider()
     st.markdown("### 📥 Descargar Evaluación")
     excel_bytes = _excel_bytes()
