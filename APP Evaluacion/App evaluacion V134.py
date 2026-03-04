@@ -2030,9 +2030,9 @@ def _tarjeta_programa(col, titulo: str, items: List[str], desc_pct: int, img_nam
 
 def pantalla6():
 
-    st.header("¡Tú también puedes construir una nueva y mejor versión de ti!")
+    st.header("A continuación")
 
-    st.write("Únete a LA TRIBU PRO con nuestro programa personalizado ")
+    st.write("te presento la asesoría detallada de nuestro programa")
 
     st.write(
         "Para asegurar alcanzar tus resultados los 10 primeros días son clave. "
