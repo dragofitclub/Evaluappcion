@@ -1491,7 +1491,7 @@ def pantalla3():
     with col[1]:
         st.number_input(f"¿Cuánto en dulces, golosinas y/o snacks salados? ({cur})", min_value=0.0, step=0.1, key="presu_snacks")
     with col[2]:
-        st.number_input(f"¿Cuánto en bebidas/gaseosas/agua/refrescos/alcohol? ({cur})", min_value=0.0, step=0.1, key="presu_bebidas")
+        st.number_input(f"¿Cuánto en gaseosas/agua/refrescos/alcohol? ({cur})", min_value=0.0, step=0.1, key="presu_bebidas")
     with col[3]:
         st.number_input(f"¿Cuánto en deliveries/salidas a comer? ({cur})", min_value=0.0, step=0.1, key="presu_deliveries")
 
