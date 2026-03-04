@@ -110,7 +110,7 @@ COUNTRY_CONFIG: Dict[str, Dict] = {
         "currency_symbol": "S/",
         "thousands_sep": ".",
         "prices": {
-                "Batido": 187,
+                "Batido": 197,
                 "Té de Hierbas": 147,
                 "Aloe Concentrado": 183,
                 "Beverage Mix": 162,
