@@ -1489,11 +1489,11 @@ def pantalla3():
     with col[0]:
         st.number_input(f"¿Cuánto gastas a la semana en tu comida? ({cur})", min_value=0.0, step=0.1, key="presu_comida")
     with col[1]:
-        st.number_input(f"¿Cuánto de este monto corresponde a dulces, golosinas y/o snacks salados? ({cur})", min_value=0.0, step=0.1, key="presu_snacks")
+        st.number_input(f"¿Cuánto en dulces, golosinas y/o snacks salados? ({cur})", min_value=0.0, step=0.1, key="presu_snacks")
     with col[2]:
-        st.number_input(f"¿Cuánto de este monto corresponde a bebidas/gaseosas/agua/refrescos/alcohol? ({cur})", min_value=0.0, step=0.1, key="presu_bebidas")
+        st.number_input(f"¿Cuánto en bebidas/gaseosas/agua/refrescos/alcohol? ({cur})", min_value=0.0, step=0.1, key="presu_bebidas")
     with col[3]:
-        st.number_input(f"¿Cuánto de este monto corresponde a deliveries/salidas a comer? ({cur})", min_value=0.0, step=0.1, key="presu_deliveries")
+        st.number_input(f"¿Cuánto en deliveries/salidas a comer? ({cur})", min_value=0.0, step=0.1, key="presu_deliveries")
 
     # ================================
     # Cálculos de presupuestos diarios
