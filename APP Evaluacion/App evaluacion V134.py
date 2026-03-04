@@ -1374,16 +1374,16 @@ def pantalla1():
         st.subheader("Análisis de Nutrición y Salud")
         c1, c2 = st.columns(2)
         with c1:
-            horarios     = st.text_input("¿A qué hora despiertas y a qué hora te vas a dormir?")
+            # horarios  (ELIMINADO)
             desayuno_h   = st.text_input("¿Tomas desayuno todos los días? ¿A qué hora?")
             que_desayunas = st.text_input("¿Qué sueles desayunar?")
             meriendas     = st.text_input("¿Comes entre comidas? ¿Qué sueles comer?")
-            porciones     = st.text_input("¿Cuántas porciones de frutas y verduras comes al dia?")
+            # porciones   (ELIMINADO)
         with c2:
             comer_noche   = st.text_input("¿Tiendes a comer de más por las noches?")
             reto          = st.text_input("¿Cuál es tu mayor reto respecto a la comida?")
             agua8         = st.text_input("¿Tomas por lo menos 8 vasos de agua al dia?")
-            alcohol       = st.text_input("¿Tomas bebidas alcohólicas? ¿Cuántas veces al mes?")
+            # alcohol      (ELIMINADO)
 
         enviado = st.form_submit_button("Guardar y continuar ➡️", use_container_width=True, type="primary")
         if enviado:
@@ -1397,15 +1397,12 @@ def pantalla1():
                 "energia": energia, "rendimiento": rendimiento, "salud": salud, "otros": otros
             })
             st.session_state.estilo_vida.update({
-                "horarios": horarios,
                 "desayuno_h": desayuno_h,
                 "que_desayunas": que_desayunas,
                 "meriendas": meriendas,
-                "porciones": porciones,
                 "comer_noche": comer_noche,
                 "reto": reto,
                 "agua8_p1": agua8,
-                "alcohol_mes": alcohol
             })
             go(next=True)
             
@@ -1828,15 +1825,12 @@ def _excel_bytes():
         ("% de grasa estimado", grasa_pct),
     ]
     estilo = [
-        ("¿A qué hora despiertas y a qué hora te vas a dormir?", e.get("horarios","")),
         ("¿Tomas desayuno todos los días? ¿A qué hora?", e.get("desayuno_h","")),
         ("¿Qué sueles desayunar?", e.get("que_desayunas","")),
         ("¿Comes entre comidas? ¿Qué sueles comer?", e.get("meriendas","")),
-        ("Cuantas porciones de frutas y verduras comes al dia?", e.get("porciones","")),
         ("Tiendes a comer de más por las noches?", e.get("comer_noche","")),
         ("Cuál es tu mayor reto respecto a la comida?", e.get("reto","")),
         ("¿Tomas por lo menos 8 vasos de agua al dia?", e.get("agua8_p1","")),
-        ("¿Tomas bebidas alcohólicas? ¿Cuántas veces al mes?", e.get("alcohol_mes","")),
         ("¿En qué momento del día sientes menos energía?", e.get("ev_menos_energia","")),
         ("¿Practicas actividad física al menos 3 veces/semana?", e.get("ev_actividad","")),
         ("¿Has intentado algo antes para verte/estar mejor? (Gym, Dieta, App, Otros)", e.get("ev_intentos","")),
