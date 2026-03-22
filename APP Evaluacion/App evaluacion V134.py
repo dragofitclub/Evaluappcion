@@ -2213,7 +2213,7 @@ def pantalla6():
                     """
                     <div style='text-align:center; font-size:13px; color:#29453A;
                         margin-top:-10px; margin-bottom:14px;'>
-                        Te desintoxica, hidrata y optimiza la absorción de nutrientes.
+                        Te desintoxica, hidrata y optimiza la absorción de nutrientes
                     </div>
                     """,
                     unsafe_allow_html=True
@@ -2224,7 +2224,7 @@ def pantalla6():
                     """
                     <div style='text-align:center; font-size:13px; color:#29453A;
                         margin-top:-10px; margin-bottom:14px;'>
-                        Prolonga la sensación de saciedad y promueve una disgestión saludable 💩.
+                        Prolonga la sensación de saciedad y promueve una disgestión saludable 💩
                     </div>
                     """,
                     unsafe_allow_html=True
