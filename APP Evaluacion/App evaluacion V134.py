@@ -110,7 +110,7 @@ COUNTRY_CONFIG: Dict[str, Dict] = {
         "currency_symbol": "S/",
         "thousands_sep": ".",
         "prices": {
-                "Batido": 197,
+                "Batido": 187,
                 "Té de Hierbas": 147,
                 "Aloe Concentrado": 183,
                 "Beverage Mix": 162,
@@ -2100,7 +2100,7 @@ def pantalla6():
     # ==== Cuenta regresiva ====
     st.markdown(
         """
-        Por las próximas 48 horas tienes un beneficio exclusivo del 5% a 10% de descuento según la opción que elijas.  
+        Por las próximas 48 horas tienes un beneficio exclusivo del 10% de descuento según la opción que elijas.  
         Te muestro las opciones 
         """
     )
@@ -2197,34 +2197,34 @@ def pantalla6():
                 unsafe_allow_html=True
             )
 
-            if titulo.strip().lower() == "batido":
+            if titulo.strip().lower() == "el nutritivo antioxidante":
                 st.markdown(
                     """
                     <div style='text-align:center; font-size:13px; color:#29453A;
                         margin-top:-10px; margin-bottom:14px;'>
-                        Te ayuda a controlar la ansiedad y reducir la cantidad de calorías al día.
+                        Te llena de energia y retarda el envejecimiento celular
                     </div>
                     """,
                     unsafe_allow_html=True
                 )
 
-            if titulo.strip().lower() == "batido + te":
+            if titulo.strip().lower() == "el desinflamante":
                 st.markdown(
                     """
                     <div style='text-align:center; font-size:13px; color:#29453A;
                         margin-top:-10px; margin-bottom:14px;'>
-                        Te permite acelerar el metabolismo y aumentar la quema de grasa.
+                        Te desintoxica, hidrata y optimiza la absorción de nutrientes.
                     </div>
                     """,
                     unsafe_allow_html=True
                 )
 
-            if titulo.strip().lower() == "batido + chupapanza":
+            if titulo.strip().lower() == "el limpiador profundo":
                 st.markdown(
                     """
                     <div style='text-align:center; font-size:13px; color:#29453A;
                         margin-top:-10px; margin-bottom:14px;'>
-                        Te ayuda a desinflamar y reducir medidas.
+                        Prolonga la sensación de saciedad y promueve una disgestión saludable 💩.
                     </div>
                     """,
                     unsafe_allow_html=True
@@ -2240,15 +2240,22 @@ def pantalla6():
 
                 st.success(f"Elegiste: {payload['titulo']} — Total {_mon(payload['precio_final'])}")
 
-    _render_programa(c1, "Batido", ["Batido"], 5, "Batido.jpg", "batido")
-    _render_programa(c2, "Batido + Te", ["Batido", "Té de Hierbas"], 10, "Batidoyte.jpg", "batido_te")
+    _render_programa(c1, "El Nutritivo Antioxidante", ["Batido", "Té de Hierbas"], 10, "Batidoyte.jpg", "batido_te")
+    _render_programa(
+        c2,
+        "El Desinflamante",
+        ["Batido", "Té de Hierbas", "Aloe Concentrado"],
+        10,
+        "Batidotealoe.jpeg",
+        "batido_te_aloe"
+    )
     _render_programa(
         c3,
-        "Batido + Chupapanza",
-        ["Batido", "Té de Hierbas", "Fibra Activa", "Aloe Concentrado"],
+        "El Limpiador Profundo",
+        ["Batido", "Té de Hierbas", "Aloe Concentrado", "Fibra Activa"],
         10,
         "Batidoychupapanza.jpg",
-        "chupapanza"
+        "batido_te_aloe_fibra"
     )
 
     if st.session_state.get("combo_elegido"):
@@ -2270,7 +2277,6 @@ def pantalla6():
         mime="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
         use_container_width=True,
     )
-
 # -------------------------------------------------------------
 # STEP 7 - Personaliza tu Programa (personalización completa)
 # -------------------------------------------------------------
