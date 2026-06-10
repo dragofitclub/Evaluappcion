@@ -458,6 +458,29 @@ COUNTRY_CONFIG: Dict[str, Dict] = {
             "Fibra Activa","Golden Beverage","NRG","Herbalifeline","PDM"
         ],
     },
+
+        # ==== NUEVO: Panama ====
+    "Panama": {
+        "code": "PA",
+        "currency_symbol": "$",
+        "thousands_sep": ",",
+        "prices": {
+            "Batido": 39.54,
+            "Té de Hierbas": 32.92,
+            "Aloe Concentrado": 41.41,
+            "Beverage Mix": 34.33,
+            "Beta Heart": 37.93,
+            "Fibra Activa": 37.93,
+            "Golden Beverage": 48.17,
+            "NRG": 24.34,
+            "Herbalifeline": 42.57,
+            "PDM": 50.65,
+        },
+        "available_products": [
+            "Batido","Té de Hierbas","Aloe Concentrado","Beverage Mix","Beta Heart",
+            "Fibra Activa","Golden Beverage","NRG","Herbalifeline","PDM"
+        ],
+    },
 }
 
 # =========================
